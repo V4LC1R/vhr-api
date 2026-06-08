@@ -1,0 +1,57 @@
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: docker/php/DockerFile
+    container_name: vhr-api
+    restart: always
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www:cached
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini:ro
+      - ./docker/php/laravel.ini:/usr/local/etc/php/conf.d/10-laravel.ini:ro
+      - ./docker/php/opcache.ini:/usr/local/etc/php/conf.d/20-opcache.ini:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - db
+      - redis
+
+  nginx:
+    image: nginx:1.25.1-alpine-slim
+    container_name: vhr-api-nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/var/www:cached
+      - ./docker/nginx:/etc/nginx/conf.d
+    depends_on:
+      - app
+
+  db:
+    image: postgres:17-alpine
+    container_name: vhr-api-db
+    restart: always
+    environment:
+      - POSTGRES_DB=central
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - vhr-api-db:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    container_name: vhr-api-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - vhr-api-redis:/data
+
+volumes:
+  vhr-api-db:
+    driver: local
+  vhr-api-redis:
+    driver: local

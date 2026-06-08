@@ -1,0 +1,81 @@
+FROM php:8.3-fpm
+
+# Instala pacotes do sistema e dependências necessárias
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    locales \
+    vim \
+    git \
+    curl \
+    zip \
+    unzip \
+    libpq-dev \
+    libzip-dev \
+    libexif-dev \
+    libonig-dev \
+    libicu-dev \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libwebp-dev \
+    libavif-dev \
+    jpegoptim \
+    optipng \
+    pngquant \
+    gifsicle \
+    && docker-php-ext-install intl \
+    && docker-php-ext-install intl bcmath \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instala extensões PHP (Removido pdo e mbstring que já são built-in/nativas)
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp --with-avif && \
+    pecl install redis && \
+    docker-php-ext-enable redis && \
+    docker-php-ext-install \
+        pdo_pgsql \
+        zip \
+        exif \
+        pcntl \
+        gd \
+        opcache
+
+# Habilita OpenSSL Legacy Provider (Mantenha apenas se integrado a sistemas muito antigos)
+RUN sed -i 's/default = default_sect/default = default_sect\nlegacy = legacy_sect/' /etc/ssl/openssl.cnf && \
+    sed -i 's/\[default_sect\]/[default_sect]\nactivate = 1/' /etc/ssl/openssl.cnf && \
+    printf "\n[legacy_sect]\nactivate = 1\n" >> /etc/ssl/openssl.cnf
+
+# Instala o Composer v2
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+
+# Alinha o UID/GID do www-data existente para 1000 (evita travar permissões na máquina local)
+RUN usermod -u 1000 www-data && groupmod -g 1000 www-data
+
+# Configura o diretório do Composer para o usuário correto
+ENV COMPOSER_HOME=/home/www-data/.composer
+RUN mkdir -p /home/www-data/.composer && \
+    chown -R www-data:www-data /home/www-data
+
+WORKDIR /var/www
+
+# Copia a aplicação já atribuindo o dono correto (Evita duplicar tamanho da imagem)
+COPY --chown=www-data:www-data . /var/www
+
+# Garante a criação das pastas do Laravel (evita quebra se estiverem vazias ou no .dockerignore)
+RUN mkdir -p /var/www/storage/framework/cache/data \
+             /var/www/storage/framework/sessions \
+             /var/www/storage/framework/views \
+             /var/www/storage/logs \
+             /var/www/bootstrap/cache && \
+    chmod -R 755 /var/www && \
+    chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
+# Define o usuário padrão para rodar os comandos e o container
+USER www-data
+
+# Sanity check rápido
+RUN composer --version
+
+EXPOSE 9000
+
+CMD ["php-fpm"]
