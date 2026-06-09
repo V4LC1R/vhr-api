@@ -3,57 +3,53 @@
 namespace Modules\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Modules\Auth\Services\AuthService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Auth\AuthenticationException;
+use Modules\Auth\Http\Requests\AuthUserRequest;
 
 class AuthController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-
-        return response()->json([]);
+    public function __construct(
+        protected AuthService $authService
+    ) {
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function login(AuthUserRequest $request): JsonResponse
     {
-        //
+        $dto = $request->toDTO();
 
-        return response()->json([]);
+        try {
+            $usuario = $this->authService->login($dto);
+
+            $request->session()->regenerate();
+
+            return response()->json([
+                'usuario' => $usuario->toResource()
+            ], 200);
+        } catch (AuthenticationException $e) {
+            return response()->json([
+                'mensagem' => $e->getMessage()
+            ], 401);
+        }
     }
 
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
+    public function me(): JsonResponse
     {
-        //
+        $usuarioLogado = auth()->guard('web')->user();
 
-        return response()->json([]);
+        return response()->json([
+            'usuario' => $usuarioLogado->toResource()
+        ], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
+    public function logout(): JsonResponse
     {
-        //
+        $this->authService->logout();
 
-        return response()->json([]);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        //
-
-        return response()->json([]);
+        return response()->json([
+            'mensagem' => 'Logout realizado com sucesso'
+        ], 200);
     }
 }
