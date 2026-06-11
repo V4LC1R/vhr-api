@@ -5,7 +5,7 @@ namespace Modules\Core\Http\Resources;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Request;
 
-class PersonResource extends JsonResource
+class UserResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,9 +16,11 @@ class PersonResource extends JsonResource
     {
         return [
             'id'         => $this->id,
-            'name'       => $this->name,
+            'username'   => $this->username,
             'email'      => $this->email,
-            'cellphone'  => $this->cellphone,
+            'status'     => $this->status,
+            'person'     => $this?->person->toResource(),
+            //vai ter companies aqui tbm
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];
