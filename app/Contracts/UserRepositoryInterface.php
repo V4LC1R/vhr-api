@@ -19,7 +19,7 @@ interface UserRepositoryInterface
      * @param array $relations
      * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function findById(int $id, array $relations = []);
+    public function findById(string $id, array $relations = []);
 
     /**
      * Busca um usuário pelo endereço de e-mail.
@@ -38,10 +38,19 @@ interface UserRepositoryInterface
     public function create(array $data);
 
     /**
+     * Atualiza um usuário existente.
+     *
+     * @param string $id
+     * @param array $data
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function update(string $id, array $data);
+
+    /**
      * Remove um usuário do sistema pelo ID.
      *
-     * @param int $id
+     * @param string $id
      * @return bool
      */
-    public function delete(int $id): bool;
+    public function delete(string $id): bool;
 }

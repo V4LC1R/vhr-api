@@ -6,7 +6,9 @@ use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Gate;
 use Modules\Core\Models\Person;
+use Modules\Core\Models\User;
 use Modules\Core\Policies\PersonPolicy;
+use Modules\Core\Policies\UserPolicy;
 
 class CoreServiceProvider extends ModuleServiceProvider
 {
@@ -41,6 +43,7 @@ class CoreServiceProvider extends ModuleServiceProvider
     {
         parent::boot();
         Gate::policy(Person::class, PersonPolicy::class);
+        Gate::policy(User::class, UserPolicy::class);
     }
 
     /**

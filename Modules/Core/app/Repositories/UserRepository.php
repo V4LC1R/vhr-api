@@ -18,7 +18,7 @@ class UserRepository implements UserRepositoryInterface
         return $this->model;
     }
 
-    public function findById(int $id, array $relations = []): ?Model
+    public function findById(string $id, array $relations = []): ?Model
     {
         return $this->model->newQuery()->with($relations)->find($id);
     }
@@ -33,7 +33,20 @@ class UserRepository implements UserRepositoryInterface
         return $this->model->newQuery()->create($data);
     }
 
-    public function delete(int $id): bool
+    public function update(string $id, array $data): ?Model
+    {
+        $user = $this->findById($id);
+
+        if (!$user) {
+            return null;
+        }
+
+        $user->update($data);
+
+        return $user->fresh();
+    }
+
+    public function delete(string $id): bool
     {
         $user = $this->findById($id);
 

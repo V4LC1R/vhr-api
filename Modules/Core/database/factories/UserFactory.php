@@ -19,7 +19,6 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'username'  => fake()->unique()->userName(),
             'email'     => fake()->unique()->safeEmail(),
             // Como o model usa cast 'hashed', passamos apenas o texto puro
             'password'  => 'password',

@@ -13,6 +13,7 @@ class Handler
 {
     public static function register(Exceptions $exceptions): void
     {
+
         $exceptions->renderable(fn (UniqueConstraintException $e) => response()->json([
             'message' => $e->getMessage(),
         ], Response::HTTP_CONFLICT));

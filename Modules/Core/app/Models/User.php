@@ -17,7 +17,6 @@ use Modules\Core\Http\Resources\UserResource;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable([
-    'username',
     'personId',
     'email',
     'password',
