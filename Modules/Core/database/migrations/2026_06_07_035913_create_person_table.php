@@ -21,7 +21,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Tabela: core.companies
         Schema::create('core.companies', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');

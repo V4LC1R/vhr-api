@@ -2,12 +2,12 @@
 
 namespace Modules\Core\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Response;
-use Modules\Core\Http\Requests\Persons\StorePersonRequest;
-use Modules\Core\Models\Person;
-use Modules\Core\Services\PersonService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Modules\Core\Models\Person;
+use App\Http\Controllers\Controller;
+use Modules\Core\Services\PersonService;
+use Modules\Core\Http\Requests\Persons\StorePersonRequest;
 use Modules\Core\Http\Requests\Persons\UpdatePersonRequest;
 
 class PersonController extends Controller
