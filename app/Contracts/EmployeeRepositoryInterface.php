@@ -6,9 +6,11 @@ namespace App\Contracts;
 
 use Illuminate\Database\Eloquent\Model;
 
-interface PersonRepositoryInterface
+interface EmployeeRepositoryInterface
 {
     public function getModel(): Model;
+
+    public function getModelClass(): string;
 
     public function findById(string $id, array $relations = []): ?Model;
 
@@ -18,5 +20,8 @@ interface PersonRepositoryInterface
 
     public function delete(string $id): bool;
 
-    public function getModelClass(): string;
+    public function findByPersonId(
+        string $personId,
+        array $relations = []
+    ): ?Model;
 }

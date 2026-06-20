@@ -1,8 +1,10 @@
 <?php
 
 use App\Contracts\CompanyRepositoryInterface;
+use App\Contracts\EmployeeRepositoryInterface;
 use App\Contracts\PersonRepositoryInterface;
 use App\Contracts\UserRepositoryInterface;
+use App\Contracts\WorkloadRepositoryInterface;
 
 if (! function_exists('companyRepo')) {
     function companyRepo(): CompanyRepositoryInterface
@@ -22,5 +24,19 @@ if (! function_exists('userRepo')) {
     function userRepo(): UserRepositoryInterface
     {
         return app(UserRepositoryInterface::class);
+    }
+}
+
+if (! function_exists('employeeRepo')) {
+    function employeeRepo(): EmployeeRepositoryInterface
+    {
+        return app(EmployeeRepositoryInterface::class);
+    }
+}
+
+if (! function_exists('workloadRepo')) {
+    function workloadRepo(): WorkloadRepositoryInterface
+    {
+        return app(WorkloadRepositoryInterface::class);
     }
 }

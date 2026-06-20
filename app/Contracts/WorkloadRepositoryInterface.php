@@ -6,7 +6,7 @@ namespace App\Contracts;
 
 use Illuminate\Database\Eloquent\Model;
 
-interface PersonRepositoryInterface
+interface WorkloadRepositoryInterface
 {
     public function getModel(): Model;
 

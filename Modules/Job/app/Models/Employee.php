@@ -1,36 +1,37 @@
 <?php
 
 namespace Modules\Job\Models;
-namespace Modules\Job\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
-// use Illuminate\Database\Eloquent\Attributes\UseFactory;
-// use Illuminate\Database\Eloquent\Attributes\UseResource;
+use Illuminate\Database\Eloquent\Attributes\UseResource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Job\Database\Factories\EmployeeFactory;
-
-//use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Job\Http\Resources\EmployeeResource;
 
 #[Fillable([
-    'personCompanyId',
+    'companyId',
+    'personId',
+    'status',
+    'role',
     'workloadId',
     'registerNumber',
     'register_at',
-    'out_at',
+    'left_at',
 ])]
-
 #[UseFactory(EmployeeFactory::class)]
-// #[UseResource(UserResource::class)]
+#[UseResource(EmployeeResource::class)]
 class Employee extends Model
 {
     use HasUuids;
     use HasFactory;
 
+
     protected $table = 'job.employees';
+
 
     protected function casts(): array
     {
@@ -41,13 +42,33 @@ class Employee extends Model
         ];
     }
 
-    public function personCompany(): BelongsTo
+
+    public function company(): BelongsTo
     {
-        return $this->belongsTo(PersonCompany::class, 'personCompanyId', 'id');
+        return $this->belongsTo(
+            companyRepo()->getModelClass(),
+            'companyId',
+            'id'
+        );
     }
+
+
+    public function person(): BelongsTo
+    {
+        return $this->belongsTo(
+            personRepo()->getModelClass(),
+            'personId',
+            'id'
+        );
+    }
+
 
     public function workload(): BelongsTo
     {
-        return $this->belongsTo(Workload::class, 'workloadId', 'id');
+        return $this->belongsTo(
+            Workload::class,
+            'workloadId',
+            'id'
+        );
     }
 }

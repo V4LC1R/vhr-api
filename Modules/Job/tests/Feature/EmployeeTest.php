@@ -7,7 +7,6 @@ use Modules\Core\Models\Company;
 use Modules\Core\Models\Person;
 use Modules\Core\Models\User;
 use Modules\Job\Models\Employee;
-use Modules\Job\Models\PersonCompany;
 use Modules\Job\Models\Workload;
 use Tests\DBTestCase;
 
@@ -15,11 +14,30 @@ class EmployeeTest extends DBTestCase
 {
     protected bool $seed = true;
 
-    protected function autenticarComPermissao(string $permission): User
-    {
+    protected function autenticarComPermissao(
+        string $permission
+    ): User {
         $user = User::factory()->create();
 
         $user->givePermissionTo($permission);
+
+        Sanctum::actingAs($user);
+
+        return $user;
+    }
+
+    protected function autenticarComRole(
+        string $role,
+        ?Person $person = null
+    ): User {
+
+        $person = $person ?? Person::factory()->create();
+
+        $user = User::factory()->create([
+            'personId' => $person?->id,
+        ]);
+
+        $user->assignRole($role);
 
         Sanctum::actingAs($user);
 
@@ -35,14 +53,8 @@ class EmployeeTest extends DBTestCase
         return $user;
     }
 
-    // ==========================================
-    // 1. CONTRATAÇÃO (CREATE)
-    // ==========================================
-
-    public function testUsuarioComPermissaoPodeContratarFuncionario(): void
+    private function criarDadosFuncionario(): array
     {
-        $this->autenticarComPermissao('job.employees.create');
-
         $company = Company::factory()->create();
 
         $person = Person::factory()->create();
@@ -51,233 +63,401 @@ class EmployeeTest extends DBTestCase
             'companyId' => $company->id,
         ]);
 
-        $payload = [
-            'companyId' => $company->id,
-            'personId' => $person->id,
-            'workloadId' => $workload->id,
-            'registerNumber' => 123,
-            'register_at' => now()->toISOString(),
-        ];
+        return compact(
+            'company',
+            'person',
+            'workload'
+        );
+    }
 
-        $response = $this->postJson(
-            '/api/v1/job/employees',
-            $payload
+    public function testUsuarioComPermissaoPodeContratarFuncionario(): void
+    {
+        $this->autenticarComPermissao(
+            'job.employees.create'
         );
 
-        $response->assertStatus(201);
+        $data = $this->criarDadosFuncionario();
 
-        $this->assertDatabaseHas('job.person_companies', [
-            'companyId' => $company->id,
-            'personId' => $person->id,
-        ]);
+        $response = $this->postJson(
+            '/api/v1/employees',
+            [
+                'companyId' => $data['company']->id,
+                'personId' => $data['person']->id,
+                'workloadId' => $data['workload']->id,
+            ]
+        );
 
-        $this->assertDatabaseHas('job.employees', [
-            'registerNumber' => 123,
-        ]);
+        $response->assertCreated();
+
+        $this->assertDatabaseHas(
+            'job.employees',
+            [
+                'companyId' => $data['company']->id,
+                'personId' => $data['person']->id,
+                'status' => 'experience',
+            ]
+        );
     }
 
     public function testUsuarioSemPermissaoNaoPodeContratarFuncionario(): void
     {
         $this->autenticarSemPermissao();
 
-        $company = Company::factory()->create();
+        $data = $this->criarDadosFuncionario();
 
-        $person = Person::factory()->create();
+        $this->postJson(
+            '/api/v1/employees',
+            [
+                'companyId' => $data['company']->id,
+                'personId' => $data['person']->id,
+                'workloadId' => $data['workload']->id,
+            ]
+        )->assertForbidden();
+    }
 
-        $workload = Workload::factory()->create([
-            'companyId' => $company->id,
-        ]);
-
-        $payload = [
-            'companyId' => $company->id,
-            'personId' => $person->id,
-            'workloadId' => $workload->id,
-            'registerNumber' => 123,
-            'register_at' => now()->toISOString(),
-        ];
-
-        $response = $this->postJson(
-            '/api/v1/job/employees',
-            $payload
+    public function testGeraMatriculaSequencialPorEmpresa(): void
+    {
+        $this->autenticarComPermissao(
+            'job.employees.create'
         );
 
-        $response->assertStatus(403);
+        $data = $this->criarDadosFuncionario();
 
-        $this->assertDatabaseCount('job.person_companies', 0);
-        $this->assertDatabaseCount('job.employees', 0);
+        $this->postJson(
+            '/api/v1/employees',
+            [
+                'companyId' => $data['company']->id,
+                'personId' => $data['person']->id,
+                'workloadId' => $data['workload']->id,
+            ]
+        )->assertCreated();
+
+        $person2 = Person::factory()->create();
+
+        $this->postJson(
+            '/api/v1/employees',
+            [
+                'companyId' => $data['company']->id,
+                'personId' => $person2->id,
+                'workloadId' => $data['workload']->id,
+            ]
+        )->assertCreated();
+
+        $registerNumbers = Employee::query()
+            ->where('companyId', $data['company']->id)
+            ->orderBy('registerNumber')
+            ->pluck('registerNumber')
+            ->values()
+            ->all();
+
+        $this->assertEquals(
+            [1, 2],
+            $registerNumbers
+        );
     }
 
-    public function testNaoPermiteContratacaoDuplicada(): void
+    public function testNaoPermiteVinculoAtivoDuplicado(): void
     {
-        $this->autenticarComPermissao('job.employees.create');
+        $this->autenticarComPermissao(
+            'job.employees.create'
+        );
 
-        $company = Company::factory()->create();
-
-        $person = Person::factory()->create();
-
-        $workload = Workload::factory()->create([
-            'companyId' => $company->id,
+        $employee = Employee::factory()->create([
+            'status' => 'hired',
         ]);
 
-        $payload = [
-            'companyId' => $company->id,
-            'personId' => $person->id,
-            'workloadId' => $workload->id,
-            'registerNumber' => 123,
-            'register_at' => now()->toISOString(),
-        ];
-
-        $this->postJson('/api/v1/job/employees', $payload)
-            ->assertStatus(201);
-
-        $response = $this->postJson('/api/v1/job/employees', $payload);
-
-        $response->assertStatus(422);
-
-        $this->assertDatabaseCount('job.person_companies', 1);
-        $this->assertDatabaseCount('job.employees', 1);
+        $this->postJson(
+            '/api/v1/employees',
+            [
+                'companyId' => $employee->companyId,
+                'personId' => $employee->personId,
+                'workloadId' => $employee->workloadId,
+            ]
+        )->assertConflict();
     }
 
-    // ==========================================
-    // 2. VISUALIZAÇÃO (VIEW)
-    // ==========================================
+    public function testPermiteRecontratacao(): void
+    {
+        $this->autenticarComPermissao(
+            'job.employees.create'
+        );
+
+        $employee = Employee::factory()->create([
+            'status' => 'out',
+            'left_at' => now(),
+        ]);
+
+        $this->postJson(
+            '/api/v1/employees',
+            [
+                'companyId' => $employee->companyId,
+                'personId' => $employee->personId,
+                'workloadId' => $employee->workloadId,
+            ]
+        )->assertCreated();
+
+        $this->assertEquals(
+            2,
+            Employee::query()
+                ->where('companyId', $employee->companyId)
+                ->where('personId', $employee->personId)
+                ->count()
+        );
+    }
 
     public function testUsuarioComPermissaoPodeVisualizarFuncionario(): void
     {
-        $this->autenticarComPermissao('job.employees.view');
+        $this->autenticarComPermissao(
+            'job.employees.view'
+        );
 
         $employee = Employee::factory()->create();
 
-        $response = $this->getJson(
-            "/api/v1/job/employees/{$employee->id}"
-        );
-
-        $response->assertStatus(200);
-    }
-
-    public function testUsuarioSemPermissaoNaoPodeVisualizarFuncionario(): void
-    {
-        $this->autenticarSemPermissao();
-
-        $employee = Employee::factory()->create();
-
-        $response = $this->getJson(
-            "/api/v1/job/employees/{$employee->id}"
-        );
-
-        $response->assertStatus(403);
+        $this->getJson(
+            "/api/v1/employees/{$employee->id}"
+        )->assertOk();
     }
 
     public function testUsuarioComPermissaoPodeListarFuncionarios(): void
     {
-        $this->autenticarComPermissao('job.employees.view');
-
-        Employee::factory()->count(3)->create();
-
-        $response = $this->getJson(
-            '/api/v1/job/employees'
+        $this->autenticarComPermissao(
+            'job.employees.view'
         );
 
-        $response->assertStatus(200);
+        Employee::factory()
+            ->count(3)
+            ->create();
+
+        $this->getJson(
+            '/api/v1/employees'
+        )->assertOk();
     }
 
-    // ==========================================
-    // 3. EDIÇÃO (UPDATE)
-    // ==========================================
-
-    public function testUsuarioComPermissaoPodeAtualizarFuncionario(): void
+    public function testOwnerPodeAtualizarFuncionario(): void
     {
-        $this->autenticarComPermissao('job.employees.update');
+        $this->autenticarComRole(
+            'owner'
+        );
+
+        $employee = Employee::factory()->create();
+
+        $workload = Workload::factory()->create([
+            'companyId' => $employee->companyId,
+        ]);
+
+        $this->putJson(
+            "/api/v1/employees/{$employee->id}",
+            [
+                'status' => $employee->status,
+                'role' => $employee->role,
+                'workloadId' => $workload->id,
+            ]
+        )->assertOk();
+
+        $this->assertDatabaseHas(
+            'job.employees',
+            [
+                'id' => $employee->id,
+                'workloadId' => $workload->id,
+            ]
+        );
+    }
+
+    public function testRhPodeAtualizarOutroFuncionario(): void
+    {
+        $this->autenticarComRole(
+            'humanResource'
+        );
+
+        $employee = Employee::factory()->create();
+
+        $workload = Workload::factory()->create([
+            'companyId' => $employee->companyId,
+        ]);
+
+        $this->putJson(
+            "/api/v1/employees/{$employee->id}",
+            [
+                'status' => $employee->status,
+                'role' => $employee->role,
+                'workloadId' => $workload->id,
+            ]
+        )->assertOk();
+    }
+
+    public function testRhNaoPodeEditarASiMesmo(): void
+    {
+        $person = Person::factory()->create();
+
+        $this->autenticarComRole(
+            'humanResource',
+            $person
+        );
 
         $employee = Employee::factory()->create([
-            'registerNumber' => 100,
+            'personId' => $person->id,
         ]);
 
-        $payload = [
-            'registerNumber' => 200,
-        ];
-
-        $response = $this->putJson(
-            "/api/v1/job/employees/{$employee->id}",
-            $payload
-        );
-
-        $response->assertStatus(200);
-
-        $this->assertDatabaseHas('job.employees', [
-            'id' => $employee->id,
-            'registerNumber' => 200,
+        $workload = Workload::factory()->create([
+            'companyId' => $employee->companyId,
         ]);
+
+        $this->putJson(
+            "/api/v1/employees/{$employee->id}",
+            [
+                'status' => $employee->status,
+                'role' => $employee->role,
+                'workloadId' => $workload->id,
+            ]
+        )->assertForbidden();
     }
 
-    public function testUsuarioSemPermissaoNaoPodeAtualizarFuncionario(): void
-    {
-        $this->autenticarSemPermissao();
-
-        $employee = Employee::factory()->create([
-            'registerNumber' => 100,
-        ]);
-
-        $payload = [
-            'registerNumber' => 200,
-        ];
-
-        $response = $this->putJson(
-            "/api/v1/job/employees/{$employee->id}",
-            $payload
-        );
-
-        $response->assertStatus(403);
-
-        $this->assertDatabaseHas('job.employees', [
-            'id' => $employee->id,
-            'registerNumber' => 100,
-        ]);
-    }
-
-    // ==========================================
-    // 4. DESLIGAMENTO (DELETE)
-    // ==========================================
-
-    public function testUsuarioComPermissaoPodeDesligarFuncionario(): void
-    {
-        $this->autenticarComPermissao('job.employees.delete');
-
-        $personCompany = PersonCompany::factory()->create([
-            'status' => 'hired',
-        ]);
-
-        $employee = Employee::factory()->create([
-            'personCompanyId' => $personCompany->id,
-        ]);
-
-        $response = $this->deleteJson(
-            "/api/v1/job/employees/{$employee->id}"
-        );
-
-        $response->assertStatus(204);
-
-        $employee->refresh();
-        $personCompany->refresh();
-
-        $this->assertNotNull($employee->left_at);
-
-        $this->assertEquals(
-            'out',
-            $personCompany->status
-        );
-    }
-
-    public function testUsuarioSemPermissaoNaoPodeDesligarFuncionario(): void
+    public function testFuncionarioComumNaoPodeAtualizar(): void
     {
         $this->autenticarSemPermissao();
 
         $employee = Employee::factory()->create();
 
-        $response = $this->deleteJson(
-            "/api/v1/job/employees/{$employee->id}"
+        $this->putJson(
+            "/api/v1/employees/{$employee->id}",
+            [
+                'status' => $employee->status,
+                'role' => $employee->role,
+                'workloadId' => $employee->workloadId,
+            ]
+        )->assertForbidden();
+    }
+
+    public function testOwnerPodeDemitirFuncionario(): void
+    {
+        $this->autenticarComRole(
+            'owner'
         );
 
-        $response->assertStatus(403);
+        $employee = Employee::factory()->create([
+            'status' => 'hired',
+            'left_at' => null,
+        ]);
+
+        $this->patchJson(
+            "/api/v1/employees/{$employee->id}/dismiss"
+        )->assertOk();
+
+        $employee->refresh();
+
+        $this->assertEquals(
+            'out',
+            $employee->status
+        );
+
+        $this->assertNotNull(
+            $employee->left_at
+        );
+    }
+
+    public function testRhPodeDemitirOutroFuncionario(): void
+    {
+        $this->autenticarComRole(
+            'humanResource'
+        );
+
+        $employee = Employee::factory()->create([
+            'status' => 'hired',
+        ]);
+
+        $this->patchJson(
+            "/api/v1/employees/{$employee->id}/dismiss"
+        )->assertOk();
+    }
+
+    public function testRhNaoPodeDemitirASiMesmo(): void
+    {
+        $person = Person::factory()->create();
+
+        $this->autenticarComRole(
+            'humanResource',
+            $person
+        );
+
+        $employee = Employee::factory()->create([
+            'personId' => $person->id,
+        ]);
+
+        $this->patchJson(
+            "/api/v1/employees/{$employee->id}/dismiss"
+        )->assertForbidden();
+    }
+
+    public function testFuncionarioComumNaoPodeDemitir(): void
+    {
+        $this->autenticarSemPermissao();
+
+        $employee = Employee::factory()->create();
+
+        $this->patchJson(
+            "/api/v1/employees/{$employee->id}/dismiss"
+        )->assertForbidden();
+    }
+
+    public function testOwnerPodeExcluirFuncionario(): void
+    {
+        $this->autenticarComRole(
+            'owner'
+        );
+
+        $employee = Employee::factory()->create();
+
+        $this->deleteJson(
+            "/api/v1/employees/{$employee->id}"
+        )->assertNoContent();
+
+        $this->assertDatabaseMissing(
+            'job.employees',
+            [
+                'id' => $employee->id,
+            ]
+        );
+    }
+
+    public function testRhPodeExcluirOutroFuncionario(): void
+    {
+        $this->autenticarComRole(
+            'humanResource'
+        );
+
+        $employee = Employee::factory()->create();
+
+        $this->deleteJson(
+            "/api/v1/employees/{$employee->id}"
+        )->assertNoContent();
+    }
+
+    public function testRhNaoPodeExcluirASiMesmo(): void
+    {
+        $person = Person::factory()->create();
+
+        $this->autenticarComRole(
+            'humanResource',
+            $person
+        );
+
+        $employee = Employee::factory()->create([
+            'personId' => $person->id,
+        ]);
+
+        $this->deleteJson(
+            "/api/v1/employees/{$employee->id}"
+        )->assertForbidden();
+    }
+
+    public function testFuncionarioComumNaoPodeExcluir(): void
+    {
+        $this->autenticarSemPermissao();
+
+        $employee = Employee::factory()->create();
+
+        $this->deleteJson(
+            "/api/v1/employees/{$employee->id}"
+        )->assertForbidden();
     }
 }

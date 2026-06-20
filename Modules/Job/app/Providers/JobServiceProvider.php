@@ -4,6 +4,9 @@ namespace Modules\Job\Providers;
 
 use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\Gate;
+use Modules\Job\Models\Employee;
+use Modules\Job\Policies\EmployeePolicy;
 
 class JobServiceProvider extends ModuleServiceProvider
 {
@@ -34,9 +37,15 @@ class JobServiceProvider extends ModuleServiceProvider
         RouteServiceProvider::class,
     ];
 
+    public function boot(): void
+    {
+        parent::boot();
+         Gate::policy(Employee::class, EmployeePolicy::class);
+    }
+
     /**
      * Define module schedules.
-     * 
+     *
      * @param $schedule
      */
     // protected function configureSchedules(Schedule $schedule): void

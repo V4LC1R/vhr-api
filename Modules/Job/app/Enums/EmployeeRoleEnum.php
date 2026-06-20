@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Job\Enums;
 
-enum PersonCompanyRoleEnum: string
+enum EmployeeRoleEnum: string
 {
     case EMPLOYEE = 'employee';
 
@@ -22,5 +22,13 @@ enum PersonCompanyRoleEnum: string
             self::HUMAN_RESOURCE => 'Recursos Humanos',
             self::ACCOUNTANT => 'Contador',
         };
+    }
+
+    public static function values(): array
+    {
+        return array_column(
+            self::cases(),
+            'value'
+        );
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Job\Enums;
 
-enum PersonCompanyStatusEnum: string
+enum EmployeeStatusEnum: string
 {
     case HIRED = 'hired';
 
@@ -19,5 +19,13 @@ enum PersonCompanyStatusEnum: string
             self::EXPERIENCE => 'Experiência',
             self::OUT => 'Desligado',
         };
+    }
+
+    public static function values(): array
+    {
+        return array_column(
+            self::cases(),
+            'value'
+        );
     }
 }
