@@ -5,7 +5,7 @@ use Modules\Core\Http\Controllers\CompanyController;
 use Modules\Core\Http\Controllers\PersonController;
 use Modules\Core\Http\Controllers\UserController;
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
+Route::middleware(['auth:sanctum','current.company'])->prefix('v1')->group(function () {
 
     Route::apiResource('persons', PersonController::class)->names([
         'index'   => 'core.persons.index',

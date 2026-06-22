@@ -32,8 +32,17 @@ class Person extends Model
 
     protected $keyType = 'string';
 
-    public function users(): HasMany
+    public function employees(): HasMany
     {
-        return $this->hasMany(User::class, 'personId');
+        return $this->hasMany(
+            employeeRepo()->getModelClass(),
+            'personId'
+        );
+    }
+
+    public function hasCompanyLink(): bool
+    {
+        return $this->employees()
+            ->exists();
     }
 }

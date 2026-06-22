@@ -2,10 +2,8 @@
 
 namespace Modules\Job\Tests\Feature;
 
-use Laravel\Sanctum\Sanctum;
 use Modules\Core\Models\Company;
 use Modules\Core\Models\Person;
-use Modules\Core\Models\User;
 use Modules\Job\Models\Employee;
 use Modules\Job\Models\Workload;
 use Tests\DBTestCase;
@@ -13,45 +11,6 @@ use Tests\DBTestCase;
 class EmployeeTest extends DBTestCase
 {
     protected bool $seed = true;
-
-    protected function autenticarComPermissao(
-        string $permission
-    ): User {
-        $user = User::factory()->create();
-
-        $user->givePermissionTo($permission);
-
-        Sanctum::actingAs($user);
-
-        return $user;
-    }
-
-    protected function autenticarComRole(
-        string $role,
-        ?Person $person = null
-    ): User {
-
-        $person = $person ?? Person::factory()->create();
-
-        $user = User::factory()->create([
-            'personId' => $person?->id,
-        ]);
-
-        $user->assignRole($role);
-
-        Sanctum::actingAs($user);
-
-        return $user;
-    }
-
-    protected function autenticarSemPermissao(): User
-    {
-        $user = User::factory()->create();
-
-        Sanctum::actingAs($user);
-
-        return $user;
-    }
 
     private function criarDadosFuncionario(): array
     {
@@ -72,11 +31,12 @@ class EmployeeTest extends DBTestCase
 
     public function testUsuarioComPermissaoPodeContratarFuncionario(): void
     {
-        $this->autenticarComPermissao(
-            'job.employees.create'
-        );
-
         $data = $this->criarDadosFuncionario();
+
+        $this->autenticarComPermissao(
+            'job.employees.create',
+            company: $data['company'],
+        );
 
         $response = $this->postJson(
             '/api/v1/employees',
@@ -117,11 +77,12 @@ class EmployeeTest extends DBTestCase
 
     public function testGeraMatriculaSequencialPorEmpresa(): void
     {
-        $this->autenticarComPermissao(
-            'job.employees.create'
-        );
-
         $data = $this->criarDadosFuncionario();
+
+        $this->autenticarComPermissao(
+            'job.employees.create',
+            company: $data['company'],
+        );
 
         $this->postJson(
             '/api/v1/employees',
@@ -158,11 +119,17 @@ class EmployeeTest extends DBTestCase
 
     public function testNaoPermiteVinculoAtivoDuplicado(): void
     {
+        $company = Company::factory()->create();
+        $workload = Workload::factory()->create(['companyId' => $company->id]);
+
         $this->autenticarComPermissao(
-            'job.employees.create'
+            'job.employees.create',
+            company: $company,
         );
 
         $employee = Employee::factory()->create([
+            'companyId' => $company->id,
+            'workloadId' => $workload->id,
             'status' => 'hired',
         ]);
 
@@ -178,11 +145,17 @@ class EmployeeTest extends DBTestCase
 
     public function testPermiteRecontratacao(): void
     {
+        $company = Company::factory()->create();
+        $workload = Workload::factory()->create(['companyId' => $company->id]);
+
         $this->autenticarComPermissao(
-            'job.employees.create'
+            'job.employees.create',
+            company: $company,
         );
 
         $employee = Employee::factory()->create([
+            'companyId' => $company->id,
+            'workloadId' => $workload->id,
             'status' => 'out',
             'left_at' => now(),
         ]);
@@ -249,7 +222,6 @@ class EmployeeTest extends DBTestCase
             "/api/v1/employees/{$employee->id}",
             [
                 'status' => $employee->status,
-                'role' => $employee->role,
                 'workloadId' => $workload->id,
             ]
         )->assertOk();
@@ -279,7 +251,6 @@ class EmployeeTest extends DBTestCase
             "/api/v1/employees/{$employee->id}",
             [
                 'status' => $employee->status,
-                'role' => $employee->role,
                 'workloadId' => $workload->id,
             ]
         )->assertOk();
@@ -291,7 +262,7 @@ class EmployeeTest extends DBTestCase
 
         $this->autenticarComRole(
             'humanResource',
-            $person
+            person:$person
         );
 
         $employee = Employee::factory()->create([
@@ -306,7 +277,6 @@ class EmployeeTest extends DBTestCase
             "/api/v1/employees/{$employee->id}",
             [
                 'status' => $employee->status,
-                'role' => $employee->role,
                 'workloadId' => $workload->id,
             ]
         )->assertForbidden();
@@ -322,7 +292,6 @@ class EmployeeTest extends DBTestCase
             "/api/v1/employees/{$employee->id}",
             [
                 'status' => $employee->status,
-                'role' => $employee->role,
                 'workloadId' => $employee->workloadId,
             ]
         )->assertForbidden();
@@ -376,7 +345,7 @@ class EmployeeTest extends DBTestCase
 
         $this->autenticarComRole(
             'humanResource',
-            $person
+            person:$person
         );
 
         $employee = Employee::factory()->create([
@@ -438,7 +407,7 @@ class EmployeeTest extends DBTestCase
 
         $this->autenticarComRole(
             'humanResource',
-            $person
+            person:$person
         );
 
         $employee = Employee::factory()->create([

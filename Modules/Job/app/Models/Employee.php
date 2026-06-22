@@ -16,7 +16,6 @@ use Modules\Job\Http\Resources\EmployeeResource;
     'companyId',
     'personId',
     'status',
-    'role',
     'workloadId',
     'registerNumber',
     'register_at',

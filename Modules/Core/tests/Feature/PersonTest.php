@@ -2,35 +2,12 @@
 
 namespace Modules\Core\Tests\Feature;
 
-use Laravel\Sanctum\Sanctum;
 use Modules\Core\Models\Person;
-use Modules\Core\Models\User;
-use Spatie\Permission\Models\Permission;
 use Tests\DBTestCase;
 
 class PersonTest extends DBTestCase
 {
     protected bool $seed = true;
-
-    protected function autenticarComPermissao(string $permission): User
-    {
-        $user = User::factory()->create();
-
-        $user->givePermissionTo($permission);
-
-        Sanctum::actingAs($user);
-
-        return $user;
-    }
-
-    protected function autenticarSemPermissao(): User
-    {
-        $user = User::factory()->create();
-
-        Sanctum::actingAs($user);
-
-        return $user;
-    }
 
     /*
     |--------------------------------------------------------------------------
@@ -215,9 +192,9 @@ class PersonTest extends DBTestCase
         Person::factory()->create(['name' => 'Clark Kent']);
 
         $this->getJson('/api/v1/persons?name=Bruce')
-        ->assertOk()
-        ->assertJsonCount(1, 'data')
-        ->assertJsonPath('data.0.name', 'Bruce Wayne');
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name', 'Bruce Wayne');
     }
 
     public function testDevePaginarPersons()
@@ -227,9 +204,9 @@ class PersonTest extends DBTestCase
         Person::factory()->count(20)->create();
 
         $this->getJson('/api/v1/persons?per_page=5')
-        ->assertOk()
-        ->assertJsonPath('per_page', 5)
-        ->assertJsonCount(5, 'data');
+            ->assertOk()
+            ->assertJsonPath('per_page', 5)
+            ->assertJsonCount(5, 'data');
     }
 
     /*

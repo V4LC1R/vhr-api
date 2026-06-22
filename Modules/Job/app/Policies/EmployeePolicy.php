@@ -12,17 +12,29 @@ class EmployeePolicy
 
     public function viewAny(User $auth): bool
     {
-        return $auth->can('job.employees.view');
+        if (!currentCompany()) {
+            return false;
+        }
+
+        return currentCompany()?->can('job.employees.view');
     }
 
     public function view(User $auth, Employee $employee): bool
     {
-        return $auth->can('job.employees.view');
+        if (!currentCompany()) {
+            return false;
+        }
+
+        return currentCompany()?->can('job.employees.view');
     }
 
     public function create(User $auth): bool
     {
-        return $auth->can('job.employees.create');
+        if (!currentCompany()) {
+            return false;
+        }
+
+        return currentCompany()?->can('job.employees.create');
     }
 
     public function update(User $auth, Employee $employee): bool
@@ -53,16 +65,20 @@ class EmployeePolicy
         User $auth,
         Employee $employee
     ): bool {
+        if (!currentCompany()) {
+            return false;
+        }
+
         if (
-            ! $auth->hasRole('owner')
-            && ! $auth->hasRole('humanResource')
+            ! currentCompany()?->hasRole('owner')
+            && ! currentCompany()?->hasRole('humanResource')
         ) {
             return false;
         }
 
         if (
-            $auth->hasRole('humanResource')
-            && $auth->personId === $employee->personId
+            currentCompany()?->hasRole('humanResource')
+            && currentCompany()?->personId === $employee->personId
         ) {
             return false;
         }

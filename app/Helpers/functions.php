@@ -5,6 +5,7 @@ use App\Contracts\EmployeeRepositoryInterface;
 use App\Contracts\PersonRepositoryInterface;
 use App\Contracts\UserRepositoryInterface;
 use App\Contracts\WorkloadRepositoryInterface;
+use Modules\Core\Models\UserCompany;
 
 if (! function_exists('companyRepo')) {
     function companyRepo(): CompanyRepositoryInterface
@@ -38,5 +39,15 @@ if (! function_exists('workloadRepo')) {
     function workloadRepo(): WorkloadRepositoryInterface
     {
         return app(WorkloadRepositoryInterface::class);
+    }
+}
+
+if (!function_exists('currentCompany')) {
+
+    function currentCompany(): ?UserCompany
+    {
+        return app()->bound('currentCompany')
+            ? app('currentCompany')
+            : null;
     }
 }

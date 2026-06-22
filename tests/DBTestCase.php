@@ -5,22 +5,25 @@ namespace Tests;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Laravel\Sanctum\Sanctum;
 use PDO;
 use PDOException;
-use Testcontainers\Container\GenericContainer;
 use Testcontainers\Container\StartedGenericContainer;
 use Testcontainers\Modules\PostgresContainer;
 use Testcontainers\Wait\WaitForLog;
-use Illuminate\Support\Facades\File;
+use Modules\Core\Models\User;
+use Modules\Core\Models\Person;
+use Modules\Core\Models\Company;
+use Modules\Core\Models\UserCompany;
 
 abstract class DBTestCase extends TestCase
 {
     protected static ?StartedGenericContainer $postgresContainer = null;
-    protected static ?StartedGenericContainer $redisContainer    = null;
+    protected static ?StartedGenericContainer $redisContainer = null;
     protected ?string $seeder = null;
-    protected static bool $containersStarted   = false;
-    protected static int $activeTestClasses   = 0;
-
+    protected static bool $containersStarted = false;
+    protected static int $activeTestClasses = 0;
     protected string $databaseName;
 
     public static function setUpBeforeClass(): void
@@ -39,18 +42,13 @@ abstract class DBTestCase extends TestCase
         echo "\n🐳 Iniciando containers...\n";
 
         self::$postgresContainer = (new PostgresContainer(
-            version:  '17-alpine',
+            version: '17-alpine',
             username: 'test',
             password: 'test',
             database: 'postgres',
         ))
             ->withWait(new WaitForLog('database system is ready to accept connections'))
             ->start();
-
-        // self::$redisContainer = (new GenericContainer('redis:alpine'))
-        //     ->withExposedPorts(6379)
-        //     ->withWait(new WaitForLog('Ready to accept connections'))
-        //     ->start();
 
         self::waitForPostgres();
 
@@ -61,42 +59,33 @@ abstract class DBTestCase extends TestCase
 
     protected static function waitForPostgres(int $maxAttempts = 40, int $sleepMs = 1500): void
     {
-        // 127.0.0.1 é o loopback do container de testes, não do host.
-        // host.docker.internal aponta para o host real no Docker Desktop.
         $host = 'host.docker.internal';
         $port = self::$postgresContainer->getFirstMappedPort();
-        $dsn  = "pgsql:host={$host};port={$port};dbname=postgres";
-
-        echo "\n⏳ Aguardando Postgres em {$host}:{$port}";
+        $dsn = "pgsql:host={$host};port={$port};dbname=postgres";
 
         for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
-            $socket = @fsockopen($host, $port, $errno, $errstr, 2);
-            if ($socket) {
-                fclose($socket);
-            } else {
-                echo '.';
-                usleep($sleepMs * 1_000);
-                continue;
-            }
-
             try {
-                $pdo = new PDO($dsn, 'test', 'test', [
-                    PDO::ATTR_TIMEOUT => 3,
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                ]);
+                $pdo = new PDO(
+                    $dsn,
+                    'test',
+                    'test',
+                    [
+                        PDO::ATTR_TIMEOUT => 3,
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    ]
+                );
+
                 $pdo->query('SELECT 1');
 
                 echo "\n✅ Postgres pronto após {$attempt} tentativa(s)\n";
                 return;
             } catch (PDOException $e) {
-                echo "\n⚠️  PDO falhou (tentativa {$attempt}): " . $e->getMessage();
-                usleep($sleepMs * 1_000);
+                echo '.';
+                usleep($sleepMs * 1000);
             }
         }
 
-        throw new \RuntimeException(
-            "Postgres não ficou pronto após {$maxAttempts} tentativas ({$sleepMs}ms cada)."
-        );
+        throw new \RuntimeException('Postgres não ficou pronto.');
     }
 
     protected function setUp(): void
@@ -112,7 +101,8 @@ abstract class DBTestCase extends TestCase
 
         $this->seedModules();
 
-        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        app(\Spatie\Permission\PermissionRegistrar::class)
+            ->forgetCachedPermissions();
     }
 
     protected function seedModules(): void
@@ -123,35 +113,112 @@ abstract class DBTestCase extends TestCase
 
             if (class_exists($fqcn)) {
                 Artisan::call('db:seed', [
-                '--class' => $fqcn,
-                '--force' => true,
+                    '--class' => $fqcn,
+                    '--force' => true,
                 ]);
             }
         }
+    }
+
+    protected function autenticarComPermissao(
+        string $permission,
+        ?Company $company = null,
+        ?User $user = null,
+        ?Person $person = null
+    ): User {
+        $company ??= Company::factory()->create();
+        $person ??= Person::factory()->create();
+        $user ??= User::factory()->create();
+        $userCompany = UserCompany::factory()->create([
+            'userId' => $user->id,
+            'companyId' => $company->id,
+            'personId' => $person->id,
+        ]);
+
+        session(['companyId' => $company->id]);
+
+        app(\Spatie\Permission\PermissionRegistrar::class)
+            ->setPermissionsTeamId($company->id);
+
+        $userCompany->givePermissionTo($permission);
+
+        Sanctum::actingAs($user);
+
+        return $user;
+    }
+
+    protected function autenticarComRole(
+        string $role,
+        ?Company $company = null,
+        ?User $user = null,
+        ?Person $person = null
+    ): User {
+        $company ??= Company::factory()->create();
+        $person ??= Person::factory()->create();
+        $user ??= User::factory()->create();
+        $userCompany = UserCompany::factory()->create([
+            'userId' => $user->id,
+            'companyId' => $company->id,
+            'personId' => $person->id,
+        ]);
+
+        session(['companyId' => $company->id]);
+
+        app(\Spatie\Permission\PermissionRegistrar::class)
+            ->setPermissionsTeamId($company->id);
+
+        $userCompany->assignRole($role);
+
+        Sanctum::actingAs($user);
+
+        return $user;
+    }
+
+    protected function autenticarSemPermissao(
+        ?Company $company = null,
+        ?User $user = null
+    ): User {
+        $company ??= Company::factory()->create();
+        $user ??= User::factory()->create();
+        $userCompany = UserCompany::factory()->create([
+            'userId' => $user->id,
+            'companyId' => $company->id,
+        ]);
+
+        session(['companyId' => $company->id]);
+
+        app(\Spatie\Permission\PermissionRegistrar::class)
+            ->setPermissionsTeamId($company->id);
+
+        Sanctum::actingAs($user);
+
+        return $user;
     }
 
     protected function tearDown(): void
     {
         DB::disconnect('pgsql');
         $this->dropDatabase();
+
         parent::tearDown();
     }
 
     protected function configureLaravel(): void
     {
         Config::set('database.default', 'pgsql');
+
         Config::set('database.connections.pgsql', [
-            'driver'         => 'pgsql',
-            'host'           => 'host.docker.internal',
-            'port'           => self::$postgresContainer->getFirstMappedPort(),
-            'database'       => $this->databaseName,
-            'username'       => 'test',
-            'password'       => 'test',
-            'charset'        => 'utf8',
-            'prefix'         => '',
+            'driver' => 'pgsql',
+            'host' => 'host.docker.internal',
+            'port' => self::$postgresContainer->getFirstMappedPort(),
+            'database' => $this->databaseName,
+            'username' => 'test',
+            'password' => 'test',
+            'charset' => 'utf8',
+            'prefix' => '',
             'prefix_indexes' => true,
-            'schema'         => 'public',
-            'sslmode'        => 'prefer',
+            'schema' => 'public',
+            'sslmode' => 'prefer',
         ]);
 
         DB::purge('pgsql');
@@ -163,11 +230,13 @@ abstract class DBTestCase extends TestCase
         return new PDO(
             sprintf(
                 'pgsql:host=host.docker.internal;port=%d;dbname=postgres',
-                self::$postgresContainer->getFirstMappedPort(),
+                self::$postgresContainer->getFirstMappedPort()
             ),
             'test',
             'test',
-            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION],
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            ]
         );
     }
 
@@ -184,13 +253,15 @@ abstract class DBTestCase extends TestCase
 
         $pdo->exec(sprintf(
             "SELECT pg_terminate_backend(pid)
-             FROM   pg_stat_activity
-             WHERE  datname = '%s'
-             AND    pid <> pg_backend_pid()",
-            $this->databaseName,
+             FROM pg_stat_activity
+             WHERE datname = '%s'
+             AND pid <> pg_backend_pid()",
+            $this->databaseName
         ));
 
-        $pdo->exec(sprintf('DROP DATABASE IF EXISTS "%s"', $this->databaseName));
+        $pdo->exec(
+            sprintf('DROP DATABASE IF EXISTS "%s"', $this->databaseName)
+        );
     }
 
     public static function tearDownAfterClass(): void
@@ -201,11 +272,9 @@ abstract class DBTestCase extends TestCase
             echo "\n🛑 Parando containers...\n";
 
             self::$postgresContainer?->stop();
-            //self::$redisContainer?->stop();
 
-            self::$postgresContainer   = null;
-            //self::$redisContainer      = null;
-            self::$containersStarted   = false;
+            self::$postgresContainer = null;
+            self::$containersStarted = false;
             static::$activeTestClasses = 0;
         }
 
