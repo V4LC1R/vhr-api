@@ -147,6 +147,40 @@ Roles disponíveis: `owner`, `humanResource`, `accountant`.
 
 ---
 
+## Roadmap
+
+### ✅ v0.1 — Fundação (concluído)
+- Estrutura modular com autenticação via sessão
+- Multi-empresa: vínculo `UserCompany` com isolamento de permissões por empresa
+- Controle de acesso com roles e permissões por empresa (Spatie Permission + teams)
+- Módulo **Auth** — login, seleção de empresa, logout
+- Módulo **Core** — cadastro de empresas, pessoas e usuários
+- Testes de integração com PostgreSQL via Testcontainers
+
+---
+
+### 🚧 v0.2 — Módulo Job (em andamento)
+- Cadastro de funcionários com matrícula sequencial por empresa
+- Vínculo funcionário ↔ pessoa ↔ empresa
+- Admissão e desligamento
+- **Cadastro de jornada de trabalho (Workload)** ← etapa atual
+
+---
+
+### 🔜 v0.3 — Módulo Attendance
+- Lançamento manual de pontos diários por funcionário (substituição de planilhas)
+- Aprovação dos lançamentos pelo owner
+- Visualização mensal consolidada por funcionário
+- Exceções: faltas, folgas e feriados _(bônus)_
+
+---
+
+### 🔮 Futuro
+- **Front-end** — interface para Job + Attendance
+- **Módulo Contract** — admissões, demissões, período de experiência, estágios, terceiros
+
+---
+
 ## Licença
 
 Proprietário — todos os direitos reservados.
