@@ -1,58 +1,152 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# VHR API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API REST para gestão de recursos humanos. Digitaliza processos de RH como cadastro de funcionários, lançamento de pontos e contratos — substituindo planilhas por um sistema estruturado multi-empresa.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Requisitos
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Dependência | Versão mínima |
+|---|---|
+| PHP | 8.3+ |
+| Composer | 2.x |
+| Docker | 24+ |
+| Docker Compose | 2.x |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+> Os testes sobem um container PostgreSQL automaticamente via **Testcontainers**. Docker precisa estar rodando durante a execução dos testes.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Stack
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **Laravel** 13 — framework base
+- **PostgreSQL** 17 — banco de dados principal
+- **Redis** — cache e sessões
+- **Laravel Sanctum** — autenticação via sessão/cookie
+- **Spatie Laravel Permission** — controle de acesso baseado em roles/permissões por empresa
+- **Spatie Laravel Data** — DTOs tipados
+- **Spatie Laravel Query Builder** — filtros nas listagens
+- **nwidart/laravel-modules** — arquitetura modular
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+---
 
-## Agentic Development
+## Instalação
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### 1. Clonar e instalar dependências
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone <repo-url> vhr-api
+cd vhr-api
+composer install
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Configurar ambiente
 
-## Contributing
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Edite o `.env` com as credenciais do banco (ou use os valores padrão do Docker Compose):
 
-## Code of Conduct
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=central
+DB_USERNAME=admin
+DB_PASSWORD=admin
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+SESSION_DRIVER=database
+CACHE_STORE=database
+```
 
-## Security Vulnerabilities
+### 3. Subir a infraestrutura
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+docker compose up -d
+```
 
-## License
+Isso sobe: **PostgreSQL** (porta 5432), **Redis** (porta 6379) e **Nginx + PHP-FPM** (porta 80).
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 4. Migrar e popular o banco
+
+```bash
+# Dentro do container
+docker exec -it vhr-api php artisan migrate --force
+
+# Ou localmente (com PHP instalado)
+php artisan migrate --force
+```
+
+---
+
+## Desenvolvimento local
+
+```bash
+composer run dev
+```
+
+Sobe em paralelo: servidor PHP, queue worker, log watcher e Vite.
+
+---
+
+## Testes
+
+Os testes usam **Testcontainers** — um container PostgreSQL é criado automaticamente por suite, isolando completamente o banco de teste do banco de desenvolvimento. **Docker precisa estar rodando.**
+
+```bash
+# Rodar todos os testes
+php artisan test
+
+# Ou via composer
+composer run test
+
+# Rodar apenas um módulo
+php artisan test --filter=EmployeeTest
+php artisan test --filter=UserTest
+php artisan test --filter=CompanyTest
+php artisan test --filter=AuthTest
+```
+
+---
+
+## Estrutura de Módulos
+
+```
+Modules/
+├── Auth/       — login, logout, seleção de empresa
+├── Core/       — usuários, empresas, pessoas
+└── Job/        — funcionários, carga horária
+```
+
+Cada módulo é autônomo: controllers, services, repositories, models, migrations, factories e testes próprios.
+
+---
+
+## Autenticação
+
+O sistema usa autenticação via **sessão** (cookie) com Sanctum.
+
+```
+POST /auth/login              — autenticação com email e senha
+POST /auth/select-company     — seleciona a empresa ativa (multi-empresa)
+GET  /auth/me                 — dados do usuário autenticado
+POST /auth/logout             — encerrar sessão
+```
+
+Após o login, todas as requisições às rotas protegidas precisam da empresa ativa definida na sessão. Se o usuário pertence a apenas uma empresa, ela é selecionada automaticamente.
+
+---
+
+## Controle de Acesso
+
+Permissões e roles são **isoladas por empresa** via Spatie Permission com teams. Cada usuário tem um vínculo `UserCompany` por empresa, e as permissões são atribuídas a esse vínculo — não diretamente ao usuário.
+
+Roles disponíveis: `owner`, `humanResource`, `accountant`.
+
+---
+
+## Licença
+
+Proprietário — todos os direitos reservados.
