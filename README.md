@@ -1,4 +1,4 @@
-# VHR API
+# VHR 
 
 API REST para gestão de recursos humanos. Digitaliza processos de RH como cadastro de funcionários, lançamento de pontos e contratos — substituindo planilhas por um sistema estruturado multi-empresa.
 
