@@ -53,13 +53,6 @@ return new class extends Migration
                 'out'
             ]);
 
-            $table->enum('role', [
-                'employee',
-                'owner',
-                'humanResource',
-                'accountant'
-            ]);
-
             $table->uuid('workloadId');
 
             $table->unsignedInteger('registerNumber');
@@ -90,7 +83,6 @@ return new class extends Migration
                 'companyId',
                 'status',
             ]);
-            $table->index('role');
 
             $table->unique([
                 'companyId',

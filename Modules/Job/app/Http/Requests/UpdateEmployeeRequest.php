@@ -5,7 +5,6 @@ namespace Modules\Job\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Modules\Job\Data\EmployeeData;
-use Modules\Job\Enums\EmployeeRoleEnum;
 use Modules\Job\Enums\EmployeeStatusEnum;
 use Modules\Job\Models\Employee;
 use Modules\Job\Models\Workload;
@@ -29,14 +28,6 @@ class UpdateEmployeeRequest extends FormRequest
                     EmployeeStatusEnum::values()
                 ),
             ],
-
-            'role' => [
-                'required',
-                Rule::in(
-                    EmployeeRoleEnum::values()
-                ),
-            ],
-
             'workloadId' => [
                 'required',
                 'uuid',

@@ -1,17 +1,14 @@
 // Enums
-
 Enum UserStatus {
   active
   inactive
 }
-
 
 Enum EmployeeStatus {
   hired
   experience
   out
 }
-
 
 Enum EmployeeRole {
   employee
@@ -20,7 +17,6 @@ Enum EmployeeRole {
   accountant
 }
 
-
 Enum TimeEntryType {
   in
   break_start
@@ -28,14 +24,12 @@ Enum TimeEntryType {
   out
 }
 
-
 Enum EngagementStatus {
   scheduled
   completed
   paid
   canceled
 }
-
 
 // ==========================================
 // SCHEMA: CORE (Azul)
@@ -48,7 +42,6 @@ Table core.persons [headercolor: #2B6CB0] {
   cellphone string [not null]
 }
 
-
 Table core.companies [headercolor: #2B6CB0] {
   id uuid [primary key]
   name string [not null]
@@ -58,14 +51,19 @@ Table core.companies [headercolor: #2B6CB0] {
 
 Table core.users [headercolor: #2B6CB0] {
   id uuid [primary key]
-  username varchar [not null]
-  personId uuid [not null]
   email string [not null]
   password string [not null]
   status UserStatus
 }
 
-
+Table core.userCompanies [headercolor: #2B6CB0] {
+  id uuid [primary key]
+  companyId uuid [not null]
+  userId uuid [not null]
+  personId uuid
+  created_at datetime
+  updated_at datetime
+}
 
 // ==========================================
 // SCHEMA: JOB (Laranja)
@@ -73,163 +71,93 @@ Table core.users [headercolor: #2B6CB0] {
 
 Table job.employees [headercolor: #D69E2E] {
   id uuid [primary key]
-
   companyId uuid [not null]
   personId uuid [not null]
-
   status EmployeeStatus [not null]
   role EmployeeRole [not null]
-
   workloadId uuid [not null]
-
   registerNumber number [not null]
-
   register_at datetime [not null]
-
   left_at datetime
 }
 
-
-
 Table job.workload [headercolor: #D69E2E] {
-
   id uuid [primary key]
-
   companyId uuid [not null]
-
   description string [not null]
-
   monthly_hours integer [not null]
-
   weekly_hours integer [not null]
-
   entry_time time [not null]
-
   left_time time [not null]
-
   interval_start_at time [not null]
-
   interval_end_at time [not null]
 }
-
-
 
 // ==========================================
 // SCHEMA: ATTENDANCE (Verde)
 // ==========================================
 
 Table attendance.dailyEngagements [headercolor: #2F855A] {
-
   id uuid [primary key]
-
   employeeId uuid [not null]
-
   date date [not null]
-
   entry_time time [not null]
-
   left_time time [not null]
-
   hourly_value number [not null]
-
   status EngagementStatus [not null]
 }
 
-
-
 Table attendance.dayOffSchedules [headercolor: #2F855A] {
-
   id uuid [primary key]
-
   companyId uuid [not null]
-
   name string [not null]
-
   month integer [not null]
-
   year integer [not null]
 }
 
-
-
 Table attendance.scheduleDaysOff [headercolor: #2F855A] {
-
   id uuid [primary key]
-
   dayOffScheduleId uuid [not null]
-
   date date [not null]
 }
 
-
-
 Table attendance.employeeSchedules [headercolor: #2F855A] {
-
   id uuid [primary key]
-
   employeeId uuid [not null]
-
   dayOffScheduleId uuid [not null]
 }
 
-
-
 Table attendance.timeEntries [headercolor: #2F855A] {
-
   id uuid [primary key]
-
   employeeId uuid [not null]
-
   timestamp datetime [not null]
-
   entry_type TimeEntryType [not null]
 }
-
 
 
 // ==========================================
 // RELATIONSHIPS / REFS
 // ==========================================
 
-
 // Core
-
-Ref: core.users.personId > core.persons.id
-
-
+Ref: core.userCompanies.companyId > core.companies.id
+Ref: core.userCompanies.userId > core.users.id
+Ref: core.userCompanies.personId > core.persons.id
 
 // Job
-
 Ref: job.employees.personId > core.persons.id
-
 Ref: job.employees.companyId > core.companies.id
-
 Ref: job.employees.workloadId > job.workload.id
-
-
 Ref: job.workload.companyId > core.companies.id
 
-
-
-
 // Attendance / Daily Engagements
-
 Ref: attendance.dailyEngagements.employeeId > job.employees.id
 
-
-
 // Attendance / Escalas
-
 Ref: attendance.dayOffSchedules.companyId > core.companies.id
-
 Ref: attendance.scheduleDaysOff.dayOffScheduleId > attendance.dayOffSchedules.id
-
 Ref: attendance.employeeSchedules.employeeId > job.employees.id
-
 Ref: attendance.employeeSchedules.dayOffScheduleId > attendance.dayOffSchedules.id
 
-
-
 // Time Entries
-
 Ref: attendance.timeEntries.employeeId > job.employees.id

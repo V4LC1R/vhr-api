@@ -11,7 +11,6 @@ use App\Contracts\CompanyRepositoryInterface;
 use App\Contracts\PersonRepositoryInterface;
 use App\Contracts\WorkloadRepositoryInterface;
 use Modules\Job\Data\EmployeeData;
-use Modules\Job\Enums\EmployeeRoleEnum;
 use Modules\Job\Enums\EmployeeStatusEnum;
 use Modules\Job\Http\Resources\EmployeeResource;
 use Modules\Job\Models\Employee;
@@ -50,10 +49,7 @@ class EmployeeService
                             'registerNumber' => $this->getNextRegisterNumber(
                                 $data->companyId
                             ),
-
                             'status' => EmployeeStatusEnum::EXPERIENCE,
-                            'role' => EmployeeRoleEnum::EMPLOYEE,
-
                             'register_at' => now()->utc(),
                         ]);
 
@@ -101,7 +97,6 @@ class EmployeeService
 
         $employee->update([
             'status' => $data->status,
-            'role' => $data->role,
             'workloadId' => $data->workloadId,
         ]);
 

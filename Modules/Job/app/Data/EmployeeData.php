@@ -19,9 +19,7 @@ class EmployeeData extends Data
         public string|Optional $personId,
         #[Required, Uuid]
         public string $workloadId,
-        public string|Optional $status = 'hired',
-        public string|Optional $role = 'employee',
+        public string|Optional $status = 'hired'
     ) {
-        $this->register_at ??= now()->utc();
     }
 }

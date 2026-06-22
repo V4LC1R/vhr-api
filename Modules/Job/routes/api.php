@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Job\Http\Controllers\EmployeeController;
 
-Route::middleware(['auth:sanctum'])
+Route::middleware(['auth:sanctum','current.company'])
     ->prefix('v1')
     ->group(function () {
 

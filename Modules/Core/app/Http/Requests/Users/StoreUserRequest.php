@@ -6,8 +6,9 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rule;
 use Modules\Core\Models\Person;
-use Modules\Core\Data\UserData;
+use Modules\Core\Models\Company;
 use Modules\Core\Models\User;
+use Modules\Core\Data\UserData;
 
 class StoreUserRequest extends FormRequest
 {
@@ -16,14 +17,16 @@ class StoreUserRequest extends FormRequest
         return true;
     }
 
+
     public function rules(): array
     {
         return [
             'personId' => [
-                'required',
+                'nullable',
                 'uuid',
                 Rule::exists(Person::class, 'id')
             ],
+
             'password' => [
                 'required',
                 Password::min(8)
@@ -32,6 +35,7 @@ class StoreUserRequest extends FormRequest
                     ->numbers()
                     ->symbols()
             ],
+
             'email' => [
                 'required',
                 'string',
@@ -42,10 +46,15 @@ class StoreUserRequest extends FormRequest
         ];
     }
 
+
     public function messages(): array
     {
         return [
-            'personId.required' => 'A pessoa vinculada é obrigatória.',
+
+            'companyId.required' => 'A empresa vinculada é obrigatória.',
+            'companyId.uuid'     => 'O código da empresa deve ser um UUID válido.',
+            'companyId.exists'   => 'A empresa selecionada não foi encontrada.',
+
             'personId.uuid'     => 'O código da pessoa deve ser um UUID válido.',
             'personId.exists'   => 'A pessoa selecionada não foi encontrada no sistema.',
 
@@ -63,6 +72,7 @@ class StoreUserRequest extends FormRequest
             'password.symbols'  => 'A senha deve conter pelo menos um caractere especial (!, @, #, $, etc.).',
         ];
     }
+
 
     public function toDTO(): UserData
     {

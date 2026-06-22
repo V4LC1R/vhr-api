@@ -27,8 +27,6 @@ class EmployeeFactory extends Factory
 
             'status' => 'hired',
 
-            'role' => 'employee',
-
             'registerNumber' => fake()
                 ->unique()
                 ->numberBetween(1, 999999),

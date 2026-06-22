@@ -4,10 +4,13 @@ namespace Modules\Core\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Models\UserCompany;
 use Modules\Core\Models\User;
+use Modules\Core\Models\Company;
+use Modules\Core\Models\Person;
 
-#[UseModel(User::class)]
-class UserFactory extends Factory
+#[UseModel(UserCompany::class)]
+class UserCompanyFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -17,10 +20,13 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'email'     => fake()->unique()->safeEmail(),
-            // Como o model usa cast 'hashed', passamos apenas o texto puro
-            'password'  => 'password',
-            'status'    => fake()->randomElement(['active', 'inactive']),
+            'userId' => User::factory(),
+
+            'companyId' => Company::factory(),
+
+            'personId' => fake()->boolean(70)
+                ? Person::factory()
+                : null,
         ];
     }
 }
