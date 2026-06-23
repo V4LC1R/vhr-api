@@ -3,6 +3,7 @@
 namespace Tests;
 
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -11,18 +12,19 @@ use PDO;
 use PDOException;
 use Testcontainers\Container\StartedGenericContainer;
 use Testcontainers\Modules\PostgresContainer;
+use Testcontainers\Modules\RedisContainer;
 use Testcontainers\Wait\WaitForLog;
-use Modules\Core\Models\User;
-use Modules\Core\Models\Person;
 use Modules\Core\Models\Company;
+use Modules\Core\Models\Person;
+use Modules\Core\Models\User;
 use Modules\Core\Models\UserCompany;
 
 abstract class DBTestCase extends TestCase
 {
     protected static ?StartedGenericContainer $postgresContainer = null;
-    protected ?string $seeder = null;
+    protected static ?StartedGenericContainer $redisContainer   = null;
     protected static bool $containersStarted = false;
-    protected static int $activeTestClasses = 0;
+    protected static int $activeTestClasses  = 0;
     protected string $databaseName;
 
     public static function setUpBeforeClass(): void
@@ -49,7 +51,10 @@ abstract class DBTestCase extends TestCase
             ->withWait(new WaitForLog('database system is ready to accept connections'))
             ->start();
 
+        self::$redisContainer = (new RedisContainer('alpine'))->start();
+
         self::waitForPostgres();
+        self::waitForRedis();
 
         self::$containersStarted = true;
 
@@ -60,22 +65,15 @@ abstract class DBTestCase extends TestCase
     {
         $host = 'host.docker.internal';
         $port = self::$postgresContainer->getFirstMappedPort();
-        $dsn = "pgsql:host={$host};port={$port};dbname=postgres";
+        $dsn  = "pgsql:host={$host};port={$port};dbname=postgres";
 
         for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
             try {
-                $pdo = new PDO(
-                    $dsn,
-                    'test',
-                    'test',
-                    [
-                        PDO::ATTR_TIMEOUT => 3,
-                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    ]
-                );
-
+                $pdo = new PDO($dsn, 'test', 'test', [
+                    PDO::ATTR_TIMEOUT => 3,
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                ]);
                 $pdo->query('SELECT 1');
-
                 echo "\n✅ Postgres pronto após {$attempt} tentativa(s)\n";
                 return;
             } catch (PDOException $e) {
@@ -87,6 +85,24 @@ abstract class DBTestCase extends TestCase
         throw new \RuntimeException('Postgres não ficou pronto.');
     }
 
+    protected static function waitForRedis(int $maxAttempts = 20, int $sleepMs = 500): void
+    {
+        $host = 'host.docker.internal';
+        $port = self::$redisContainer->getFirstMappedPort();
+
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            $socket = @fsockopen($host, $port, $errno, $errstr, 3);
+            if ($socket !== false) {
+                fclose($socket);
+                echo "\n✅ Redis pronto após {$attempt} tentativa(s)\n";
+                return;
+            }
+            usleep($sleepMs * 1000);
+        }
+
+        throw new \RuntimeException('Redis não ficou pronto.');
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -95,6 +111,8 @@ abstract class DBTestCase extends TestCase
 
         $this->createDatabase();
         $this->configureLaravel();
+
+        Cache::flush();
 
         Artisan::call('migrate', ['--force' => true]);
 
@@ -119,19 +137,65 @@ abstract class DBTestCase extends TestCase
         }
     }
 
+    protected function configureLaravel(): void
+    {
+        $redisPort = self::$redisContainer->getFirstMappedPort();
+
+        Config::set('database.redis.default', [
+            'host'     => 'host.docker.internal',
+            'port'     => $redisPort,
+            'password' => null,
+            'database' => 0,
+        ]);
+
+        Config::set('database.redis.cache', [
+            'host'     => 'host.docker.internal',
+            'port'     => $redisPort,
+            'password' => null,
+            'database' => 1,
+        ]);
+
+        Config::set('cache.default', 'redis');
+
+        // Remove any stale resolved redis store so the next access re-resolves
+        // with the connection config we just set above. Without this, flush()
+        // hits a driver that was resolved before configureLaravel() ran —
+        // leaving stale serialized objects in Redis and causing __PHP_Incomplete_Class.
+        Cache::forgetDriver('redis');
+
+        Config::set('database.default', 'pgsql');
+
+        Config::set('database.connections.pgsql', [
+            'driver'         => 'pgsql',
+            'host'           => 'host.docker.internal',
+            'port'           => self::$postgresContainer->getFirstMappedPort(),
+            'database'       => $this->databaseName,
+            'username'       => 'test',
+            'password'       => 'test',
+            'charset'        => 'utf8',
+            'prefix'         => '',
+            'prefix_indexes' => true,
+            'schema'         => 'public',
+            'sslmode'        => 'prefer',
+        ]);
+
+        DB::purge('pgsql');
+        DB::reconnect('pgsql');
+    }
+
     protected function autenticarComPermissao(
         string $permission,
         ?Company $company = null,
         ?User $user = null,
         ?Person $person = null
     ): User {
-        $company ??= Company::factory()->create();
-        $person ??= Person::factory()->create();
-        $user ??= User::factory()->create();
+        $company    ??= Company::factory()->create();
+        $person     ??= Person::factory()->create();
+        $user       ??= User::factory()->create();
         $userCompany = UserCompany::factory()->create([
-            'userId' => $user->id,
+            'userId'    => $user->id,
             'companyId' => $company->id,
-            'personId' => $person->id,
+            'personId'  => $person->id,
         ]);
 
         session(['companyId' => $company->id]);
@@ -152,13 +216,13 @@ abstract class DBTestCase extends TestCase
         ?User $user = null,
         ?Person $person = null
     ): User {
-        $company ??= Company::factory()->create();
-        $person ??= Person::factory()->create();
-        $user ??= User::factory()->create();
+        $company    ??= Company::factory()->create();
+        $person     ??= Person::factory()->create();
+        $user       ??= User::factory()->create();
         $userCompany = UserCompany::factory()->create([
-            'userId' => $user->id,
+            'userId'    => $user->id,
             'companyId' => $company->id,
-            'personId' => $person->id,
+            'personId'  => $person->id,
         ]);
 
         session(['companyId' => $company->id]);
@@ -177,10 +241,10 @@ abstract class DBTestCase extends TestCase
         ?Company $company = null,
         ?User $user = null
     ): User {
-        $company ??= Company::factory()->create();
-        $user ??= User::factory()->create();
+        $company    ??= Company::factory()->create();
+        $user       ??= User::factory()->create();
         $userCompany = UserCompany::factory()->create([
-            'userId' => $user->id,
+            'userId'    => $user->id,
             'companyId' => $company->id,
         ]);
 
@@ -202,28 +266,6 @@ abstract class DBTestCase extends TestCase
         parent::tearDown();
     }
 
-    protected function configureLaravel(): void
-    {
-        Config::set('database.default', 'pgsql');
-
-        Config::set('database.connections.pgsql', [
-            'driver' => 'pgsql',
-            'host' => 'host.docker.internal',
-            'port' => self::$postgresContainer->getFirstMappedPort(),
-            'database' => $this->databaseName,
-            'username' => 'test',
-            'password' => 'test',
-            'charset' => 'utf8',
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'schema' => 'public',
-            'sslmode' => 'prefer',
-        ]);
-
-        DB::purge('pgsql');
-        DB::reconnect('pgsql');
-    }
-
     protected function adminPdo(): PDO
     {
         return new PDO(
@@ -233,9 +275,7 @@ abstract class DBTestCase extends TestCase
             ),
             'test',
             'test',
-            [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            ]
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
         );
     }
 
@@ -271,9 +311,11 @@ abstract class DBTestCase extends TestCase
             echo "\n🛑 Parando containers...\n";
 
             self::$postgresContainer?->stop();
+            self::$redisContainer?->stop();
 
-            self::$postgresContainer = null;
-            self::$containersStarted = false;
+            self::$postgresContainer  = null;
+            self::$redisContainer     = null;
+            self::$containersStarted  = false;
             static::$activeTestClasses = 0;
         }
 

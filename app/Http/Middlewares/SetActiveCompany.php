@@ -22,16 +22,17 @@ class SetActiveCompany
 
         $userId = $request->user()->id;
 
-        $userCompany = Cache::remember(
-            "user.company:{$userId}:{$companyId}",
+        $userCompanyId = Cache::remember(
+            "user.company.id:{$userId}:{$companyId}",
             now()->addMinutes(30),
             fn () => UserCompany::query()
-                ->with('company', 'person')
                 ->where('userId', $userId)
                 ->where('companyId', $companyId)
-                ->first()
+                ->value('id')
                 ?: throw new ModelNotFoundException()
         );
+
+        $userCompany = UserCompany::with('company', 'person')->findOrFail($userCompanyId);
 
         if (!$userCompany) {
             abort(403, 'Empresa ativa inválida.');
