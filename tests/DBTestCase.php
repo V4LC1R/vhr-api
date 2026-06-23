@@ -20,7 +20,6 @@ use Modules\Core\Models\UserCompany;
 abstract class DBTestCase extends TestCase
 {
     protected static ?StartedGenericContainer $postgresContainer = null;
-    protected static ?StartedGenericContainer $redisContainer = null;
     protected ?string $seeder = null;
     protected static bool $containersStarted = false;
     protected static int $activeTestClasses = 0;

@@ -2,39 +2,27 @@
 
 namespace Modules\Job\Queries;
 
-use Modules\Job\Models\Employee;
-use Modules\Job\Filters\RegisterAtFilter;
 use Modules\Job\Filters\EmployeePersonNameFilter;
-use Spatie\QueryBuilder\QueryBuilder;
+use Modules\Job\Filters\EmploymentKindFilter;
+use Modules\Job\Filters\EmploymentStatusFilter;
+use Modules\Job\Filters\RegisterAtFilter;
+use Modules\Job\Models\Employee;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class EmployeeListQuery
 {
     public static function make(): QueryBuilder
     {
         return QueryBuilder::for(Employee::class)
-            ->with([
-                'person',
-                'workload',
-            ])
+            ->with(['person', 'activeEmployment.workload'])
             ->allowedFilters(
-                AllowedFilter::custom(
-                    'name',
-                    new EmployeePersonNameFilter()
-                ),
-                AllowedFilter::exact('status'),
-                AllowedFilter::exact('role'),
-                AllowedFilter::custom(
-                    'registerAt',
-                    new RegisterAtFilter()
-                ),
+                AllowedFilter::custom('name', new EmployeePersonNameFilter()),
+                AllowedFilter::custom('status', new EmploymentStatusFilter()),
+                AllowedFilter::custom('kind', new EmploymentKindFilter()),
+                AllowedFilter::custom('registerAt', new RegisterAtFilter()),
             )
-            ->allowedSorts(
-                'registerNumber',
-                'register_at',
-                'status',
-                'role',
-            )
+            ->allowedSorts('registerNumber')
             ->defaultSort('-registerNumber');
     }
 }

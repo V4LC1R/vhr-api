@@ -5,7 +5,7 @@ namespace Modules\Job\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Modules\Job\Data\EmployeeData;
-use Modules\Job\Enums\EmployeeStatusEnum;
+use Modules\Job\Enums\EmploymentStatusEnum;
 use Modules\Job\Models\Employee;
 use Modules\Job\Models\Workload;
 
@@ -24,20 +24,13 @@ class UpdateEmployeeRequest extends FormRequest
         return [
             'status' => [
                 'required',
-                Rule::in(
-                    EmployeeStatusEnum::values()
-                ),
+                Rule::in(EmploymentStatusEnum::values()),
             ],
             'workloadId' => [
                 'required',
                 'uuid',
-                Rule::exists(
-                    Workload::class,
-                    'id'
-                )->where(
-                    'companyId',
-                    $employee->companyId
-                ),
+                Rule::exists(Workload::class, 'id')
+                    ->where('companyId', $employee->companyId),
             ],
         ];
     }
@@ -47,24 +40,12 @@ class UpdateEmployeeRequest extends FormRequest
         return [
             'status.required' =>
                 'O status é obrigatório.',
-
             'status.in' =>
                 'O status informado é inválido.',
-
-
-            'role.required' =>
-                'A função é obrigatória.',
-
-            'role.in' =>
-                'A função informada é inválida.',
-
-
             'workloadId.required' =>
                 'A jornada é obrigatória.',
-
             'workloadId.uuid' =>
                 'A jornada informada é inválida.',
-
             'workloadId.exists' =>
                 'A jornada informada não pertence à empresa do funcionário.',
         ];
@@ -72,8 +53,6 @@ class UpdateEmployeeRequest extends FormRequest
 
     public function toDTO(): EmployeeData
     {
-        return EmployeeData::from(
-            $this->validated()
-        );
+        return EmployeeData::from($this->validated());
     }
 }
