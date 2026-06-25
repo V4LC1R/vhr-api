@@ -40,37 +40,7 @@ class EmployeeService
         $this->ensureNoActiveEmployment($company->id, $person->id);
 
         return DB::transaction(function () use ($data, $company, $person) {
-            $employee = Employee::query()
-                ->where('companyId', $company->id)
-                ->where('personId', $person->id)
-                ->first();
-
-            if (! $employee) {
-                $maxAttempts = 3;
-
-                for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
-                    try {
-                        $employee = $this->employeeRepository->create([
-                            'companyId'      => $company->id,
-                            'personId'       => $person->id,
-                            'registerNumber' => $this->getNextRegisterNumber($company->id),
-                        ]);
-
-                        break;
-                    } catch (QueryException $e) {
-                        if (! DatabaseExceptionResolver::isUniqueViolation($e)) {
-                            throw $e;
-                        }
-
-                        if ($attempt === $maxAttempts) {
-                            throw new UniqueConstraintException(
-                                'Já existe um funcionário cadastrado com os dados informados.',
-                                previous: $e
-                            );
-                        }
-                    }
-                }
-            }
+            $employee = $this->resolveOrCreateEmployee($company->id, $person->id);
 
             $this->employmentRepository->create([
                 'employeeId'  => $employee->id,
@@ -150,6 +120,41 @@ class EmployeeService
         return EmployeeResource::collection($employees);
     }
 
+    private function resolveOrCreateEmployee(string $companyId, string $personId): Employee
+    {
+        $employee = Employee::query()
+            ->where('companyId', $companyId)
+            ->where('personId', $personId)
+            ->first();
+
+        if ($employee) {
+            return $employee;
+        }
+
+        $maxAttempts = 3;
+
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                return $this->employeeRepository->create([
+                    'companyId'      => $companyId,
+                    'personId'       => $personId,
+                    'registerNumber' => $this->getNextRegisterNumber($companyId),
+                ]);
+            } catch (QueryException $e) {
+                if (! DatabaseExceptionResolver::isUniqueViolation($e)) {
+                    throw $e;
+                }
+
+                if ($attempt === $maxAttempts) {
+                    throw new UniqueConstraintException(
+                        'Já existe um funcionário cadastrado com os dados informados.',
+                        previous: $e
+                    );
+                }
+            }
+        }
+    }
+
     private function findCompany(string $companyId)
     {
         $company = $this->companyRepository->findById($companyId);
@@ -195,20 +200,22 @@ class EmployeeService
 
     private function ensureNoActiveEmployment(string $companyId, string $personId): void
     {
-        $hasActive = $this->employeeRepository
+        $hasActiveClt = $this->employeeRepository
             ->getModel()
             ->newQuery()
             ->where('companyId', $companyId)
             ->where('personId', $personId)
-            ->whereHas('employments', fn ($q) => $q->whereIn('status', [
-                EmploymentStatusEnum::HIRED->value,
-                EmploymentStatusEnum::EXPERIENCE->value,
-            ]))
+            ->whereHas('employments', fn ($q) => $q
+                ->where('kind', EmploymentTypeEnum::CLT->value)
+                ->whereIn('status', [
+                    EmploymentStatusEnum::HIRED->value,
+                    EmploymentStatusEnum::EXPERIENCE->value,
+                ]))
             ->exists();
 
-        if ($hasActive) {
+        if ($hasActiveClt) {
             throw new UniqueConstraintException(
-                'Esta pessoa já possui vínculo ativo com a empresa.'
+                'Esta pessoa já possui vínculo CLT ativo com a empresa.'
             );
         }
     }

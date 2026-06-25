@@ -4,6 +4,7 @@ namespace Modules\Job\Tests\Feature;
 
 use Modules\Core\Models\Company;
 use Modules\Core\Models\Person;
+use Modules\Job\Enums\EmploymentTypeEnum;
 use Modules\Job\Models\Employee;
 use Modules\Job\Models\Employment;
 use Modules\Job\Models\Workload;
@@ -154,6 +155,33 @@ class EmployeeTest extends DBTestCase
                 'workloadId' => $workload->id,
             ]
         )->assertConflict();
+    }
+
+    public function testPermiteContratarMesmaPersonComVinculoNaoCltAtivo(): void
+    {
+        $company  = Company::factory()->create();
+        $workload = Workload::factory()->create(['companyId' => $company->id]);
+
+        $this->autenticarComPermissao(
+            'job.employees.create',
+            company: $company,
+        );
+
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
+
+        Employment::factory()->create([
+            'employeeId' => $employee->id,
+            'workloadId' => $workload->id,
+            'kind'       => EmploymentTypeEnum::FREELANCER->value,
+        ]);
+
+        $workload2 = Workload::factory()->create(['companyId' => $company->id]);
+
+        $this->postJson('/api/v1/employees', [
+            'companyId'  => $employee->companyId,
+            'personId'   => $employee->personId,
+            'workloadId' => $workload2->id,
+        ])->assertCreated();
     }
 
     public function testPermiteRecontratacao(): void
@@ -339,7 +367,7 @@ class EmployeeTest extends DBTestCase
 
         $this->deleteJson("/api/v1/employees/{$employee->id}")->assertNoContent();
 
-        $this->assertDatabaseMissing('job.employees',    ['id' => $employee->id]);
+        $this->assertDatabaseMissing('job.employees', ['id' => $employee->id]);
         $this->assertDatabaseMissing('job.employments', ['employeeId' => $employee->id]);
     }
 

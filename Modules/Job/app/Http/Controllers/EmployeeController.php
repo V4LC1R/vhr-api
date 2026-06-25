@@ -4,11 +4,11 @@ namespace Modules\Job\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use App\Http\Controllers\Controller;
 use Modules\Job\Models\Employee;
+use App\Http\Controllers\Controller;
 use Modules\Job\Services\EmployeeService;
-use Modules\Job\Http\Requests\StoreEmployeeRequest;
-use Modules\Job\Http\Requests\UpdateEmployeeRequest;
+use Modules\Job\Http\Requests\Employee\StoreEmployeeRequest;
+use Modules\Job\Http\Requests\Employee\UpdateEmployeeRequest;
 
 class EmployeeController extends Controller
 {
