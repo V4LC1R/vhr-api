@@ -11,26 +11,46 @@ class UserPolicy
 
     public function viewAny(User $auth): bool
     {
-        return $auth->can('core.users.view');
+        if (!currentCompany()) {
+            return false;
+        }
+
+        return currentCompany()?->can('core.users.view');
     }
 
     public function view(User $auth, User $user): bool
     {
-        return $auth->can('core.users.view');
+        if (!currentCompany()) {
+            return false;
+        }
+
+        return currentCompany()?->can('core.users.view');
     }
 
     public function create(User $auth): bool
     {
-        return $auth->can('core.users.create');
+        if (!currentCompany()) {
+            return false;
+        }
+
+        return currentCompany()?->can('core.users.create');
     }
 
     public function update(User $auth, User $user): bool
     {
-        return $auth->can('core.users.update');
+        if (!currentCompany()) {
+            return false;
+        }
+
+        return currentCompany()?->can('core.users.update');
     }
 
     public function delete(User $auth, User $user): bool
     {
-        return $auth->can('core.users.delete');
+        if (!currentCompany()) {
+            return false;
+        }
+
+        return currentCompany()?->can('core.users.delete');
     }
 }

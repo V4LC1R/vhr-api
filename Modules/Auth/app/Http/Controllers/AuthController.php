@@ -5,9 +5,9 @@ namespace Modules\Auth\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Modules\Auth\Services\AuthService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Auth\AuthenticationException;
 use Modules\Auth\Http\Requests\AuthUserRequest;
+use Modules\Auth\Http\Requests\SelectCompanyRequest;
 
 class AuthController extends Controller
 {
@@ -21,17 +21,32 @@ class AuthController extends Controller
         $dto = $request->toDTO();
 
         try {
-            $usuario = $this->authService->login($dto);
+            $authData = $this->authService->login($dto);
 
-            $request->session()->regenerate();
+            $request->session()->regenerate(true);
+
+            return response()->json($authData);
+        } catch (AuthenticationException $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 401);
+        }
+    }
+
+    public function selectCompany(SelectCompanyRequest $request): JsonResponse
+    {
+        try {
+            $this->authService->selectCompany(
+                $request->validated('companyId')
+            );
 
             return response()->json([
-                'usuario' => $usuario->toResource()
+                'message' => 'Empresa selecionada com sucesso'
             ], 200);
         } catch (AuthenticationException $e) {
             return response()->json([
-                'mensagem' => $e->getMessage()
-            ], 401);
+                'message' => $e->getMessage()
+            ], 403);
         }
     }
 
@@ -40,7 +55,7 @@ class AuthController extends Controller
         $usuarioLogado = auth()->guard('web')->user();
 
         return response()->json([
-            'usuario' => $usuarioLogado->toResource()
+            'user' => $usuarioLogado->toResource()
         ], 200);
     }
 
@@ -49,7 +64,7 @@ class AuthController extends Controller
         $this->authService->logout();
 
         return response()->json([
-            'mensagem' => 'Logout realizado com sucesso'
+            'message' => 'Logout realizado com sucesso'
         ], 200);
     }
 }

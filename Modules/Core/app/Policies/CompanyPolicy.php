@@ -12,26 +12,62 @@ class CompanyPolicy
 
     public function viewAny(User $auth): bool
     {
-        return $auth->can('core.companies.view');
+        if (!currentCompany()) {
+            return false;
+        }
+
+        return currentCompany()?->can(
+            'core.companies.view'
+        );
     }
 
-    public function view(User $auth, Company $company): bool
-    {
-        return $auth->can('core.companies.view');
+    public function view(
+        User $auth,
+        Company $company
+    ): bool {
+        if (!currentCompany()) {
+            return false;
+        }
+
+        return currentCompany()?->can(
+            'core.companies.view'
+        );
     }
 
     public function create(User $auth): bool
     {
-        return $auth->can('core.companies.create');
+        if (!currentCompany()) {
+            return false;
+        }
+
+        return currentCompany()?->hasRole(
+            'owner'
+        );
     }
 
-    public function update(User $auth, Company $company): bool
-    {
-        return $auth->can('core.companies.update');
+    public function update(
+        User $auth,
+        Company $company
+    ): bool {
+        if (!currentCompany()) {
+            return false;
+        }
+
+        return currentCompany()?->hasRole(
+            'owner'
+        );
     }
 
-    public function delete(User $auth, Company $company): bool
-    {
-        return $auth->can('core.companies.delete');
+    public function delete(
+        User $auth,
+        Company $company
+    ): bool {
+        if (!currentCompany()) {
+            return false;
+        }
+
+        return currentCompany()?->hasRole(
+            'owner'
+        );
     }
 }

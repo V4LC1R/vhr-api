@@ -19,8 +19,8 @@ class PersonResource extends JsonResource
             'name'       => $this->name,
             'email'      => $this->email,
             'cellphone'  => $this->cellphone,
-            'created_at' => $this->created_at?->toIso8601String(),
-            'updated_at' => $this->updated_at?->toIso8601String(),
+            'createdAt' => $this->created_at?->toIso8601String(),
+            'updatedAt' => $this->updated_at?->toIso8601String(),
         ];
     }
 }

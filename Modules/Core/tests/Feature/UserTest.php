@@ -2,7 +2,6 @@
 
 namespace Modules\Core\Tests\Feature;
 
-use Laravel\Sanctum\Sanctum;
 use Modules\Core\Models\Person;
 use Modules\Core\Models\User;
 use Tests\DBTestCase;
@@ -10,24 +9,6 @@ use Tests\DBTestCase;
 class UserTest extends DBTestCase
 {
     protected bool $seed = true;
-
-    protected function autenticarComPermissao(string $permission): User
-    {
-        $user = User::factory()->create();
-        $user->givePermissionTo($permission);
-        Sanctum::actingAs($user);
-
-        return $user;
-    }
-
-    protected function autenticarSemPermissao(): User
-    {
-        $user = User::factory()->create();
-        Sanctum::actingAs($user);
-
-        return $user;
-    }
-
     /*
     |--------------------------------------------------------------------------
     | CREATE (Cadastro de Usuário por um Admin/Operador)
@@ -56,24 +37,8 @@ class UserTest extends DBTestCase
             ->assertUnprocessable()
             ->assertJsonValidationErrors([
                 'email',
-                'password',
-                'personId',
+                'password'
             ]);
-    }
-
-    public function testDeveRetornarErroDeValidacaoSePersonIdNaoExistirNoBanco()
-    {
-        $this->autenticarComPermissao('core.users.create');
-
-        $payload = [
-            'email'     => 'clark@dailyplanet.com',
-            'password'  => 'secret123',
-            'personId'  => fake()->uuid(), // ID aleatório que não existe na tabela core.persons
-        ];
-
-        $this->postJson('/api/v1/users', $payload)
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors(['personId']);
     }
 
     public function testDeveRetornarConflitoSeUsernameOuEmailJaExistirem()
@@ -102,17 +67,22 @@ class UserTest extends DBTestCase
         $person = Person::factory()->create();
 
         $payload = [
+            'personId' => $person->id,
             'email'     => 'clark@dailyplanet.com',
             'password'  => 'Super_secure_password1',
-            'personId'  => $person->id,
         ];
 
-        $this->postJson('/api/v1/users', $payload)
-            ->assertCreated();
+        $response = $this->postJson('/api/v1/users', $payload)
+            ->assertCreated()
+            ->json();
 
         $this->assertDatabaseHas('core.users', [
             'email'    => 'clark@dailyplanet.com',
+        ]);
+
+        $this->assertDatabaseHas('core.user_companies', [
             'personId' => $person->id,
+            'companyId' => currentCompany()->companyId,
         ]);
     }
 
@@ -141,13 +111,11 @@ class UserTest extends DBTestCase
 
     public function testDeveAtualizarDadosAdministrativosDoUsuarioComSucesso()
     {
-        $this->autenticarComPermissao('core.users.update');
-
         $user = User::factory()->create(['status' => 'active']);
+        $this->autenticarComPermissao('core.users.update', user:$user);
 
         $payload = [
             'email'     => $user->email,
-            'personId'  => $user->personId,
             'password'  => 'Super_secure_password1',
             'status'    => 'inactive',
         ];
@@ -179,7 +147,7 @@ class UserTest extends DBTestCase
     public function testDeveRetornarForbiddenAoRemoverUsuarioSemPermissao()
     {
         $user = User::factory()->create();
-        $this->autenticarSemPermissao();
+        $this->autenticarSemPermissao(company:null, user:$user);
 
         $this->deleteJson("/api/v1/users/{$user->id}")
             ->assertForbidden();
@@ -187,8 +155,8 @@ class UserTest extends DBTestCase
 
     public function testDeveRemoverUmUsuarioComSucesso()
     {
-        $this->autenticarComPermissao('core.users.delete');
         $user = User::factory()->create();
+        $this->autenticarComPermissao('core.users.delete', company:null, user:$user);
 
         $this->deleteJson("/api/v1/users/{$user->id}")
             ->assertNoContent();

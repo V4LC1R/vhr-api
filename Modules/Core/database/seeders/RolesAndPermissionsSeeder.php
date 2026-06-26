@@ -15,27 +15,65 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // 2. Definir as Permissões focadas nas tabelas Atuais (Schema Core)
         $permissions = [
-            // Módulo: Persons
+            // ==========================================
+            // CORE - PERSONS
+            // ==========================================
+
             'core.persons.view',
             'core.persons.create',
             'core.persons.update',
             'core.persons.delete',
 
-            // Módulo: Companies
+            // ==========================================
+            // CORE - COMPANIES
+            // ==========================================
+
             'core.companies.view',
             'core.companies.create',
             'core.companies.update',
             'core.companies.delete',
 
-            // Módulo: Users
+            // ==========================================
+            // CORE - USERS
+            // ==========================================
+
             'core.users.view',
             'core.users.create',
             'core.users.update',
             'core.users.delete',
 
-            // Futuros escopos baseados no seu DER (Deixando gatilhos prontos)
-            'job.workload.manage',
-            'attendance.timeEntries.manage',
+            // ==========================================
+            // JOB - WORKLOADS
+            // ==========================================
+
+            'job.workloads.view',
+            'job.workloads.create',
+            'job.workloads.update',
+            'job.workloads.delete',
+
+            // ==========================================
+            // JOB - EMPLOYEES
+            // ==========================================
+
+            'job.employees.view',
+            'job.employees.create',
+            'job.employees.update',
+            'job.employees.delete',
+            'job.employees.dismiss',
+
+            // ==========================================
+            // ATTENDANCE - TIME ENTRIES
+            // ==========================================
+
+            'attendance.timeEntries.view',
+            'attendance.timeEntries.create',
+            'attendance.timeEntries.update',
+            'attendance.timeEntries.delete',
+
+            // ==========================================
+            // ATTENDANCE - DAILY ENGAGEMENTS
+            // ==========================================
+
             'attendance.dailyEngagements.view',
         ];
 
@@ -56,23 +94,44 @@ class RolesAndPermissionsSeeder extends Seeder
             'core.persons.view',
             'core.persons.create',
             'core.persons.update',
+
             'core.companies.view',
-            'job.workload.manage',
-            'attendance.timeEntries.manage'
+
+            'job.workloads.view',
+            'job.workloads.create',
+            'job.workloads.update',
+            'job.workloads.delete',
+
+            'job.employees.view',
+            'job.employees.create',
+            'job.employees.update',
+            'job.employees.delete',
+            'job.employees.dismiss',
+
+            'attendance.timeEntries.view',
+            'attendance.timeEntries.create',
+            'attendance.timeEntries.update',
         ]);
 
         // Papel: Accountant (Contador - Foco em Visualização e Auditoria)
         $accountantRole = Role::firstOrCreate(['name' => 'accountant', 'guard_name' => 'web']);
         $accountantRole->syncPermissions([
-            'core.persons.view',
+           'core.persons.view',
             'core.companies.view',
-            'attendance.dailyEngagements.view'
+
+            'job.employees.view',
+            'job.workloads.view',
+
+            'attendance.timeEntries.view',
+            'attendance.dailyEngagements.view',
         ]);
 
         // Papel: Employee (Funcionário comum - Acesso apenas aos seus dados / auto-atendimento)
         $employeeRole = Role::firstOrCreate(['name' => 'employee', 'guard_name' => 'web']);
         $employeeRole->syncPermissions([
-            'core.persons.view', // Geralmente restrito ao próprio ID via política (Policy)
+            'core.persons.view',
+            'job.employees.view',
+            'attendance.timeEntries.view', // Geralmente restrito ao próprio ID via política (Policy)
         ]);
     }
 }

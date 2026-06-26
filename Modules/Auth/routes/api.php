@@ -14,7 +14,7 @@ Route::middleware(['web'])->post('auth/login', [AuthController::class, 'login'])
 
 // Rotas Protegidas (Apenas usuários autenticados via cookie/sessão)
 Route::middleware(['web','auth:sanctum'])->prefix('auth')->group(function () {
-
+    Route::post('/select-company', [AuthController::class, 'selectCompany'])->name('auth.select.company');
     Route::get('/me', [AuthController::class, 'me'])->name('auth.me');
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
 });

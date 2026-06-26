@@ -23,7 +23,13 @@ class UserController extends Controller
     {
         $data = $request->toDTO();
 
-        $user = $this->service->create($data);
+        $personId = $request->input('personId', null);
+
+        $user = $this->service->create(
+            $data,
+            currentCompany()->companyId,
+            $personId
+        );
 
         return response()->json($user, Response::HTTP_CREATED);
     }

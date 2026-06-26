@@ -8,19 +8,39 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Tabela: core.users
+
         Schema::create('core.users', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('email')->unique();
             $table->string('password');
 
-            // Enum UserStatus (active, inactive)
             $table->enum('status', ['active', 'inactive'])->default('active');
 
-            // Chave Estrangeira apontando para core.persons
+            $table->softDeletes();
+            $table->timestamps();
+        });
+
+        Schema::create('core.user_companies', function (Blueprint $table) {
+
+            $table->uuid('id')->primary();
+
+            $table->foreignUuid('companyId')
+                ->constrained('core.companies')
+                ->cascadeOnDelete();
+
+            $table->foreignUuid('userId')
+                ->constrained('core.users')
+                ->cascadeOnDelete();
+
             $table->foreignUuid('personId')
-                  ->constrained('core.persons')
-                  ->onDelete('cascade');
+                ->nullable()
+                ->constrained('core.persons')
+                ->nullOnDelete();
+
+            $table->unique([
+                'companyId',
+                'userId'
+            ]);
 
             $table->softDeletes();
             $table->timestamps();
@@ -30,5 +50,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('core.users');
+        Schema::dropIfExists('core.user_companies');
     }
 };

@@ -4,8 +4,6 @@ namespace Modules\Core\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
-use Modules\Core\Models\Person;
 use Modules\Core\Models\User;
 
 #[UseModel(User::class)]
@@ -23,9 +21,6 @@ class UserFactory extends Factory
             // Como o model usa cast 'hashed', passamos apenas o texto puro
             'password'  => 'password',
             'status'    => fake()->randomElement(['active', 'inactive']),
-
-            // Cria uma Person automaticamente usando a factory dela caso não seja passada uma
-            'personId'  => Person::factory(),
         ];
     }
 }

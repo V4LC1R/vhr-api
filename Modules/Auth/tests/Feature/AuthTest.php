@@ -26,7 +26,7 @@ class AuthTest extends DBTestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'usuario' => ['id', 'email']
+                'user' => ['id', 'email']
             ]);
 
         $this->assertAuthenticatedAs($usuario, 'web');
@@ -63,7 +63,7 @@ class AuthTest extends DBTestCase
 
         $response->assertStatus(200)
             ->assertJson([
-                'usuario' => [
+                'user' => [
                     'id' => $usuario->id,
                     'email' => 'pai@sistema.com',
                 ]
@@ -81,7 +81,7 @@ class AuthTest extends DBTestCase
 
         $response->assertStatus(200)
             ->assertJson([
-                'mensagem' => 'Logout realizado com sucesso'
+                'message' => 'Logout realizado com sucesso'
             ]);
 
         $this->assertGuest('web');

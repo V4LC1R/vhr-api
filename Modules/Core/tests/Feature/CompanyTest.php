@@ -2,8 +2,6 @@
 
 namespace Modules\Core\Tests\Feature;
 
-use Laravel\Sanctum\Sanctum;
-use Modules\Core\Models\User;
 use Modules\Core\Models\Company;
 use Tests\DBTestCase;
 
@@ -11,30 +9,13 @@ class CompanyTest extends DBTestCase
 {
     protected bool $seed = true;
 
-    protected function autenticarComPermissao(string $permission): User
-    {
-        $user = User::factory()->create();
-        $user->givePermissionTo($permission);
-        Sanctum::actingAs($user);
-
-        return $user;
-    }
-
-    protected function autenticarSemPermissao(): User
-    {
-        $user = User::factory()->create();
-        Sanctum::actingAs($user);
-
-        return $user;
-    }
-
     // ==========================================
     // 1. TESTES DE CRIAÇÃO (CREATE)
     // ==========================================
 
     public function testUsuarioComPermissaoPodeCriarEmpresa(): void
     {
-        $this->autenticarComPermissao('core.companies.create');
+        $this->autenticarComRole('owner');
 
         $payload = [
             'name' => 'Empresa Sucesso LTDA',
@@ -68,8 +49,9 @@ class CompanyTest extends DBTestCase
 
     public function testUsuarioComPermissaoPodeAtualizarEmpresa(): void
     {
-        $this->autenticarComPermissao('core.companies.update');
         $company = Company::factory()->create(['name' => 'Nome Antigo']);
+
+        $this->autenticarComRole('owner', $company);
 
         $payload = ['name' => 'Nome Atualizado','cnpj' => '98765432000199'];
 
@@ -84,8 +66,9 @@ class CompanyTest extends DBTestCase
 
     public function testUsuarioSemPermissaoNaoPodeAtualizarEmpresa(): void
     {
-        $this->autenticarSemPermissao();
         $company = Company::factory()->create(['name' => 'Nome Original',]);
+
+        $this->autenticarSemPermissao($company);
 
         $payload = ['name' => 'Tentativa de Hack','cnpj' => '98765432000199'];
 
@@ -104,8 +87,9 @@ class CompanyTest extends DBTestCase
 
     public function testUsuarioComPermissaoPodeListarEVerEmpresa(): void
     {
-        $this->autenticarComPermissao('core.companies.view');
         $company = Company::factory()->create();
+
+        $this->autenticarComPermissao('core.companies.view', $company);
 
         // Testando o Show (ver uma específica)
         $responseShow = $this->getJson("/api/v1/companies/{$company->id}");
@@ -118,8 +102,8 @@ class CompanyTest extends DBTestCase
 
     public function testUsuarioSemPermissaoNaoPodeVerEmpresa(): void
     {
-        $this->autenticarSemPermissao();
         $company = Company::factory()->create();
+        $this->autenticarSemPermissao($company);
 
         $response = $this->getJson("/api/v1/companies/{$company->id}");
         $response->assertStatus(403);
@@ -134,8 +118,8 @@ class CompanyTest extends DBTestCase
 
     public function testUsuarioComPermissaoPodeDeletarEmpresa(): void
     {
-        $this->autenticarComPermissao('core.companies.delete');
         $company = Company::factory()->create();
+        $this->autenticarComRole('owner', $company);
 
         $response = $this->deleteJson("/api/v1/companies/{$company->id}");
 
@@ -145,8 +129,8 @@ class CompanyTest extends DBTestCase
 
     public function testUsuarioSemPermissaoNaoPodeDeletarEmpresa(): void
     {
-        $this->autenticarSemPermissao();
         $company = Company::factory()->create();
+        $this->autenticarSemPermissao($company);
 
         $response = $this->deleteJson("/api/v1/companies/{$company->id}");
 
