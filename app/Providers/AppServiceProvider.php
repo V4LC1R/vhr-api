@@ -3,12 +3,16 @@
 namespace App\Providers;
 
 use App\Contracts\CompanyRepositoryInterface;
+use App\Contracts\DailyEngagementRepositoryInterface;
 use App\Contracts\EmployeeRepositoryInterface;
 use App\Contracts\EmploymentRepositoryInterface;
 use App\Contracts\PersonRepositoryInterface;
+use App\Contracts\TimeEntryRepositoryInterface;
 use App\Contracts\UserRepositoryInterface;
 use App\Contracts\WorkloadRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
+use Modules\Attendance\Repositories\DailyEngagementRepository;
+use Modules\Attendance\Repositories\TimeEntryRepository;
 use Modules\Core\Repositories\CompanyRepository;
 use Modules\Core\Repositories\PersonRepository;
 use Modules\Core\Repositories\UserRepository;
@@ -31,5 +35,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EmployeeRepositoryInterface::class, EmployeeRepository::class);
         $this->app->bind(EmploymentRepositoryInterface::class, EmploymentRepository::class);
         $this->app->bind(WorkloadRepositoryInterface::class, WorkloadRepository::class);
+        $this->app->bind(TimeEntryRepositoryInterface::class, TimeEntryRepository::class);
+        $this->app->bind(DailyEngagementRepositoryInterface::class, DailyEngagementRepository::class);
     }
 }

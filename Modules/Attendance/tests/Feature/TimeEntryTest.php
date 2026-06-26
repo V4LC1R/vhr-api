@@ -1,0 +1,288 @@
+<?php
+
+namespace Modules\Attendance\Tests\Feature;
+
+use Modules\Attendance\Models\DailyEngagement;
+use Modules\Attendance\Models\TimeEntry;
+use Modules\Core\Models\Company;
+use Modules\Job\Enums\EmploymentTypeEnum;
+use Modules\Job\Models\Employee;
+use Modules\Job\Models\Employment;
+use Modules\Job\Models\Workload;
+use Tests\DBTestCase;
+
+class TimeEntryTest extends DBTestCase
+{
+    protected bool $seed = true;
+
+    /**
+     * Cria um funcionário com vínculo ativo e jornada (08:00–18:00, intervalo 12:00–13:00).
+     */
+    private function funcionarioComJornada(
+        Company $company,
+        ?string $kind = null
+    ): Employee {
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
+        $workload = Workload::factory()->create(['companyId' => $company->id]);
+
+        Employment::factory()->create(array_filter([
+            'employeeId' => $employee->id,
+            'workloadId' => $workload->id,
+            'kind'       => $kind,
+        ]));
+
+        return $employee->load('activeEmployment');
+    }
+
+    // ==========================================
+    // LANÇAMENTO (POST)
+    // ==========================================
+
+    public function testUsuarioComPermissaoPodeLancarMarcacao(): void
+    {
+        $company = Company::factory()->create();
+        $this->autenticarComPermissao('attendance.timeEntries.create', company: $company);
+
+        $employee = $this->funcionarioComJornada($company);
+
+        $this->postJson('/api/v1/time-entries', [
+            'employeeId' => $employee->id,
+            'punched_at' => '2026-06-25 08:00:00',
+            'type'       => 'entry',
+        ])->assertCreated();
+
+        $this->assertDatabaseHas('attendance.time_entries', [
+            'companyId' => $company->id,
+            'type'      => 'entry',
+        ]);
+
+        $this->assertDatabaseHas('attendance.daily_engagements', [
+            'companyId'  => $company->id,
+            'employeeId' => $employee->id,
+            'date'       => '2026-06-25',
+        ]);
+    }
+
+    public function testUsuarioSemPermissaoNaoPodeLancarMarcacao(): void
+    {
+        $this->autenticarSemPermissao();
+
+        $this->postJson('/api/v1/time-entries', [
+            'employeeId' => fake()->uuid(),
+            'punched_at' => '2026-06-25 08:00:00',
+            'type'       => 'entry',
+        ])->assertForbidden();
+    }
+
+    public function testLancarMarcacoesCriaUmUnicoDia(): void
+    {
+        $company = Company::factory()->create();
+        $this->autenticarComPermissao('attendance.timeEntries.create', company: $company);
+
+        $employee = $this->funcionarioComJornada($company);
+
+        foreach (['08:00:00', '18:00:00'] as $i => $hora) {
+            $this->postJson('/api/v1/time-entries', [
+                'employeeId' => $employee->id,
+                'punched_at' => "2026-06-25 {$hora}",
+                'type'       => $i === 0 ? 'entry' : 'exit',
+            ])->assertCreated();
+        }
+
+        $this->assertDatabaseCount('attendance.daily_engagements', 1);
+        $this->assertDatabaseCount('attendance.time_entries', 2);
+    }
+
+    public function testLancarMarcacaoCriaDiaComoRascunho(): void
+    {
+        $company = Company::factory()->create();
+        $this->autenticarComPermissao('attendance.timeEntries.create', company: $company);
+
+        $employee = $this->funcionarioComJornada($company);
+
+        $this->postJson('/api/v1/time-entries', [
+            'employeeId' => $employee->id,
+            'punched_at' => '2026-06-25 08:00:00',
+            'type'       => 'entry',
+        ])->assertCreated();
+
+        $this->assertDatabaseHas('attendance.daily_engagements', [
+            'employeeId' => $employee->id,
+            'status'     => 'draft',
+        ]);
+    }
+
+    public function testConverteMarcacaoParaUtc(): void
+    {
+        $company = Company::factory()->create();
+        $this->autenticarComPermissao('attendance.timeEntries.create', company: $company);
+
+        $employee = $this->funcionarioComJornada($company);
+
+        // Front envia com fuso; o back converte para UTC (08:00 -03:00 => 11:00 UTC).
+        $this->postJson('/api/v1/time-entries', [
+            'employeeId' => $employee->id,
+            'punched_at' => '2026-06-10T08:00:00-03:00',
+            'type'       => 'entry',
+        ])->assertCreated();
+
+        $this->assertDatabaseHas('attendance.time_entries', [
+            'punched_at' => '2026-06-10 11:00:00',
+        ]);
+
+        $this->assertDatabaseHas('attendance.daily_engagements', [
+            'employeeId' => $employee->id,
+            'date'       => '2026-06-10',
+        ]);
+    }
+
+    public function testCalculaHorasTrabalhadasESaldo(): void
+    {
+        $company = Company::factory()->create();
+        $this->autenticarComPermissao('attendance.timeEntries.create', company: $company);
+
+        $employee = $this->funcionarioComJornada($company);
+
+        $marcacoes = [
+            ['08:00:00', 'entry'],
+            ['12:00:00', 'exit'],
+            ['13:00:00', 'entry'],
+            ['18:00:00', 'exit'],
+        ];
+
+        foreach ($marcacoes as [$hora, $type]) {
+            $this->postJson('/api/v1/time-entries', [
+                'employeeId' => $employee->id,
+                'punched_at' => "2026-06-25 {$hora}",
+                'type'       => $type,
+            ])->assertCreated();
+        }
+
+        $this->assertDatabaseHas('attendance.daily_engagements', [
+            'employeeId'       => $employee->id,
+            'worked_minutes'   => 540,
+            'expected_minutes' => 540,
+            'balance_minutes'  => 0,
+        ]);
+    }
+
+    // ==========================================
+    // DIÁRIA (implementação parcial)
+    // ==========================================
+
+    public function testDiaristaRecebeValorDeDiaria(): void
+    {
+        $company = Company::factory()->create();
+        $this->autenticarComPermissao('attendance.timeEntries.create', company: $company);
+
+        $employee = $this->funcionarioComJornada($company, kind: EmploymentTypeEnum::DAYLI->value);
+
+        $this->postJson('/api/v1/time-entries', [
+            'employeeId' => $employee->id,
+            'punched_at' => '2026-06-25 08:00:00',
+            'type'       => 'entry',
+        ])->assertCreated();
+
+        $this->postJson('/api/v1/time-entries', [
+            'employeeId' => $employee->id,
+            'punched_at' => '2026-06-25 12:00:00',
+            'type'       => 'exit',
+        ])->assertCreated();
+
+        $day = DailyEngagement::query()
+            ->where('employeeId', $employee->id)
+            ->first();
+
+        $this->assertEquals(1.0, $day->diaria_value);
+    }
+
+    public function testVinculoPorHoraNaoRecebeDiaria(): void
+    {
+        $company = Company::factory()->create();
+        $this->autenticarComPermissao('attendance.timeEntries.create', company: $company);
+
+        $employee = $this->funcionarioComJornada($company); // CLT
+
+        $this->postJson('/api/v1/time-entries', [
+            'employeeId' => $employee->id,
+            'punched_at' => '2026-06-25 08:00:00',
+            'type'       => 'entry',
+        ])->assertCreated();
+
+        $day = DailyEngagement::query()
+            ->where('employeeId', $employee->id)
+            ->first();
+
+        $this->assertNull($day->diaria_value);
+    }
+
+    // ==========================================
+    // ATUALIZAÇÃO / EXCLUSÃO
+    // ==========================================
+
+    public function testOwnerPodeAtualizarMarcacao(): void
+    {
+        $company = Company::factory()->create();
+        $this->autenticarComRole('owner', company: $company);
+
+        $employee = $this->funcionarioComJornada($company);
+        $day = DailyEngagement::factory()->create([
+            'companyId'  => $company->id,
+            'employeeId' => $employee->id,
+        ]);
+        $entry = TimeEntry::factory()->create([
+            'companyId'         => $company->id,
+            'dailyEngagementId' => $day->id,
+            'punched_at'        => '2026-06-25 08:00:00',
+            'type'              => 'entry',
+        ]);
+
+        $this->putJson("/api/v1/time-entries/{$entry->id}", [
+            'punched_at' => '2026-06-25 09:00:00',
+        ])->assertOk();
+
+        $this->assertDatabaseHas('attendance.time_entries', [
+            'id' => $entry->id,
+        ]);
+    }
+
+    public function testFuncionarioComumNaoPodeAtualizarMarcacao(): void
+    {
+        $this->autenticarSemPermissao();
+
+        $entry = TimeEntry::factory()->create();
+
+        $this->putJson("/api/v1/time-entries/{$entry->id}", [
+            'punched_at' => '2026-06-25 09:00:00',
+        ])->assertForbidden();
+    }
+
+    public function testOwnerPodeExcluirMarcacao(): void
+    {
+        $company = Company::factory()->create();
+        $this->autenticarComRole('owner', company: $company);
+
+        $employee = $this->funcionarioComJornada($company);
+        $day = DailyEngagement::factory()->create([
+            'companyId'  => $company->id,
+            'employeeId' => $employee->id,
+        ]);
+        $entry = TimeEntry::factory()->create([
+            'companyId'         => $company->id,
+            'dailyEngagementId' => $day->id,
+        ]);
+
+        $this->deleteJson("/api/v1/time-entries/{$entry->id}")->assertNoContent();
+
+        $this->assertDatabaseMissing('attendance.time_entries', ['id' => $entry->id]);
+    }
+
+    public function testFuncionarioComumNaoPodeExcluirMarcacao(): void
+    {
+        $this->autenticarSemPermissao();
+
+        $entry = TimeEntry::factory()->create();
+
+        $this->deleteJson("/api/v1/time-entries/{$entry->id}")->assertForbidden();
+    }
+}

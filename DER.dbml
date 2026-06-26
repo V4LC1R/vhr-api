@@ -7,17 +7,28 @@ Enum UserStatus {
 
 
 Enum TimeEntryType {
-  in
-  break_start
-  break_end
-  out
+  entry
+  exit
 }
 
-Enum EngagementStatus {
-  scheduled
-  completed
-  paid
-  canceled
+Enum TimeEntrySource {
+  manual
+  device
+}
+
+Enum DailyEngagementStatus {
+  draft
+  pending
+  approved
+  rejected
+}
+
+Enum DailyEngagementType {
+  work
+  day_off
+  holiday
+  medical
+  absence
 }
 
 // ==========================================
@@ -102,6 +113,47 @@ Table job.workload [headercolor: #D69E2E] {
 
 
 // ==========================================
+// SCHEMA: ATTENDANCE (Verde)
+// ==========================================
+
+Table attendance.daily_engagements [headercolor: #38A169] {
+  id uuid [primary key]
+  companyId uuid [not null]
+  employeeId uuid [not null]
+  workloadId uuid
+  date date [not null]
+  type DailyEngagementType [not null]
+  status DailyEngagementStatus [not null]
+  worked_minutes integer
+  expected_minutes integer
+  balance_minutes integer
+  diaria_value decimal
+  note string
+  draftedBy uuid
+  approvedBy uuid
+  approvedAt datetime
+  created_at datetime
+  updated_at datetime
+
+  indexes {
+    (companyId, employeeId, date) [unique]
+  }
+}
+
+Table attendance.time_entries [headercolor: #38A169] {
+  id uuid [primary key]
+  companyId uuid [not null]
+  dailyEngagementId uuid [not null]
+  punched_at datetime [not null]
+  type TimeEntryType [not null]
+  source TimeEntrySource [not null]
+  note string
+  created_at datetime
+  updated_at datetime
+}
+
+
+// ==========================================
 // RELATIONSHIPS / REFS
 // ==========================================
 
@@ -115,3 +167,12 @@ Ref: job.employees.personId > core.persons.id
 Ref: job.employees.companyId > core.companies.id
 Ref: job.employment.workloadId > job.workload.id
 Ref: job.workload.companyId > core.companies.id
+
+// Attendance
+Ref: attendance.daily_engagements.companyId > core.companies.id
+Ref: attendance.daily_engagements.employeeId > job.employees.id
+Ref: attendance.daily_engagements.workloadId > job.workload.id
+Ref: attendance.daily_engagements.draftedBy > core.userCompanies.id
+Ref: attendance.daily_engagements.approvedBy > core.userCompanies.id
+Ref: attendance.time_entries.companyId > core.companies.id
+Ref: attendance.time_entries.dailyEngagementId > attendance.daily_engagements.id

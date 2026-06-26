@@ -1,9 +1,11 @@
 <?php
 
 use App\Contracts\CompanyRepositoryInterface;
+use App\Contracts\DailyEngagementRepositoryInterface;
 use App\Contracts\EmployeeRepositoryInterface;
 use App\Contracts\EmploymentRepositoryInterface;
 use App\Contracts\PersonRepositoryInterface;
+use App\Contracts\TimeEntryRepositoryInterface;
 use App\Contracts\UserRepositoryInterface;
 use App\Contracts\WorkloadRepositoryInterface;
 use Modules\Core\Models\UserCompany;
@@ -47,6 +49,20 @@ if (! function_exists('workloadRepo')) {
     function workloadRepo(): WorkloadRepositoryInterface
     {
         return app(WorkloadRepositoryInterface::class);
+    }
+}
+
+if (! function_exists('timeEntryRepo')) {
+    function timeEntryRepo(): TimeEntryRepositoryInterface
+    {
+        return app(TimeEntryRepositoryInterface::class);
+    }
+}
+
+if (! function_exists('dailyEngagementRepo')) {
+    function dailyEngagementRepo(): DailyEngagementRepositoryInterface
+    {
+        return app(DailyEngagementRepositoryInterface::class);
     }
 }
 
