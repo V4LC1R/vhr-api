@@ -55,17 +55,20 @@ class AttendanceCalculator
 
         foreach ($entries as $entry) {
             if ($entry->type === TimeEntryTypeEnum::ENTRY) {
-                $openEntry = $entry->punched_at;
+                // Mantém a primeira entrada aberta; entradas repetidas são ignoradas.
+                $openEntry ??= $entry->punched_at;
 
                 continue;
             }
 
+            // Saída só soma se houver uma entrada em aberto; saída solta é ignorada.
             if ($entry->type === TimeEntryTypeEnum::EXIT && $openEntry !== null) {
                 $worked += (int) abs($openEntry->diffInMinutes($entry->punched_at));
                 $openEntry = null;
             }
         }
 
+        // Marcação que ficou em aberto (entrada sem saída) não é calculada.
         return $worked;
     }
 

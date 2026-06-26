@@ -148,7 +148,7 @@ class TimeEntryService
 
     private function findEmployee(string $employeeId, string $companyId): Employee
     {
-        $employee = Employee::query()
+        $employee = Employee::query()// usar o bind employRepo()
             ->where('id', $employeeId)
             ->where('companyId', $companyId)
             ->with('activeEmployment')

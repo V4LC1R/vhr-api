@@ -163,7 +163,7 @@ Roles disponíveis: `owner`, `humanResource`, `accountant`.
 - Cadastro de funcionários com matrícula sequencial por empresa
 - Vínculo funcionário ↔ pessoa ↔ empresa
 - Admissão e desligamento
-- **Cadastro de jornada de trabalho (Workload)** ← etapa atual
+- **Cadastro de jornada de trabalho (Workload)** 
 
 ---
 

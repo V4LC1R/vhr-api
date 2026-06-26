@@ -47,6 +47,11 @@ return new class extends Migration
                 ->on('job.workloads')
                 ->onDelete('set null');
 
+            $table->foreign('draftedBy')
+                ->references('id')
+                ->on('core.user_companies')
+                ->onDelete('set null');
+
             $table->foreign('approvedBy')
                 ->references('id')
                 ->on('core.user_companies')
