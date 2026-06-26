@@ -59,6 +59,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'job.employees.create',
             'job.employees.update',
             'job.employees.delete',
+            'job.employees.dismiss',
 
             // ==========================================
             // ATTENDANCE - TIME ENTRIES
@@ -105,6 +106,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'job.employees.create',
             'job.employees.update',
             'job.employees.delete',
+            'job.employees.dismiss',
 
             'attendance.timeEntries.view',
             'attendance.timeEntries.create',

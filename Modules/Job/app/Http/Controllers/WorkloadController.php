@@ -4,60 +4,57 @@ namespace Modules\Job\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Modules\Job\Http\Requests\Workload\StoreWorkloadRequest;
+use Modules\Job\Http\Requests\Workload\UpdateWorkloadRequest;
+use Modules\Job\Models\Workload;
+use Modules\Job\Services\WorkloadService;
 
 class WorkloadController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        return view('job::index');
+    public function __construct(
+        protected readonly WorkloadService $service
+    ) {
+        $this->authorizeResource(Workload::class, 'workload');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function index(Request $request)
     {
-        return view('job::create');
+        $workloads = $this->service->list(
+            perPage: $request->integer('per_page', 15)
+        );
+
+        return response()->json($workloads);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreWorkloadRequest $request)
     {
+        $workload = $this->service->create($request->toDTO());
+
+        return response()->json($workload, Response::HTTP_CREATED);
     }
 
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
+    public function show(Workload $workload)
     {
-        return view('job::show');
+        return response()->json($workload->toResource());
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('job::edit');
+    public function update(
+        UpdateWorkloadRequest $request,
+        Workload $workload
+    ) {
+        $workload = $this->service->update(
+            $workload,
+            $request->toDTO()
+        );
+
+        return response()->json($workload);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
+    public function destroy(Workload $workload)
     {
-    }
+        $this->service->delete($workload);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
+        return response()->noContent();
     }
 }

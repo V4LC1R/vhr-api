@@ -31,6 +31,14 @@ class Workload extends Model
 
     protected $table = 'job.workloads';
 
+    protected function casts(): array
+    {
+        return [
+            'monthly_hours' => 'integer',
+            'weekly_hours'  => 'integer',
+        ];
+    }
+
     public function employments(): HasMany
     {
         return $this->hasMany(Employment::class, 'workloadId');

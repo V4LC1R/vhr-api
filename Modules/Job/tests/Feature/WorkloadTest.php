@@ -74,9 +74,10 @@ class WorkloadTest extends DBTestCase
 
         $workload = Workload::factory()->create(['companyId' => $company->id]);
 
-        $this->getJson("/api/v1/workloads/{$workload->id}")
-            ->assertOk()
-            ->assertJsonPath('data.id', $workload->id);
+        $response = $this->getJson("/api/v1/workloads/{$workload->id}")
+            ->assertOk();
+
+        $response->assertJsonPath('id', $workload->id);
     }
 
     public function testUsuarioComPermissaoPodeListarWorkloads(): void
