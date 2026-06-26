@@ -1,5 +1,6 @@
 {
     "Core": true,
     "Auth": true,
-    "Job": true
+    "Job": true,
+    "Attendance": true
 }

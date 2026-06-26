@@ -159,7 +159,7 @@ Roles disponíveis: `owner`, `humanResource`, `accountant`.
 
 ---
 
-### 🚧 v0.2 — Módulo Job (em andamento)
+### ✅ v0.2 — Módulo Job (concluído)
 - Cadastro de funcionários com matrícula sequencial por empresa
 - Vínculo funcionário ↔ pessoa ↔ empresa
 - Admissão e desligamento
@@ -167,8 +167,8 @@ Roles disponíveis: `owner`, `humanResource`, `accountant`.
 
 ---
 
-### 🔜 v0.3 — Módulo Attendance
-- Lançamento manual de pontos diários por funcionário (substituição de planilhas)
+### 🔜 v0.3 — Módulo Attendance (em andamento)
+- Lançamento manual de pontos diários por funcionário (substituição de planilhas)  ← etapa atual
 - Aprovação dos lançamentos pelo owner
 - Visualização mensal consolidada por funcionário
 - Exceções: faltas, folgas e feriados _(bônus)_

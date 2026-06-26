@@ -75,6 +75,9 @@ class RolesAndPermissionsSeeder extends Seeder
             // ==========================================
 
             'attendance.dailyEngagements.view',
+            'attendance.dailyEngagements.create',
+            'attendance.dailyEngagements.update',
+            'attendance.dailyEngagements.approve',
         ];
 
         // Criar permissões se não existirem
@@ -111,6 +114,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'attendance.timeEntries.view',
             'attendance.timeEntries.create',
             'attendance.timeEntries.update',
+            'attendance.timeEntries.delete',
+
+            'attendance.dailyEngagements.view',
+            'attendance.dailyEngagements.create',
+            'attendance.dailyEngagements.update',
         ]);
 
         // Papel: Accountant (Contador - Foco em Visualização e Auditoria)
@@ -132,6 +140,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'core.persons.view',
             'job.employees.view',
             'attendance.timeEntries.view', // Geralmente restrito ao próprio ID via política (Policy)
+            'attendance.dailyEngagements.view', // Restrito ao próprio funcionário via Policy
         ]);
     }
 }
