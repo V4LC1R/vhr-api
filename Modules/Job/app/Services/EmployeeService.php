@@ -14,7 +14,6 @@ use Illuminate\Database\QueryException;
 use Modules\Job\Data\EmployeeData;
 use Modules\Job\Enums\EmploymentStatusEnum;
 use Modules\Job\Enums\EmploymentTypeEnum;
-use Modules\Job\Http\Resources\EmployeeResource;
 use Modules\Job\Models\Employee;
 use Modules\Job\Queries\EmployeeListQuery;
 use Spatie\LaravelData\Optional;
@@ -115,9 +114,9 @@ class EmployeeService
 
     public function list(int $perPage = 15)
     {
-        $employees = EmployeeListQuery::make()->paginate($perPage);
-
-        return EmployeeResource::collection($employees);
+        return EmployeeListQuery::make()
+            ->paginate($perPage)
+            ->through(fn (Employee $employee) => $employee->toResource());
     }
 
     private function resolveOrCreateEmployee(string $companyId, string $personId): Employee
