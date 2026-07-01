@@ -2,6 +2,7 @@
 
 namespace Modules\Attendance\Models;
 
+use App\Supports\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Attributes\UseResource;
@@ -28,6 +29,7 @@ class TimeEntry extends Model
 {
     use HasUuids;
     use HasFactory;
+    use BelongsToCompany;
 
     protected $table = 'attendance.time_entries';
 

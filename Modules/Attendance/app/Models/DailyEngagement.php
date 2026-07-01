@@ -2,6 +2,7 @@
 
 namespace Modules\Attendance\Models;
 
+use App\Supports\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Attributes\UseResource;
@@ -15,8 +16,6 @@ use Modules\Attendance\Enums\DailyEngagementStatusEnum;
 use Modules\Attendance\Enums\DailyEngagementTypeEnum;
 use Modules\Attendance\Http\Resources\DailyEngagementResource;
 use Modules\Core\Models\UserCompany;
-use Modules\Job\Models\Employee;
-use Modules\Job\Models\Workload;
 
 #[Fillable([
     'companyId',
@@ -40,6 +39,7 @@ class DailyEngagement extends Model
 {
     use HasUuids;
     use HasFactory;
+    use BelongsToCompany;
 
     protected $table = 'attendance.daily_engagements';
 
@@ -64,25 +64,19 @@ class DailyEngagement extends Model
 
     public function employee(): BelongsTo
     {
-        return $this->belongsTo(Employee::class, 'employeeId'); // usar o bind employRepo()
+        return $this->belongsTo(employeeRepo()->getModelClass(), 'employeeId');
     }
 
     public function workload(): BelongsTo
     {
-        return $this->belongsTo(Workload::class, 'workloadId'); // usar o bind workloadRepo()
+        return $this->belongsTo(workloadRepo()->getModelClass(), 'workloadId');
     }
 
-    /**
-     * Quem deixou o dia em rascunho — UserCompany (papel do user na empresa).
-     */
     public function draftedByUserCompany(): BelongsTo
     {
         return $this->belongsTo(UserCompany::class, 'draftedBy');
     }
 
-    /**
-     * Quem aprovou/rejeitou o dia — UserCompany (papel do user na empresa).
-     */
     public function approvedByUserCompany(): BelongsTo
     {
         return $this->belongsTo(UserCompany::class, 'approvedBy');

@@ -2,6 +2,7 @@
 
 namespace Modules\Job\Models;
 
+use App\Supports\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Attributes\UseResource;
@@ -26,6 +27,7 @@ class Employee extends Model
 {
     use HasUuids;
     use HasFactory;
+    use BelongsToCompany;
 
     protected $table = 'job.employees';
 
