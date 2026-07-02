@@ -1,6 +1,7 @@
 import { createInertiaApp } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
 import type { ComponentType } from 'react';
+import { ThemeProvider } from '@/components/theme-provider';
 
 createInertiaApp({
     resolve: async (name) => {
@@ -11,7 +12,11 @@ createInertiaApp({
         return module.default;
     },
     setup({ el, App, props }) {
-        createRoot(el).render(<App {...props} />);
+        createRoot(el).render(
+            <ThemeProvider>
+                <App {...props} />
+            </ThemeProvider>,
+        );
     },
     progress: { color: '#0f766e' },
 });
