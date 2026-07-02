@@ -1,8 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Auth\Http\Controllers\AuthController;
+use Inertia\Inertia;
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('auths', AuthController::class)->names('auth');
+Route::prefix('auth')->group(function () {
+    Route::inertia('/login', 'Auth/Login')->name('login');
+
+    Route::inertia('/forgot-password', 'Auth/ForgotPassword')->name('password.request');
+
+    Route::get('/reset-password/{token}', fn (string $token) => Inertia::render('Auth/ResetPassword', [
+        'token' => $token,
+    ]))->name('password.reset');
 });
