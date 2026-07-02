@@ -1,8 +1,8 @@
 import { RHF } from "@/components/rhf-fields";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { FieldLabel } from "@/components/ui/field";
+import { Link } from "@inertiajs/react";
+
 import { useFormContext } from "react-hook-form";
 
 export function LoginForm() {
@@ -26,23 +26,20 @@ export function LoginForm() {
                 className="h-10"
             />
            
-            <div className="flex flex-row w-full">
-                <Field orientation="horizontal">
-                    <Checkbox
-                        id="checkout-7j9-same-as-shipping-wgm"
-                        defaultChecked
-                    />
-                    <FieldLabel
-                        htmlFor="checkout-7j9-same-as-shipping-wgm"
-                        className="font-normal"
-                    >
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Checkbox id="remember" defaultChecked />
+                    <FieldLabel htmlFor="remember" className="font-normal">
                         Manter logado
                     </FieldLabel>
-                </Field>
-
-                <div className="w-60">
-                    <a href="/forgot-password" className="text-sm underline">Esqueci minha senha!</a>
                 </div>
+
+                <Link
+                    href="/forgot-password"
+                    className="text-sm underline underline-offset-4 hover:text-primary"
+                >
+                    Esqueci minha senha!
+                </Link>
             </div>
         </>
     )
