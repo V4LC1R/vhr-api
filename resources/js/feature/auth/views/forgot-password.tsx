@@ -32,7 +32,7 @@ export function ForgotPassword() {
 
     return (
         <RHF.Form
-            className="w-full h-full md:h-130 max-w-sm rounded-xl border bg-card p-8 shadow-lg shadow-gray-200/60 flex flex-col justify-center"
+            className="w-full h-full md:h-130 max-w-sm rounded-xl border bg-card p-8 shadow-lg flex flex-col justify-center"
             form={form}
             onSubmit={onSubmit}
         >
@@ -58,7 +58,7 @@ export function ForgotPassword() {
 
                 <p className="text-center text-sm text-muted-foreground">
                     Lembrou a senha?{" "}
-                    <Link href="/" className="underline underline-offset-4 hover:text-primary">
+                    <Link href="/auth/login" className="underline underline-offset-4 hover:text-primary">
                         Voltar para o login
                     </Link>
                 </p>

@@ -35,7 +35,7 @@ export function LoginForm() {
                 </div>
 
                 <Link
-                    href="/forgot-password"
+                    href="/auth/forgot-password"
                     className="text-sm underline underline-offset-4 hover:text-primary"
                 >
                     Esqueci minha senha!

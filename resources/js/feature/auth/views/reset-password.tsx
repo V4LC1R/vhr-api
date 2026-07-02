@@ -73,7 +73,7 @@ export function ResetPasswordView() {
 
                 <p className="text-center text-sm text-muted-foreground">
                     Lembrou a senha?{" "}
-                    <Link href="/" className="underline underline-offset-4 hover:text-primary">
+                    <Link href="auth/login" className="underline underline-offset-4 hover:text-primary">
                         Voltar para o login
                     </Link>
                 </p>

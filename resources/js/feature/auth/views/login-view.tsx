@@ -9,7 +9,7 @@ export function LoginView() {
 
     return (
         <RHF.Form
-            className="w-full h-full md:h-130 max-w-sm rounded-xl border bg-card p-8 shadow-lg shadow-gray-200/60 flex flex-col justify-center"
+            className="w-full h-full md:h-130 max-w-sm rounded-xl border bg-card p-8 shadow-lg flex flex-col justify-center"
             form={form}
             onSubmit={onSubmit}
         >
