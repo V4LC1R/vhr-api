@@ -224,27 +224,45 @@ class EmployeeTest extends DBTestCase
 
     public function testUsuarioComPermissaoPodeVisualizarFuncionario(): void
     {
-        $this->autenticarComPermissao('job.employees.view');
+        $company = Company::factory()->create();
 
-        $employee = Employee::factory()->create();
+        $this->autenticarComPermissao('job.employees.view', company: $company);
+
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
 
         $this->getJson("/api/v1/employees/{$employee->id}")->assertOk();
     }
 
+    public function testNaoAcessaFuncionarioDeOutraEmpresa(): void
+    {
+        $companyA = Company::factory()->create();
+
+        $this->autenticarComPermissao('job.employees.view', company: $companyA);
+
+        $outraEmpresa = Company::factory()->create();
+        $employee     = Employee::factory()->create(['companyId' => $outraEmpresa->id]);
+
+        $this->getJson("/api/v1/employees/{$employee->id}")->assertNotFound();
+    }
+
     public function testUsuarioComPermissaoPodeListarFuncionarios(): void
     {
-        $this->autenticarComPermissao('job.employees.view');
+        $company = Company::factory()->create();
 
-        Employee::factory()->count(3)->create();
+        $this->autenticarComPermissao('job.employees.view', company: $company);
+
+        Employee::factory()->count(3)->create(['companyId' => $company->id]);
 
         $this->getJson('/api/v1/employees')->assertOk();
     }
 
     public function testOwnerPodeAtualizarFuncionario(): void
     {
-        $this->autenticarComRole('owner');
+        $company = Company::factory()->create();
 
-        ['employee' => $employee] = $this->criarFuncionarioComVinculo();
+        $this->autenticarComRole('owner', company: $company);
+
+        ['employee' => $employee] = $this->criarFuncionarioComVinculo($company);
 
         $workload = Workload::factory()->create(['companyId' => $employee->companyId]);
 
@@ -265,9 +283,11 @@ class EmployeeTest extends DBTestCase
 
     public function testRhPodeAtualizarOutroFuncionario(): void
     {
-        $this->autenticarComRole('humanResource');
+        $company = Company::factory()->create();
 
-        ['employee' => $employee] = $this->criarFuncionarioComVinculo();
+        $this->autenticarComRole('humanResource', company: $company);
+
+        ['employee' => $employee] = $this->criarFuncionarioComVinculo($company);
 
         $workload = Workload::factory()->create(['companyId' => $employee->companyId]);
 
@@ -282,11 +302,15 @@ class EmployeeTest extends DBTestCase
 
     public function testRhNaoPodeEditarASiMesmo(): void
     {
-        $person = Person::factory()->create();
+        $company = Company::factory()->create();
+        $person  = Person::factory()->create();
 
-        $this->autenticarComRole('humanResource', person: $person);
+        $this->autenticarComRole('humanResource', company: $company, person: $person);
 
-        $employee = Employee::factory()->create(['personId' => $person->id]);
+        $employee = Employee::factory()->create([
+            'companyId' => $company->id,
+            'personId'  => $person->id,
+        ]);
 
         $workload = Workload::factory()->create(['companyId' => $employee->companyId]);
 
@@ -301,9 +325,11 @@ class EmployeeTest extends DBTestCase
 
     public function testFuncionarioComumNaoPodeAtualizar(): void
     {
-        $this->autenticarSemPermissao();
+        $company = Company::factory()->create();
 
-        $employee = Employee::factory()->create();
+        $this->autenticarSemPermissao(company: $company);
+
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
 
         $workload = Workload::factory()->create(['companyId' => $employee->companyId]);
 
@@ -318,9 +344,11 @@ class EmployeeTest extends DBTestCase
 
     public function testOwnerPodeDemitirFuncionario(): void
     {
-        $this->autenticarComRole('owner');
+        $company = Company::factory()->create();
 
-        ['employee' => $employee] = $this->criarFuncionarioComVinculo();
+        $this->autenticarComRole('owner', company: $company);
+
+        ['employee' => $employee] = $this->criarFuncionarioComVinculo($company);
 
         $this->patchJson("/api/v1/employees/{$employee->id}/dismiss")->assertOk();
 
@@ -332,38 +360,48 @@ class EmployeeTest extends DBTestCase
 
     public function testRhPodeDemitirOutroFuncionario(): void
     {
-        $this->autenticarComRole('humanResource');
+        $company = Company::factory()->create();
 
-        ['employee' => $employee] = $this->criarFuncionarioComVinculo();
+        $this->autenticarComRole('humanResource', company: $company);
+
+        ['employee' => $employee] = $this->criarFuncionarioComVinculo($company);
 
         $this->patchJson("/api/v1/employees/{$employee->id}/dismiss")->assertOk();
     }
 
     public function testRhNaoPodeDemitirASiMesmo(): void
     {
-        $person = Person::factory()->create();
+        $company = Company::factory()->create();
+        $person  = Person::factory()->create();
 
-        $this->autenticarComRole('humanResource', person: $person);
+        $this->autenticarComRole('humanResource', company: $company, person: $person);
 
-        $employee = Employee::factory()->create(['personId' => $person->id]);
+        $employee = Employee::factory()->create([
+            'companyId' => $company->id,
+            'personId'  => $person->id,
+        ]);
 
         $this->patchJson("/api/v1/employees/{$employee->id}/dismiss")->assertForbidden();
     }
 
     public function testFuncionarioComumNaoPodeDemitir(): void
     {
-        $this->autenticarSemPermissao();
+        $company = Company::factory()->create();
 
-        $employee = Employee::factory()->create();
+        $this->autenticarSemPermissao(company: $company);
+
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
 
         $this->patchJson("/api/v1/employees/{$employee->id}/dismiss")->assertForbidden();
     }
 
     public function testOwnerPodeExcluirFuncionario(): void
     {
-        $this->autenticarComRole('owner');
+        $company = Company::factory()->create();
 
-        $employee = Employee::factory()->create();
+        $this->autenticarComRole('owner', company: $company);
+
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
 
         $this->deleteJson("/api/v1/employees/{$employee->id}")->assertNoContent();
 
@@ -373,29 +411,37 @@ class EmployeeTest extends DBTestCase
 
     public function testRhPodeExcluirOutroFuncionario(): void
     {
-        $this->autenticarComRole('humanResource');
+        $company = Company::factory()->create();
 
-        $employee = Employee::factory()->create();
+        $this->autenticarComRole('humanResource', company: $company);
+
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
 
         $this->deleteJson("/api/v1/employees/{$employee->id}")->assertNoContent();
     }
 
     public function testRhNaoPodeExcluirASiMesmo(): void
     {
-        $person = Person::factory()->create();
+        $company = Company::factory()->create();
+        $person  = Person::factory()->create();
 
-        $this->autenticarComRole('humanResource', person: $person);
+        $this->autenticarComRole('humanResource', company: $company, person: $person);
 
-        $employee = Employee::factory()->create(['personId' => $person->id]);
+        $employee = Employee::factory()->create([
+            'companyId' => $company->id,
+            'personId'  => $person->id,
+        ]);
 
         $this->deleteJson("/api/v1/employees/{$employee->id}")->assertForbidden();
     }
 
     public function testFuncionarioComumNaoPodeExcluir(): void
     {
-        $this->autenticarSemPermissao();
+        $company = Company::factory()->create();
 
-        $employee = Employee::factory()->create();
+        $this->autenticarSemPermissao(company: $company);
+
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
 
         $this->deleteJson("/api/v1/employees/{$employee->id}")->assertForbidden();
     }

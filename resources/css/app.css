@@ -97,14 +97,14 @@
 
     --radius: 0.625rem;
 
-    --sidebar: hsl(168 56% 11%);
-    --sidebar-foreground: hsl(42 33% 96%);
-    --sidebar-primary: hsl(43 48% 55%);
-    --sidebar-primary-foreground: hsl(168 56% 11%);
-    --sidebar-accent: hsl(168 40% 18%);
-    --sidebar-accent-foreground: hsl(42 33% 96%);
-    --sidebar-border: hsl(168 40% 18%);
-    --sidebar-ring: hsl(43 48% 52%);
+    --sidebar: hsl(42 62% 96%);                       /* creme claro */
+    --sidebar-foreground: hsl(168 40% 12%);           /* esmeralda — igual --foreground */
+    --sidebar-primary: hsl(43 48% 55%);               /* ouro — item ativo */
+    --sidebar-primary-foreground: hsl(168 56% 11%);   /* esmeralda sobre ouro */
+    --sidebar-accent: hsl(42 28% 92%);                /* areia — hover suave */
+    --sidebar-accent-foreground: hsl(168 40% 14%);    /* esmeralda no hover */
+    --sidebar-border: hsl(40 16% 88%);                /* borda clara — igual --border */
+    --sidebar-ring: hsl(43 48% 52%);                  /* foco em ouro */
 
     /* Marca (uso livre) */
     --brand-emerald: hsl(168 56% 11%);

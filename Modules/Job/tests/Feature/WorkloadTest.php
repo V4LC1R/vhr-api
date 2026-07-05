@@ -141,9 +141,11 @@ class WorkloadTest extends DBTestCase
 
     public function testFuncionarioComumNaoPodeAtualizarWorkload(): void
     {
-        $this->autenticarSemPermissao();
+        $company = Company::factory()->create();
 
-        $workload = Workload::factory()->create();
+        $this->autenticarSemPermissao(company: $company);
+
+        $workload = Workload::factory()->create(['companyId' => $company->id]);
         $payload = $this->dadosWorkload($workload->companyId);
 
         $this->putJson("/api/v1/workloads/{$workload->id}", $payload)->assertForbidden();
@@ -181,9 +183,11 @@ class WorkloadTest extends DBTestCase
 
     public function testFuncionarioComumNaoPodeExcluirWorkload(): void
     {
-        $this->autenticarSemPermissao();
+        $company = Company::factory()->create();
 
-        $workload = Workload::factory()->create();
+        $this->autenticarSemPermissao(company: $company);
+
+        $workload = Workload::factory()->create(['companyId' => $company->id]);
 
         $this->deleteJson("/api/v1/workloads/{$workload->id}")->assertForbidden();
     }

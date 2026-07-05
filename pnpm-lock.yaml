@@ -17,6 +17,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.4.0
         version: 5.4.0(react-hook-form@7.80.0(react@19.2.7))
+      '@iconify/react':
+        specifier: ^6.0.2
+        version: 6.0.2(react@19.2.7)
       '@inertiajs/react':
         specifier: ^3.5.0
         version: 3.5.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -297,6 +300,14 @@ packages:
     resolution: {integrity: sha512-EIsqr/t/qbinPIhGjMdtvutIN1Kk4uwbROE9/UQ93CAVGR7GkA7Y92+fX80OzXi/OB67jVFYwKGO1WzkxmkFZw==}
     peerDependencies:
       react-hook-form: ^7.55.0
+
+  '@iconify/react@6.0.2':
+    resolution: {integrity: sha512-SMmC2sactfpJD427WJEDN6PMyznTFMhByK9yLW0gOTtnjzzbsi/Ke/XqsumsavFPwNiXs8jSiYeZTmLCLwO+Fg==}
+    peerDependencies:
+      react: '>=16'
+
+  '@iconify/types@2.0.0':
+    resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
 
   '@inertiajs/core@3.5.0':
     resolution: {integrity: sha512-k0RpPULYD6d+FsYUIaSkUbvLbMGBRkzMc+qHhwfTVrMwCvXd6FyQ+O99PT5AN4j3BKy96XT45AKDwBhhti8Tgg==}
@@ -2305,6 +2316,13 @@ snapshots:
     dependencies:
       '@standard-schema/utils': 0.3.0
       react-hook-form: 7.80.0(react@19.2.7)
+
+  '@iconify/react@6.0.2(react@19.2.7)':
+    dependencies:
+      '@iconify/types': 2.0.0
+      react: 19.2.7
+
+  '@iconify/types@2.0.0': {}
 
   '@inertiajs/core@3.5.0':
     dependencies:

@@ -248,9 +248,11 @@ class TimeEntryTest extends DBTestCase
 
     public function testFuncionarioComumNaoPodeAtualizarMarcacao(): void
     {
-        $this->autenticarSemPermissao();
+        $company = Company::factory()->create();
 
-        $entry = TimeEntry::factory()->create();
+        $this->autenticarSemPermissao(company: $company);
+
+        $entry = TimeEntry::factory()->create(['companyId' => $company->id]);
 
         $this->putJson("/api/v1/time-entries/{$entry->id}", [
             'punched_at' => '2026-06-25 09:00:00',
@@ -279,9 +281,11 @@ class TimeEntryTest extends DBTestCase
 
     public function testFuncionarioComumNaoPodeExcluirMarcacao(): void
     {
-        $this->autenticarSemPermissao();
+        $company = Company::factory()->create();
 
-        $entry = TimeEntry::factory()->create();
+        $this->autenticarSemPermissao(company: $company);
+
+        $entry = TimeEntry::factory()->create(['companyId' => $company->id]);
 
         $this->deleteJson("/api/v1/time-entries/{$entry->id}")->assertForbidden();
     }
