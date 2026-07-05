@@ -24,6 +24,7 @@ export function ThemeToggle() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger
+                className="cursor-pointer"
                 render={<Button variant="ghost" size="icon" aria-label="Alternar tema" />}
             >
                 <Sun className="size-4 dark:hidden" />
@@ -35,7 +36,7 @@ export function ThemeToggle() {
                     onValueChange={(value) => setTheme(value as Theme)}
                 >
                     {options.map(({ value, label, icon: Icon }) => (
-                        <DropdownMenuRadioItem key={value} value={value}>
+                        <DropdownMenuRadioItem className="cursor-pointer" key={value} value={value}>
                             <Icon className="size-4" />
                             {label}
                         </DropdownMenuRadioItem>

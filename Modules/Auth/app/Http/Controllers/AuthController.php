@@ -5,6 +5,7 @@ namespace Modules\Auth\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Modules\Auth\Services\AuthService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Auth\AuthenticationException;
 use Modules\Auth\Http\Requests\AuthUserRequest;
 use Modules\Auth\Http\Requests\SelectCompanyRequest;
@@ -59,9 +60,14 @@ class AuthController extends Controller
         ], 200);
     }
 
-    public function logout(): JsonResponse
+    public function logout(Request $request): JsonResponse
     {
         $this->authService->logout();
+
+        // Encerra a sessão de fato: limpa os dados (companyId etc.) e gera um
+        // novo CSRF token. Sem isso a sessão sobrevive ao logout.
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return response()->json([
             'message' => 'Logout realizado com sucesso'

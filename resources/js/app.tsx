@@ -2,6 +2,9 @@ import { createInertiaApp } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
 import type { ComponentType } from 'react';
 import { ThemeProvider } from '@/components/theme/theme-provider';
+import { registerHttpInterceptors } from '@/lib/http';
+
+registerHttpInterceptors();
 
 createInertiaApp({
     resolve: async (name) => {

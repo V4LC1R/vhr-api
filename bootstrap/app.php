@@ -2,6 +2,7 @@
 
 use App\Exceptions\Handler;
 use App\Http\Middlewares\HandleInertiaRequests;
+use App\Http\Middlewares\NoStoreCache;
 use App\Http\Middlewares\SetActiveCompany;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'current.company' => SetActiveCompany::class,
+            'no-store'        => NoStoreCache::class,
         ]);
 
         // A empresa ativa precisa ser resolvida ANTES do route-model binding,

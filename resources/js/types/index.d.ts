@@ -18,13 +18,22 @@ export interface AuthCurrent {
     permissions: string[];
 }
 
+// Empresa que o user pode acessar — alimenta o seletor de empresa
+export interface AuthCompany {
+    companyId: string;
+    name: string | null;
+}
+
 export interface SharedProps {
     auth: {
         user: AuthUser | null;
         current: AuthCurrent | null;
+        companies: AuthCompany[];
     };
 }
 
 declare module '@inertiajs/core' {
-    interface PageProps extends SharedProps {}
+    interface InertiaConfig {
+        sharedPageProps: SharedProps;
+    }
 }

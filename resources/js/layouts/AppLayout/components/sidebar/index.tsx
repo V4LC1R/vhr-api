@@ -3,10 +3,11 @@ import { SidebarHeaderApp } from "./header";
 import { SidebarFooterApp } from "./footer";
 import { NavMain } from "./nav-main";
 
-
 export function AppSidebar() {
+    
+
     return (
-       <Sidebar>
+       <Sidebar collapsible="icon">
             <SidebarHeaderApp/>
             <SidebarContent>
                 <NavMain />

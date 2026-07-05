@@ -58,6 +58,18 @@ class HandleInertiaRequests extends Middleware
                     'roles'       => $current->getRoleNames(),
                     'permissions' => $current->getAllPermissions()->pluck('name'),
                 ] : null,
+
+                // todas as empresas do user — alimenta o seletor de empresa
+                'companies' => $user
+                    ? $user->userCompanies()
+                        ->with('company')
+                        ->get()
+                        ->map(fn ($uc) => [
+                            'companyId' => $uc->companyId,
+                            'name'      => $uc->company?->name,
+                        ])
+                        ->values()
+                    : [],
             ],
         ];
     }

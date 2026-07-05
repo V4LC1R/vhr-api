@@ -1,9 +1,10 @@
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 
 import { loginSchema } from "../schemas/login-schema";
 import { LoginForm } from "../types";
 import { useLogin } from "./useLogin";
+import { router } from "@inertiajs/react";
 
 export function useLoginForm() {
     const {login,processing} = useLogin()
@@ -19,8 +20,10 @@ export function useLoginForm() {
     const onSubmit = async (data:LoginForm) => {
         try {
             const session = await login(data)
+            console.log(session)
+            router.visit('/dashboard')
         } catch (error) {
-            
+            console.log(error)
         }
     }
 

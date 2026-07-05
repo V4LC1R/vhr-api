@@ -3,7 +3,6 @@
 namespace App\Http\Middlewares;
 
 use Closure;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,16 +33,16 @@ class SetActiveCompany
                 ->toArray()
         );
 
-        $userCompany = (new UserCompany)->newFromBuilder(
+        $userCompany = (new UserCompany())->newFromBuilder(
             collect($data)->except(['company', 'person'])->toArray()
         );
 
         if (!empty($data['company'])) {
-            $userCompany->setRelation('company', (new Company)->newFromBuilder($data['company']));
+            $userCompany->setRelation('company', (new Company())->newFromBuilder($data['company']));
         }
 
         if (!empty($data['person'])) {
-            $userCompany->setRelation('person', (new Person)->newFromBuilder($data['person']));
+            $userCompany->setRelation('person', (new Person())->newFromBuilder($data['person']));
         }
 
         app()->instance('currentCompany', $userCompany);
