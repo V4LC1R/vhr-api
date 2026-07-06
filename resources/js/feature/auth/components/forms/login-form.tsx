@@ -4,6 +4,7 @@ import { FieldLabel } from "@/components/ui/field";
 import { Link } from "@inertiajs/react";
 
 import { useFormContext } from "react-hook-form";
+import { PasswordInput } from "../password-input";
 
 export function LoginForm() {
     const {control}= useFormContext()
@@ -18,12 +19,9 @@ export function LoginForm() {
                 className="h-10"
             />
 
-            <RHF.Input
+            <PasswordInput
                 control={control}
                 name="password"
-                label="Senha"
-                type="password"
-                className="h-10"
             />
            
             <div className="flex items-center justify-between">

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="VHR">
+  <circle cx="100" cy="100" r="80" fill="none" stroke="#CBB06B" stroke-width="2"></circle>
+  <path d="M63 63 L84 63 L100 122 L116 63 L137 63 L100 146 Z" fill="#CBB06B"></path>
+  <circle cx="70" cy="150" r="2.4" fill="#CBB06B"></circle>
+  <circle cx="100" cy="156" r="2.4" fill="#CBB06B"></circle>
+  <circle cx="130" cy="150" r="2.4" fill="#CBB06B"></circle>
+</svg>

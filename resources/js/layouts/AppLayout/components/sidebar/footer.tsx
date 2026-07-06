@@ -39,10 +39,10 @@ export function SidebarFooterApp() {
                                     className="data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground"
                                 >
                                     <Avatar className="size-8 rounded-lg">
-                                        <AvatarFallback className="rounded-lg">{initial}</AvatarFallback>
+                                        <AvatarFallback className="rounded-lg dark:text-accent">{initial}</AvatarFallback>
                                     </Avatar>
                                     <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                                        <span className="truncate font-medium">{name}</span>
+                                        <span className="truncate font-medium dark:text-accent">{name}</span>
                                         <span className="truncate text-xs text-sidebar-foreground/60">{email}</span>
                                     </div>
                                     <ChevronsUpDown className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
@@ -56,7 +56,7 @@ export function SidebarFooterApp() {
                         >
                             <div className="flex items-center gap-2 px-1.5 py-1.5 text-left text-sm">
                                 <Avatar className="size-8 rounded-lg">
-                                    <AvatarFallback className="rounded-lg">{initial}</AvatarFallback>
+                                    <AvatarFallback className="rounded-lg className='dark:text-accent'">{initial}</AvatarFallback>
                                 </Avatar>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
                                     <span className="truncate font-medium">{name}</span>

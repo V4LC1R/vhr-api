@@ -10,7 +10,7 @@ export function HeaderApp() {
     const companyName = current?.company?.name ?? companies[0]?.name ?? null
 
     return (
-        <div className="w-full h-full p-2 border-b-sidebar-border border-b border-dashed flex flex-row items-center justify-between">
+        <div className="w-full p-2 border-b-sidebar-border border-b border-dashed flex flex-row items-center justify-between sticky">
             <SidebarTrigger className="cursor-pointer"/>
             <div className="flex flex-row items-center gap-2">
                 {canSwitch ? (

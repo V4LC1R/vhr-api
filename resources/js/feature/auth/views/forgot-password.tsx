@@ -6,6 +6,7 @@ import { z } from "zod";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { RHF } from "@/components/rhf-fields";
 import { Button } from "@/components/ui/button";
+import { logo } from "@/lib/utils";
 
 const forgotPasswordSchema = z.object({
     email: z.string().nonempty("Um email e necessario!"),
@@ -36,7 +37,9 @@ export function ForgotPassword() {
             form={form}
             onSubmit={onSubmit}
         >
-            <div className="mb-6 flex flex-col gap-1 text-center">
+            <div className="mb-6 flex flex-col gap-1 text-center items-center">
+                <img src={logo.dark} alt="VHR" className="size-25 shrink-0 dark:hidden" />
+                <img src={logo.gold} alt="VHR" className="hidden size-25 shrink-0 dark:block" />
                 <h1 className="text-2xl font-semibold tracking-tight">Esqueceu a sua senha?</h1>
                 <p className="text-sm text-muted-foreground">Insira o email cadastrado para recuperar</p>
             </div>

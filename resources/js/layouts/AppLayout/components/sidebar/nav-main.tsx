@@ -23,18 +23,34 @@ import { ChevronRight } from 'lucide-react';
 import { navItems, type NavItem } from '../../config/nav';
 import { useAuth } from '@/hooks/use-auth';
 
-type Props = {
-    permissions:string[]
+/**
+ * Filtra a navegação pelas permissões da empresa ativa.
+ *
+ * - Item de folha: aparece se não tiver `permission` ou se o usuário a possuir.
+ * - Grupo (com `children`): filtra os filhos e só aparece se sobrar ao menos um;
+ *   a `permission` do próprio grupo é ignorada aqui (a visibilidade vem dos filhos).
+ */
+function filterNav(items: NavItem[], can: (permission: string) => boolean): NavItem[] {
+    return items.reduce<NavItem[]>((acc, item) => {
+        if (item.children?.length) {
+            const children = item.children.filter((child) => !child.permission || can(child.permission));
+            if (children.length) acc.push({ ...item, children });
+        } else if (!item.permission || can(item.permission)) {
+            acc.push(item);
+        }
+        return acc;
+    }, []);
 }
 
-export function NavMain({}) {
+export function NavMain() {
     const url = usePage().url.split('?')[0];
     const isActive = (path: string) => url === path || url.startsWith(`${path}/`);
-    const {can} = useAuth()
+    const { can } = useAuth();
+    const items = filterNav(navItems, can);
     return (
         <SidebarGroup>
             <SidebarMenu className="gap-1">
-                {navItems.map((item) =>
+                {items.map((item) =>
                     item.children?.length ? (
                         <NavGroup key={item.path} item={item} isActive={isActive} />
                     ) : (
@@ -42,6 +58,7 @@ export function NavMain({}) {
                             <SidebarMenuButton
                                 isActive={isActive(item.path)}
                                 tooltip={item.label}
+                                className="transition-[background-color,color,width,height,padding] duration-200"
                                 render={<Link href={item.path} />}
                             >
                                 <Icon icon={item.icon} />
@@ -67,7 +84,7 @@ function NavGroup({ item, isActive }: { item: NavItem; isActive: (path: string) 
                     <DropdownMenuTrigger
                         render={
                             <SidebarMenuButton isActive={childActive}>
-                                <Icon icon={item.icon} />
+                                <Icon className='dark:text-accent' icon={item.icon} />
                                 <span>{item.label}</span>
                             </SidebarMenuButton>
                         }
@@ -76,9 +93,13 @@ function NavGroup({ item, isActive }: { item: NavItem; isActive: (path: string) 
                         <DropdownMenuGroup>
                             <DropdownMenuLabel>{item.label}</DropdownMenuLabel>
                             {item.children!.map((child) => (
-                                <DropdownMenuItem key={child.path} render={<Link href={child.path} />}>
-                                    <Icon icon={child.icon} />
-                                    <span>{child.label}</span>
+                                <DropdownMenuItem
+                                    key={child.path}
+                                    className="transition-colors duration-200"
+                                    render={<Link href={child.path} />}
+                                >
+                                    <Icon className='dark:text-accent' icon={child.icon} />
+                                    <span >{child.label}</span>
                                 </DropdownMenuItem>
                             ))}
                         </DropdownMenuGroup>
@@ -92,20 +113,28 @@ function NavGroup({ item, isActive }: { item: NavItem; isActive: (path: string) 
         <Collapsible defaultOpen={childActive} render={<SidebarMenuItem />}>
             <CollapsibleTrigger
                 render={
-                    <SidebarMenuButton tooltip={item.label} isActive={childActive} className="group/collapsible">
-                        <Icon icon={item.icon} />
+                    <SidebarMenuButton
+                        tooltip={item.label}
+                        isActive={childActive}
+                        className="group/collapsible transition-[background-color,color,width,height,padding] duration-200"
+                    >
+                        <Icon className='dark:text-accent' icon={item.icon} />
                         <span>{item.label}</span>
                         <ChevronRight className="ml-auto transition-transform group-data-[panel-open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
                 }
             />
-            <CollapsibleContent>
+            <CollapsibleContent className="h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-200 ease-out data-starting-style:h-0 data-ending-style:h-0">
                 <SidebarMenuSub>
                     {item.children!.map((child) => (
                         <SidebarMenuSubItem key={child.path}>
-                            <SidebarMenuSubButton isActive={isActive(child.path)} render={<Link href={child.path} />}>
-                                <Icon icon={child.icon} />
-                                <span>{child.label}</span>
+                            <SidebarMenuSubButton
+                                isActive={isActive(child.path)}
+                                className="transition-colors duration-200"
+                                render={<Link href={child.path} />}
+                            >
+                                <Icon className='dark:text-accent ' icon={child.icon} />
+                                <span  className=''>{child.label}</span>
                             </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                     ))}

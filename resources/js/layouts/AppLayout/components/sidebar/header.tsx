@@ -1,30 +1,23 @@
 import { SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { logo } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
-import { Clock } from 'lucide-react';
 
 export function SidebarHeaderApp() {
-    
-
     return (
         <SidebarHeader>
             <SidebarMenu>
                 {/* ---- LOGO DO SISTEMA ---- */}
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" tooltip="VHR" render={<Link href="/dashboard" />}>
-                        <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                            {/* Troque este ícone pela logo:
-                                <img src="/logo.svg" alt="VHR" className="size-5" />  (arquivo em public/)
-                                ou cole seu <svg> inline aqui */}
-                            <Clock className="size-4" />
-                        </div>
+                        {/* Marca VHR — tinta escura no tema claro, branca no escuro */}
+                        <img src={logo.dark} alt="VHR" className="size-8 shrink-0 dark:hidden" />
+                        <img src={logo.gold} alt="VHR" className="hidden size-8 shrink-0 dark:block" />
                         <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
                             <span className="truncate font-heading font-semibold">VHR</span>
                             <span className="truncate text-xs text-sidebar-foreground/60">Gestão de RH</span>
                         </div>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
-
-                
             </SidebarMenu>
         </SidebarHeader>
     );

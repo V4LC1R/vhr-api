@@ -6,6 +6,8 @@ import { z } from "zod";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { RHF } from "@/components/rhf-fields";
 import { Button } from "@/components/ui/button";
+import { logo } from "@/lib/utils";
+import { PasswordInput } from "../components/password-input";
 
 const resetPasswordSchema = z
     .object({
@@ -39,30 +41,26 @@ export function ResetPasswordView() {
 
     return (
         <RHF.Form
-            className="w-full h-full md:h-130 max-w-sm rounded-xl border bg-card p-8 shadow-lg shadow-gray-200/60 flex flex-col justify-center"
+            className="w-full h-full md:h-130 max-w-sm rounded-xl border bg-card p-8 shadow-lg  flex flex-col justify-center"
             form={form}
             onSubmit={onSubmit}
         >
-            <div className="mb-6 flex flex-col gap-1 text-center">
+            <div className="mb-6 flex flex-col gap-1 text-center items-center">
+                <img src={logo.dark} alt="VHR" className="size-25 shrink-0 dark:hidden" />
+                <img src={logo.gold} alt="VHR" className="hidden size-25 shrink-0 dark:block" />
                 <h1 className="text-2xl font-semibold tracking-tight">Redefinir senha</h1>
                 <p className="text-sm text-muted-foreground">Escolha uma nova senha para sua conta</p>
             </div>
 
             <FieldGroup>
-                <RHF.Input
+                <PasswordInput
                     control={form.control as unknown as Control}
                     name="password"
-                    label="Nova senha"
-                    type="password"
-                    className="h-10"
                 />
 
-                <RHF.Input
+                <PasswordInput
                     control={form.control as unknown as Control}
                     name="password_confirmation"
-                    label="Confirmar senha"
-                    type="password"
-                    className="h-10"
                 />
 
                 <Field orientation="vertical">
@@ -73,7 +71,7 @@ export function ResetPasswordView() {
 
                 <p className="text-center text-sm text-muted-foreground">
                     Lembrou a senha?{" "}
-                    <Link href="auth/login" className="underline underline-offset-4 hover:text-primary">
+                    <Link href="/auth/login" className="underline underline-offset-4 hover:text-primary">
                         Voltar para o login
                     </Link>
                 </p>

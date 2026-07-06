@@ -6,11 +6,11 @@ import { HeaderApp } from './components/header';
 export default function AppLayout({ children }: PropsWithChildren) {
 
     return (
-        <div className="min-h-screen bg-background text-foreground">
+        <div className="min-h-screen bg-background text-foreground ">
             <SidebarProvider>
                 <AppSidebar/>
-                <HeaderApp/>
-                <div>
+                <div className='flex flex-1 flex-col'>
+                    <HeaderApp/>
                     {children}
                 </div>
             </SidebarProvider>
