@@ -4,15 +4,12 @@ namespace Modules\Core\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
-use Illuminate\Database\Eloquent\Attributes\UseResource;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Modules\Core\Database\Factories\PersonFactory;
+use Modules\Core\Database\Factories\PasswordResetTokenFactory;
 use Modules\Core\Enums\TokenPasswordStatusEnum;
-use Modules\Core\Http\Resources\PersonResource;
 
 #[Fillable([
     'token',
@@ -24,13 +21,11 @@ use Modules\Core\Http\Resources\PersonResource;
     'requestedAt',
     'usedAt'
 ])]
-#[UseFactory(PersonFactory::class)]
-#[UseResource(PersonResource::class)]
+#[UseFactory(PasswordResetTokenFactory::class)]
 class PasswordResetToken extends Model
 {
     use HasUuids;
     use HasFactory;
-    use SoftDeletes;
 
     protected $table = 'core.password_reset_tokens';
 
@@ -48,9 +43,9 @@ class PasswordResetToken extends Model
         ];
     }
 
-    public function user(): HasMany
+    public function user(): BelongsTo
     {
-        return $this->hasMany(
+        return $this->belongsTo(
             User::class,
             'userId'
         );
