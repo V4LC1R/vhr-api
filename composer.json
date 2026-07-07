@@ -12,6 +12,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
         "nwidart/laravel-modules": "^13.0",
+        "resend/resend-laravel": "^1.4",
         "spatie/laravel-data": "*",
         "spatie/laravel-permission": "^8.0",
         "spatie/laravel-query-builder": "^7.3",

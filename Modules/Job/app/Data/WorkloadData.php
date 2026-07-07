@@ -14,17 +14,17 @@ class WorkloadData extends Data
     public function __construct(
         public string|Optional $description,
         #[IntegerType]
-        public int|Optional $monthly_hours,
+        public int|Optional $monthlyHours,
         #[IntegerType]
-        public int|Optional $weekly_hours,
+        public int|Optional $weeklyHours,
         #[DateFormat('H:i:s')]
-        public string|Optional $entry_time,
+        public string|Optional $entryTime,
         #[DateFormat('H:i:s')]
-        public string|Optional $left_time,
+        public string|Optional $leftTime,
         #[DateFormat('H:i:s')]
-        public string|Optional $interval_start_at,
+        public string|Optional $intervalStartAt,
         #[DateFormat('H:i:s')]
-        public string|Optional $interval_end_at,
+        public string|Optional $intervalEndAt,
     ) {
     }
 }

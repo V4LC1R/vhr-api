@@ -102,15 +102,15 @@ class DevCompanySeeder extends Seeder
             ->first();
 
         $jornadas = collect([
-            ['description' => 'Jornada 44h (Seg-Sex 08-18)', 'weekly_hours' => 44, 'monthly_hours' => 220],
-            ['description' => 'Meio período 22h',            'weekly_hours' => 22, 'monthly_hours' => 110],
+            ['description' => 'Jornada 44h (Seg-Sex 08-18)', 'weeklyHours' => 44, 'monthlyHours' => 220],
+            ['description' => 'Meio período 22h',            'weeklyHours' => 22, 'monthlyHours' => 110],
         ])->map(fn (array $j) => Workload::factory()->create([
             ...$j,
             'companyId'         => $company->id,
-            'entry_time'        => '08:00:00',
-            'left_time'         => '18:00:00',
-            'interval_start_at' => '12:00:00',
-            'interval_end_at'   => '13:00:00',
+            'entryTime'        => '08:00:00',
+            'leftTime'         => '18:00:00',
+            'intervalStartAt' => '12:00:00',
+            'intervalEndAt'   => '13:00:00',
         ]));
 
         $funcionarios = [
@@ -142,7 +142,7 @@ class DevCompanySeeder extends Seeder
                 'workloadId'  => $jornadas->first()->id,
                 'kind'        => $f['kind']->value,
                 'status'      => EmploymentStatusEnum::HIRED->value,
-                'register_at' => now()->utc(),
+                'registerAt' => now()->utc(),
             ]);
 
             // Ponto apenas para os 3 primeiros, o bastante para popular relatórios.
@@ -183,14 +183,14 @@ class DevCompanySeeder extends Seeder
             TimeEntry::factory()->create([
                 'companyId'         => $company->id,
                 'dailyEngagementId' => $day->id,
-                'punched_at'        => $date->copy()->setTime(11, 0)->utc(),
+                'punchedAt'        => $date->copy()->setTime(11, 0)->utc(),
                 'type'              => 'entry',
             ]);
 
             TimeEntry::factory()->create([
                 'companyId'         => $company->id,
                 'dailyEngagementId' => $day->id,
-                'punched_at'        => $date->copy()->setTime(20, 0)->utc(),
+                'punchedAt'        => $date->copy()->setTime(20, 0)->utc(),
                 'type'              => 'exit',
             ]);
         }

@@ -101,7 +101,7 @@ class DailyEngagementTest extends DBTestCase
         $this->assertDatabaseHas('attendance.daily_engagements', [
             'id'               => $day->id,
             'type'             => 'holiday',
-            'expected_minutes' => 0,
+            'expectedMinutes' => 0,
         ]);
     }
 

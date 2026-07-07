@@ -48,7 +48,7 @@ class EmployeeService
                     ? EmploymentTypeEnum::CLT->value
                     : $data->kind,
                 'status'      => EmploymentStatusEnum::EXPERIENCE->value,
-                'register_at' => now()->utc(),
+                'registerAt' => now()->utc(),
             ]);
 
             return $employee
@@ -98,7 +98,7 @@ class EmployeeService
         return DB::transaction(function () use ($activeEmployment, $employee) {
             $activeEmployment->update([
                 'status'  => EmploymentStatusEnum::LEFT->value,
-                'left_at' => now()->utc(),
+                'leftAt' => now()->utc(),
             ]);
 
             return $employee

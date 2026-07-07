@@ -15,12 +15,12 @@ class WorkloadFactory extends Factory
         return [
             'companyId' => Company::factory(),
             'description' => fake()->jobTitle(),
-            'monthly_hours' => 220,
-            'weekly_hours' => 44,
-            'entry_time' => '08:00:00',
-            'left_time' => '18:00:00',
-            'interval_start_at' => '12:00:00',
-            'interval_end_at' => '13:00:00',
+            'monthlyHours' => 220,
+            'weeklyHours' => 44,
+            'entryTime' => '08:00:00',
+            'leftTime' => '18:00:00',
+            'intervalStartAt' => '12:00:00',
+            'intervalEndAt' => '13:00:00',
         ];
     }
 }

@@ -12,7 +12,7 @@ class TimeEntryResource extends JsonResource
         return [
             'id'                => $this->id,
             'dailyEngagementId' => $this->dailyEngagementId,
-            'punchedAt'         => $this->punched_at,
+            'punchedAt'         => $this->punchedAt,
             'type'              => $this->type,
             'source'            => $this->source,
             'note'              => $this->note,

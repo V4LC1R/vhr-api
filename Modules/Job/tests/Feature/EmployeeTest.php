@@ -355,7 +355,7 @@ class EmployeeTest extends DBTestCase
         $latestEmployment = $employee->employments()->latest()->first();
 
         $this->assertEquals('left', $latestEmployment->status->value);
-        $this->assertNotNull($latestEmployment->left_at);
+        $this->assertNotNull($latestEmployment->leftAt);
     }
 
     public function testRhPodeDemitirOutroFuncionario(): void

@@ -29,7 +29,7 @@ class TimeEntryService
     {
         $company   = $this->resolveCompany();
         $employee  = $this->findEmployee($data->employeeId, $company->companyId);
-        $punchedAt = $this->normalizePunchedAt($data->punched_at);
+        $punchedAt = $this->normalizePunchedAt($data->punchedAt);
         $date      = substr($punchedAt, 0, 10);
 
         return DB::transaction(function () use ($data, $company, $employee, $date, $punchedAt) {
@@ -38,7 +38,7 @@ class TimeEntryService
             $timeEntry = $this->timeEntryRepository->create([
                 'companyId'         => $company->companyId,
                 'dailyEngagementId' => $day->id,
-                'punched_at'        => $punchedAt,
+                'punchedAt'        => $punchedAt,
                 'type'              => $data->type,
                 'source'            => TimeEntrySourceEnum::MANUAL->value,
                 'note'              => $data->note instanceof Optional ? null : $data->note,
@@ -56,8 +56,8 @@ class TimeEntryService
         return DB::transaction(function () use ($timeEntry, $data) {
             $payload = [];
 
-            if (! ($data->punched_at instanceof Optional)) {
-                $payload['punched_at'] = $this->normalizePunchedAt($data->punched_at);
+            if (! ($data->punchedAt instanceof Optional)) {
+                $payload['punchedAt'] = $this->normalizePunchedAt($data->punchedAt);
             }
 
             if (! ($data->type instanceof Optional)) {
@@ -98,7 +98,7 @@ class TimeEntryService
             ->getModel()
             ->newQuery()
             ->where('companyId', $company->companyId)
-            ->latest('punched_at')
+            ->latest('punchedAt')
             ->paginate($perPage)
             ->through(fn (TimeEntry $timeEntry) => $timeEntry->toResource());
     }

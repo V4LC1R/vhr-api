@@ -19,7 +19,7 @@ class AttendanceCalculatorTest extends DBTestCase
      * com as marcações informadas. Jornada padrão: 08:00–18:00, intervalo 12:00–13:00
      * => esperado de 540 min.
      *
-     * @param  array<int, array{0:string,1:string}>  $punches  pares [punched_at, type]
+     * @param  array<int, array{0:string,1:string}>  $punches  pares [punchedAt, type]
      */
     private function novoDia(
         array $punches = [],
@@ -48,7 +48,7 @@ class AttendanceCalculatorTest extends DBTestCase
             TimeEntry::factory()->create([
                 'companyId'         => $company->id,
                 'dailyEngagementId' => $day->id,
-                'punched_at'        => $punchedAt,
+                'punchedAt'        => $punchedAt,
                 'type'              => $punchType,
             ]);
         }
@@ -76,9 +76,9 @@ class AttendanceCalculatorTest extends DBTestCase
             ['2026-06-10 18:00:00', 'exit'],
         ]));
 
-        $this->assertSame(540, $day->worked_minutes);
-        $this->assertSame(540, $day->expected_minutes);
-        $this->assertSame(0, $day->balance_minutes);
+        $this->assertSame(540, $day->workedMinutes);
+        $this->assertSame(540, $day->expectedMinutes);
+        $this->assertSame(0, $day->balanceMinutes);
     }
 
     public function testHoraExtraGeraSaldoPositivo(): void
@@ -90,17 +90,17 @@ class AttendanceCalculatorTest extends DBTestCase
             ['2026-06-10 19:00:00', 'exit'],
         ]));
 
-        $this->assertSame(600, $day->worked_minutes);
-        $this->assertSame(60, $day->balance_minutes);
+        $this->assertSame(600, $day->workedMinutes);
+        $this->assertSame(60, $day->balanceMinutes);
     }
 
     public function testSemMarcacoesGeraSaldoNegativo(): void
     {
         $day = $this->calcular($this->novoDia([]));
 
-        $this->assertSame(0, $day->worked_minutes);
-        $this->assertSame(540, $day->expected_minutes);
-        $this->assertSame(-540, $day->balance_minutes);
+        $this->assertSame(0, $day->workedMinutes);
+        $this->assertSame(540, $day->expectedMinutes);
+        $this->assertSame(-540, $day->balanceMinutes);
     }
 
     // ==========================================
@@ -113,7 +113,7 @@ class AttendanceCalculatorTest extends DBTestCase
             ['2026-06-10 08:00:00', 'entry'],
         ]));
 
-        $this->assertSame(0, $day->worked_minutes);
+        $this->assertSame(0, $day->workedMinutes);
     }
 
     public function testUltimaEntradaEmAbertoEhIgnorada(): void
@@ -124,7 +124,7 @@ class AttendanceCalculatorTest extends DBTestCase
             ['2026-06-10 13:00:00', 'entry'], // fica em aberto
         ]));
 
-        $this->assertSame(240, $day->worked_minutes);
+        $this->assertSame(240, $day->workedMinutes);
     }
 
     public function testSaidaSemEntradaEhIgnorada(): void
@@ -133,7 +133,7 @@ class AttendanceCalculatorTest extends DBTestCase
             ['2026-06-10 12:00:00', 'exit'],
         ]));
 
-        $this->assertSame(0, $day->worked_minutes);
+        $this->assertSame(0, $day->workedMinutes);
     }
 
     public function testEntradasDuplicadasMantemAPrimeira(): void
@@ -145,7 +145,7 @@ class AttendanceCalculatorTest extends DBTestCase
         ]));
 
         // 08:00 -> 12:00 = 240 (não 08:30 -> 12:00 = 210)
-        $this->assertSame(240, $day->worked_minutes);
+        $this->assertSame(240, $day->workedMinutes);
     }
 
     public function testMarcacaoCruzandoMeiaNoiteCalculaCorreto(): void
@@ -159,9 +159,9 @@ class AttendanceCalculatorTest extends DBTestCase
             comJornada: false,
         ));
 
-        $this->assertSame(240, $day->worked_minutes);
-        $this->assertSame(0, $day->expected_minutes);
-        $this->assertSame(240, $day->balance_minutes);
+        $this->assertSame(240, $day->workedMinutes);
+        $this->assertSame(0, $day->expectedMinutes);
+        $this->assertSame(240, $day->balanceMinutes);
     }
 
     public function testSemJornadaEsperadoZero(): void
@@ -174,9 +174,9 @@ class AttendanceCalculatorTest extends DBTestCase
             comJornada: false,
         ));
 
-        $this->assertSame(240, $day->worked_minutes);
-        $this->assertSame(0, $day->expected_minutes);
-        $this->assertSame(240, $day->balance_minutes);
+        $this->assertSame(240, $day->workedMinutes);
+        $this->assertSame(0, $day->expectedMinutes);
+        $this->assertSame(240, $day->balanceMinutes);
     }
 
     // ==========================================
@@ -187,17 +187,17 @@ class AttendanceCalculatorTest extends DBTestCase
     {
         $day = $this->calcular($this->novoDia(type: 'day_off'));
 
-        $this->assertSame(0, $day->expected_minutes);
-        $this->assertSame(0, $day->worked_minutes);
-        $this->assertSame(0, $day->balance_minutes);
+        $this->assertSame(0, $day->expectedMinutes);
+        $this->assertSame(0, $day->workedMinutes);
+        $this->assertSame(0, $day->balanceMinutes);
     }
 
     public function testFeriadoZeraEsperado(): void
     {
         $day = $this->calcular($this->novoDia(type: 'holiday'));
 
-        $this->assertSame(0, $day->expected_minutes);
-        $this->assertSame(0, $day->balance_minutes);
+        $this->assertSame(0, $day->expectedMinutes);
+        $this->assertSame(0, $day->balanceMinutes);
     }
 
     public function testAtestadoAbonaAJornada(): void
@@ -205,18 +205,18 @@ class AttendanceCalculatorTest extends DBTestCase
         // atestado: conta como trabalhado mesmo sem marcações
         $day = $this->calcular($this->novoDia(type: 'medical'));
 
-        $this->assertSame(540, $day->expected_minutes);
-        $this->assertSame(540, $day->worked_minutes);
-        $this->assertSame(0, $day->balance_minutes);
+        $this->assertSame(540, $day->expectedMinutes);
+        $this->assertSame(540, $day->workedMinutes);
+        $this->assertSame(0, $day->balanceMinutes);
     }
 
     public function testFaltaGeraSaldoNegativo(): void
     {
         $day = $this->calcular($this->novoDia(type: 'absence'));
 
-        $this->assertSame(0, $day->worked_minutes);
-        $this->assertSame(540, $day->expected_minutes);
-        $this->assertSame(-540, $day->balance_minutes);
+        $this->assertSame(0, $day->workedMinutes);
+        $this->assertSame(540, $day->expectedMinutes);
+        $this->assertSame(-540, $day->balanceMinutes);
     }
 
     // ==========================================
@@ -233,7 +233,7 @@ class AttendanceCalculatorTest extends DBTestCase
             kind: EmploymentTypeEnum::DAYLI->value,
         ));
 
-        $this->assertSame(1.0, $day->diaria_value);
+        $this->assertSame(1.0, $day->diariaValue);
     }
 
     public function testDiaristaSemPresencaNaoRecebeDiaria(): void
@@ -242,7 +242,7 @@ class AttendanceCalculatorTest extends DBTestCase
             kind: EmploymentTypeEnum::DAYLI->value,
         ));
 
-        $this->assertSame(0.0, $day->diaria_value);
+        $this->assertSame(0.0, $day->diariaValue);
     }
 
     public function testVinculoPorHoraNaoRecebeDiaria(): void
@@ -254,6 +254,6 @@ class AttendanceCalculatorTest extends DBTestCase
             ],
         ));
 
-        $this->assertNull($day->diaria_value);
+        $this->assertNull($day->diariaValue);
     }
 }

@@ -115,4 +115,15 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Destinatário de testes (dev)
+    |--------------------------------------------------------------------------
+    |
+    | Usado pelo comando `mail:test-reset` para disparar e-mails de verificação.
+    |
+    */
+
+    'dev_tester' => env('DEV_EMAIL_TESTER'),
+
 ];

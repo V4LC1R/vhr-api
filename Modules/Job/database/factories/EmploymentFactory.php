@@ -18,8 +18,8 @@ class EmploymentFactory extends Factory
             'kind'        => EmploymentTypeEnum::CLT->value,
             'status'      => EmploymentStatusEnum::EXPERIENCE->value,
             'workloadId'  => Workload::factory(),
-            'register_at' => now()->utc(),
-            'left_at'     => null,
+            'registerAt' => now()->utc(),
+            'leftAt'     => null,
         ];
     }
 
@@ -32,7 +32,7 @@ class EmploymentFactory extends Factory
     {
         return $this->state([
             'status'  => EmploymentStatusEnum::LEFT->value,
-            'left_at' => now()->utc(),
+            'leftAt' => now()->utc(),
         ]);
     }
 }

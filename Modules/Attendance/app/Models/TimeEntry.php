@@ -18,7 +18,7 @@ use Modules\Attendance\Http\Resources\TimeEntryResource;
 #[Fillable([
     'companyId',
     'dailyEngagementId',
-    'punched_at',
+    'punchedAt',
     'type',
     'source',
     'note',
@@ -36,7 +36,7 @@ class TimeEntry extends Model
     protected function casts(): array
     {
         return [
-            'punched_at' => 'datetime',
+            'punchedAt' => 'datetime',
             'type'       => TimeEntryTypeEnum::class,
             'source'     => TimeEntrySourceEnum::class,
         ];

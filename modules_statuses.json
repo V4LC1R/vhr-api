@@ -2,5 +2,6 @@
     "Core": true,
     "Auth": true,
     "Job": true,
-    "Attendance": true
+    "Attendance": true,
+    "Communication": true
 }

@@ -4,6 +4,7 @@ use App\Contracts\CompanyRepositoryInterface;
 use App\Contracts\DailyEngagementRepositoryInterface;
 use App\Contracts\EmployeeRepositoryInterface;
 use App\Contracts\EmploymentRepositoryInterface;
+use App\Contracts\PasswordResetTokenRepositoryInterface;
 use App\Contracts\PersonRepositoryInterface;
 use App\Contracts\TimeEntryRepositoryInterface;
 use App\Contracts\UserRepositoryInterface;
@@ -63,6 +64,13 @@ if (! function_exists('dailyEngagementRepo')) {
     function dailyEngagementRepo(): DailyEngagementRepositoryInterface
     {
         return app(DailyEngagementRepositoryInterface::class);
+    }
+}
+
+if (! function_exists('passwordResetRepo')) {
+    function passwordResetRepo(): PasswordResetTokenRepositoryInterface
+    {
+        return app(PasswordResetTokenRepositoryInterface::class);
     }
 }
 

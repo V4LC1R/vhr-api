@@ -24,7 +24,7 @@ class StoreTimeEntryRequest extends FormRequest
                 Rule::exists(Employee::class, 'id')
                     ->where('companyId', currentCompany()?->companyId),
             ],
-            'punched_at' => ['required', 'date'],
+            'punchedAt' => ['required', 'date'],
             'type'       => ['required', Rule::in(TimeEntryTypeEnum::values())],
             'note'       => ['nullable', 'string', 'max:255'],
         ];
@@ -37,8 +37,8 @@ class StoreTimeEntryRequest extends FormRequest
             'employeeId.uuid'     => 'O funcionário informado é inválido.',
             'employeeId.exists'   => 'O funcionário não pertence à empresa atual.',
 
-            'punched_at.required' => 'O horário da marcação é obrigatório.',
-            'punched_at.date'     => 'O horário da marcação é inválido.',
+            'punchedAt.required' => 'O horário da marcação é obrigatório.',
+            'punchedAt.date'     => 'O horário da marcação é inválido.',
 
             'type.required'       => 'O tipo da marcação é obrigatório.',
             'type.in'             => 'O tipo da marcação é inválido.',

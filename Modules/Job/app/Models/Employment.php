@@ -17,8 +17,8 @@ use Modules\Job\Enums\EmploymentTypeEnum;
     'workloadId',
     'kind',
     'status',
-    'register_at',
-    'left_at',
+    'registerAt',
+    'leftAt',
 ])]
 #[UseFactory(EmploymentFactory::class)]
 class Employment extends Model
@@ -33,8 +33,8 @@ class Employment extends Model
         return [
             'status'      => EmploymentStatusEnum::class,
             'kind'        => EmploymentTypeEnum::class,
-            'register_at' => 'datetime',
-            'left_at'     => 'datetime',
+            'registerAt' => 'datetime',
+            'leftAt'     => 'datetime',
         ];
     }
 

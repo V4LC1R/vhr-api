@@ -11,7 +11,7 @@ import type { TimeEntryPayload } from './schemas';
 export function mapToForm(resource: TimeEntry): TimeEntryPayload {
     return {
         employeeId: '',
-        punched_at: resource.punchedAt,
+        punchedAt: resource.punchedAt,
         type: resource.type,
         note: resource.note,
     };
@@ -20,7 +20,7 @@ export function mapToForm(resource: TimeEntry): TimeEntryPayload {
 export function mapToApi(form: TimeEntryPayload): TimeEntryPayload {
     return {
         employeeId: form.employeeId,
-        punched_at: form.punched_at,
+        punchedAt: form.punchedAt,
         type: form.type,
         note: form.note,
     };

@@ -19,7 +19,7 @@ class TimeEntryFactory extends Factory
             'companyId'         => fn (array $attrs) => DailyEngagement::query()
                 ->whereKey($attrs['dailyEngagementId'])
                 ->value('companyId'),
-            'punched_at'        => now()->utc(),
+            'punchedAt'        => now()->utc(),
             'type'              => TimeEntryTypeEnum::ENTRY->value,
             'source'            => TimeEntrySourceEnum::MANUAL->value,
         ];
