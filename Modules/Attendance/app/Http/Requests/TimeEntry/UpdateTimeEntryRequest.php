@@ -17,7 +17,7 @@ class UpdateTimeEntryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'punched_at' => ['sometimes', 'date'],
+            'punchedAt' => ['sometimes', 'date'],
             'type'       => ['sometimes', Rule::in(TimeEntryTypeEnum::values())],
             'note'       => ['sometimes', 'nullable', 'string', 'max:255'],
         ];
@@ -26,7 +26,7 @@ class UpdateTimeEntryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'punched_at.date' => 'O horário da marcação é inválido.',
+            'punchedAt.date' => 'O horário da marcação é inválido.',
             'type.in'         => 'O tipo da marcação é inválido.',
         ];
     }

@@ -11,7 +11,7 @@ class RegisterAtFilter implements Filter
     {
         $query->whereHas(
             'activeEmployment',
-            fn ($q) => $q->whereDate('register_at', $value)
+            fn ($q) => $q->whereDate('registerAt', $value)
         );
     }
 }

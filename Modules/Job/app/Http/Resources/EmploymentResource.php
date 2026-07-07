@@ -15,8 +15,8 @@ class EmploymentResource extends JsonResource
             'workloadId' => $this->workloadId,
             'kind'       => $this->kind,
             'status'     => $this->status,
-            'registerAt' => $this->register_at,
-            'leftAt'     => $this->left_at,
+            'registerAt' => $this->registerAt,
+            'leftAt'     => $this->leftAt,
             'workload'   => $this->whenLoaded(
                 'workload',
                 fn () => $this->workload->toResource()

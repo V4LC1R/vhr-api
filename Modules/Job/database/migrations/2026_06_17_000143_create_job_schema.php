@@ -16,12 +16,12 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('companyId');
             $table->string('description');
-            $table->integer('monthly_hours');
-            $table->integer('weekly_hours');
-            $table->time('entry_time');
-            $table->time('left_time');
-            $table->time('interval_start_at');
-            $table->time('interval_end_at');
+            $table->integer('monthlyHours');
+            $table->integer('weeklyHours');
+            $table->time('entryTime');
+            $table->time('leftTime');
+            $table->time('intervalStartAt');
+            $table->time('intervalEndAt');
             $table->timestamps();
 
             $table->foreign('companyId')
@@ -63,8 +63,8 @@ return new class extends Migration
                 ->default('clt');
             $table->enum('status', ['hired', 'experience', 'left'])
                 ->default('experience');
-            $table->dateTime('register_at');
-            $table->dateTime('left_at')->nullable();
+            $table->dateTime('registerAt');
+            $table->dateTime('leftAt')->nullable();
             $table->timestamps();
 
             $table->foreign('employeeId')

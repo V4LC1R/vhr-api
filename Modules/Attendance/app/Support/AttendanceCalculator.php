@@ -11,7 +11,7 @@ use Modules\Job\Enums\EmploymentTypeEnum;
 
 /**
  * Calcula e persiste os números cacheados de um dia (DailyEngagement):
- * worked_minutes, expected_minutes, balance_minutes e diaria_value.
+ * workedMinutes, expectedMinutes, balanceMinutes e diariaValue.
  *
  * É a única fonte de cálculo — chamado em toda mutação de marcação ou de tipo do dia.
  */
@@ -34,10 +34,10 @@ class AttendanceCalculator
         $balance = $worked - $expected;
 
         $engagement->forceFill([
-            'worked_minutes'   => $worked,
-            'expected_minutes' => $expected,
-            'balance_minutes'  => $balance,
-            'diaria_value'     => $this->diariaValue($engagement, $worked),
+            'workedMinutes'   => $worked,
+            'expectedMinutes' => $expected,
+            'balanceMinutes'  => $balance,
+            'diariaValue'     => $this->diariaValue($engagement, $worked),
         ])->save();
 
         return $engagement;
@@ -48,7 +48,7 @@ class AttendanceCalculator
      */
     private function workedMinutes(DailyEngagement $engagement): int
     {
-        $entries = $engagement->timeEntries->sortBy('punched_at')->values();
+        $entries = $engagement->timeEntries->sortBy('punchedAt')->values();
 
         $worked = 0;
         $openEntry = null;
@@ -56,14 +56,14 @@ class AttendanceCalculator
         foreach ($entries as $entry) {
             if ($entry->type === TimeEntryTypeEnum::ENTRY) {
                 // Mantém a primeira entrada aberta; entradas repetidas são ignoradas.
-                $openEntry ??= $entry->punched_at;
+                $openEntry ??= $entry->punchedAt;
 
                 continue;
             }
 
             // Saída só soma se houver uma entrada em aberto; saída solta é ignorada.
             if ($entry->type === TimeEntryTypeEnum::EXIT && $openEntry !== null) {
-                $worked += (int) abs($openEntry->diffInMinutes($entry->punched_at));
+                $worked += (int) abs($openEntry->diffInMinutes($entry->punchedAt));
                 $openEntry = null;
             }
         }
@@ -85,13 +85,13 @@ class AttendanceCalculator
         $workload = $engagement->workload;
 
         $work = abs(
-            Carbon::parse($workload->left_time)
-                ->diffInMinutes(Carbon::parse($workload->entry_time))
+            Carbon::parse($workload->leftTime)
+                ->diffInMinutes(Carbon::parse($workload->entryTime))
         );
 
         $interval = abs(
-            Carbon::parse($workload->interval_end_at)
-                ->diffInMinutes(Carbon::parse($workload->interval_start_at))
+            Carbon::parse($workload->intervalEndAt)
+                ->diffInMinutes(Carbon::parse($workload->intervalStartAt))
         );
 
         return (int) max(0, $work - $interval);

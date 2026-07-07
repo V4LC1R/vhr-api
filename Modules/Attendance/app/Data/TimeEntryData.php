@@ -13,7 +13,7 @@ class TimeEntryData extends Data
     public function __construct(
         #[Uuid]
         public string|Optional $employeeId,
-        public string|Optional $punched_at,
+        public string|Optional $punchedAt,
         public string|Optional $type,
         public string|Optional $note,
     ) {

@@ -13,7 +13,7 @@ use Modules\Attendance\Enums\DailyEngagementTypeEnum;
  * por limiar) ainda depende de confirmação do cliente final. Toda a lógica de
  * "quanto vale a diária do dia" vive AQUI — é o único ponto a trocar quando a
  * regra definitiva for definida. O dado cru necessário a qualquer regra
- * (worked_minutes + type/presença) já é persistido em cada dia.
+ * (workedMinutes + type/presença) já é persistido em cada dia.
  */
 class DiariaRule
 {

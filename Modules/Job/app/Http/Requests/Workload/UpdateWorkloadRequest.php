@@ -17,12 +17,12 @@ class UpdateWorkloadRequest extends FormRequest
     {
         return [
             'description'       => ['sometimes', 'string', 'max:255'],
-            'monthly_hours'     => ['sometimes', 'integer', 'min:1'],
-            'weekly_hours'      => ['sometimes', 'integer', 'min:1', 'lte:monthly_hours'],
-            'entry_time'        => ['sometimes', 'date_format:H:i:s'],
-            'left_time'         => ['sometimes', 'date_format:H:i:s', 'after:entry_time'],
-            'interval_start_at' => ['sometimes', 'date_format:H:i:s', 'after_or_equal:entry_time', 'before:left_time'],
-            'interval_end_at'   => ['sometimes', 'date_format:H:i:s', 'after:interval_start_at', 'before_or_equal:left_time'],
+            'monthlyHours'     => ['sometimes', 'integer', 'min:1'],
+            'weeklyHours'      => ['sometimes', 'integer', 'min:1', 'lte:monthlyHours'],
+            'entryTime'        => ['sometimes', 'date_format:H:i:s'],
+            'leftTime'         => ['sometimes', 'date_format:H:i:s', 'after:entryTime'],
+            'intervalStartAt' => ['sometimes', 'date_format:H:i:s', 'after_or_equal:entryTime', 'before:leftTime'],
+            'intervalEndAt'   => ['sometimes', 'date_format:H:i:s', 'after:intervalStartAt', 'before_or_equal:leftTime'],
         ];
     }
 
@@ -31,23 +31,23 @@ class UpdateWorkloadRequest extends FormRequest
         return [
             'description.max'              => 'A descrição não pode ter mais de 255 caracteres.',
 
-            'monthly_hours.min'            => 'As horas mensais devem ser pelo menos 1.',
+            'monthlyHours.min'            => 'As horas mensais devem ser pelo menos 1.',
 
-            'weekly_hours.min'             => 'As horas semanais devem ser pelo menos 1.',
-            'weekly_hours.lte'             => 'As horas semanais não podem exceder as horas mensais.',
+            'weeklyHours.min'             => 'As horas semanais devem ser pelo menos 1.',
+            'weeklyHours.lte'             => 'As horas semanais não podem exceder as horas mensais.',
 
-            'entry_time.date_format'       => 'O horário de entrada deve estar no formato HH:MM:SS.',
+            'entryTime.date_format'       => 'O horário de entrada deve estar no formato HH:MM:SS.',
 
-            'left_time.date_format'        => 'O horário de saída deve estar no formato HH:MM:SS.',
-            'left_time.after'              => 'O horário de saída deve ser posterior ao de entrada.',
+            'leftTime.date_format'        => 'O horário de saída deve estar no formato HH:MM:SS.',
+            'leftTime.after'              => 'O horário de saída deve ser posterior ao de entrada.',
 
-            'interval_start_at.date_format' => 'O início do intervalo deve estar no formato HH:MM:SS.',
-            'interval_start_at.after_or_equal' => 'O início do intervalo deve ser a partir do horário de entrada.',
-            'interval_start_at.before'     => 'O início do intervalo deve ser anterior ao horário de saída.',
+            'intervalStartAt.date_format' => 'O início do intervalo deve estar no formato HH:MM:SS.',
+            'intervalStartAt.after_or_equal' => 'O início do intervalo deve ser a partir do horário de entrada.',
+            'intervalStartAt.before'     => 'O início do intervalo deve ser anterior ao horário de saída.',
 
-            'interval_end_at.date_format'  => 'O fim do intervalo deve estar no formato HH:MM:SS.',
-            'interval_end_at.after'        => 'O fim do intervalo deve ser posterior ao início.',
-            'interval_end_at.before_or_equal' => 'O fim do intervalo não pode ultrapassar o horário de saída.',
+            'intervalEndAt.date_format'  => 'O fim do intervalo deve estar no formato HH:MM:SS.',
+            'intervalEndAt.after'        => 'O fim do intervalo deve ser posterior ao início.',
+            'intervalEndAt.before_or_equal' => 'O fim do intervalo não pode ultrapassar o horário de saída.',
         ];
     }
 

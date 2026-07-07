@@ -22,10 +22,10 @@ return new class extends Migration
                 ->default('work');
             $table->enum('status', ['draft', 'pending', 'approved', 'rejected'])
                 ->default('draft');
-            $table->integer('worked_minutes')->nullable();
-            $table->integer('expected_minutes')->nullable();
-            $table->integer('balance_minutes')->nullable();
-            $table->decimal('diaria_value', 3, 1)->nullable();
+            $table->integer('workedMinutes')->nullable();
+            $table->integer('expectedMinutes')->nullable();
+            $table->integer('balanceMinutes')->nullable();
+            $table->decimal('diariaValue', 3, 1)->nullable();
             $table->string('note')->nullable();
             $table->uuid('draftedBy')->nullable();
             $table->uuid('approvedBy')->nullable();
@@ -69,7 +69,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('companyId');
             $table->uuid('dailyEngagementId');
-            $table->dateTime('punched_at');
+            $table->dateTime('punchedAt');
             $table->enum('type', ['entry', 'exit']);
             $table->enum('source', ['manual', 'device'])->default('manual');
             $table->string('note')->nullable();

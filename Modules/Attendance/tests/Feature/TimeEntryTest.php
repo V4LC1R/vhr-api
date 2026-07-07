@@ -47,7 +47,7 @@ class TimeEntryTest extends DBTestCase
 
         $this->postJson('/api/v1/time-entries', [
             'employeeId' => $employee->id,
-            'punched_at' => '2026-06-25 08:00:00',
+            'punchedAt' => '2026-06-25 08:00:00',
             'type'       => 'entry',
         ])->assertCreated();
 
@@ -69,7 +69,7 @@ class TimeEntryTest extends DBTestCase
 
         $this->postJson('/api/v1/time-entries', [
             'employeeId' => fake()->uuid(),
-            'punched_at' => '2026-06-25 08:00:00',
+            'punchedAt' => '2026-06-25 08:00:00',
             'type'       => 'entry',
         ])->assertForbidden();
     }
@@ -84,7 +84,7 @@ class TimeEntryTest extends DBTestCase
         foreach (['08:00:00', '18:00:00'] as $i => $hora) {
             $this->postJson('/api/v1/time-entries', [
                 'employeeId' => $employee->id,
-                'punched_at' => "2026-06-25 {$hora}",
+                'punchedAt' => "2026-06-25 {$hora}",
                 'type'       => $i === 0 ? 'entry' : 'exit',
             ])->assertCreated();
         }
@@ -102,7 +102,7 @@ class TimeEntryTest extends DBTestCase
 
         $this->postJson('/api/v1/time-entries', [
             'employeeId' => $employee->id,
-            'punched_at' => '2026-06-25 08:00:00',
+            'punchedAt' => '2026-06-25 08:00:00',
             'type'       => 'entry',
         ])->assertCreated();
 
@@ -122,12 +122,12 @@ class TimeEntryTest extends DBTestCase
         // Front envia com fuso; o back converte para UTC (08:00 -03:00 => 11:00 UTC).
         $this->postJson('/api/v1/time-entries', [
             'employeeId' => $employee->id,
-            'punched_at' => '2026-06-10T08:00:00-03:00',
+            'punchedAt' => '2026-06-10T08:00:00-03:00',
             'type'       => 'entry',
         ])->assertCreated();
 
         $this->assertDatabaseHas('attendance.time_entries', [
-            'punched_at' => '2026-06-10 11:00:00',
+            'punchedAt' => '2026-06-10 11:00:00',
         ]);
 
         $this->assertDatabaseHas('attendance.daily_engagements', [
@@ -153,16 +153,16 @@ class TimeEntryTest extends DBTestCase
         foreach ($marcacoes as [$hora, $type]) {
             $this->postJson('/api/v1/time-entries', [
                 'employeeId' => $employee->id,
-                'punched_at' => "2026-06-25 {$hora}",
+                'punchedAt' => "2026-06-25 {$hora}",
                 'type'       => $type,
             ])->assertCreated();
         }
 
         $this->assertDatabaseHas('attendance.daily_engagements', [
             'employeeId'       => $employee->id,
-            'worked_minutes'   => 540,
-            'expected_minutes' => 540,
-            'balance_minutes'  => 0,
+            'workedMinutes'   => 540,
+            'expectedMinutes' => 540,
+            'balanceMinutes'  => 0,
         ]);
     }
 
@@ -179,13 +179,13 @@ class TimeEntryTest extends DBTestCase
 
         $this->postJson('/api/v1/time-entries', [
             'employeeId' => $employee->id,
-            'punched_at' => '2026-06-25 08:00:00',
+            'punchedAt' => '2026-06-25 08:00:00',
             'type'       => 'entry',
         ])->assertCreated();
 
         $this->postJson('/api/v1/time-entries', [
             'employeeId' => $employee->id,
-            'punched_at' => '2026-06-25 12:00:00',
+            'punchedAt' => '2026-06-25 12:00:00',
             'type'       => 'exit',
         ])->assertCreated();
 
@@ -193,7 +193,7 @@ class TimeEntryTest extends DBTestCase
             ->where('employeeId', $employee->id)
             ->first();
 
-        $this->assertEquals(1.0, $day->diaria_value);
+        $this->assertEquals(1.0, $day->diariaValue);
     }
 
     public function testVinculoPorHoraNaoRecebeDiaria(): void
@@ -205,7 +205,7 @@ class TimeEntryTest extends DBTestCase
 
         $this->postJson('/api/v1/time-entries', [
             'employeeId' => $employee->id,
-            'punched_at' => '2026-06-25 08:00:00',
+            'punchedAt' => '2026-06-25 08:00:00',
             'type'       => 'entry',
         ])->assertCreated();
 
@@ -213,7 +213,7 @@ class TimeEntryTest extends DBTestCase
             ->where('employeeId', $employee->id)
             ->first();
 
-        $this->assertNull($day->diaria_value);
+        $this->assertNull($day->diariaValue);
     }
 
     // ==========================================
@@ -233,12 +233,12 @@ class TimeEntryTest extends DBTestCase
         $entry = TimeEntry::factory()->create([
             'companyId'         => $company->id,
             'dailyEngagementId' => $day->id,
-            'punched_at'        => '2026-06-25 08:00:00',
+            'punchedAt'        => '2026-06-25 08:00:00',
             'type'              => 'entry',
         ]);
 
         $this->putJson("/api/v1/time-entries/{$entry->id}", [
-            'punched_at' => '2026-06-25 09:00:00',
+            'punchedAt' => '2026-06-25 09:00:00',
         ])->assertOk();
 
         $this->assertDatabaseHas('attendance.time_entries', [
@@ -255,7 +255,7 @@ class TimeEntryTest extends DBTestCase
         $entry = TimeEntry::factory()->create(['companyId' => $company->id]);
 
         $this->putJson("/api/v1/time-entries/{$entry->id}", [
-            'punched_at' => '2026-06-25 09:00:00',
+            'punchedAt' => '2026-06-25 09:00:00',
         ])->assertForbidden();
     }
 

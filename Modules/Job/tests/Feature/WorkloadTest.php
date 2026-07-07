@@ -18,12 +18,12 @@ class WorkloadTest extends DBTestCase
         return [
             'companyId'         => $companyId,
             'description'       => 'Jornada Padrão 44h',
-            'monthly_hours'     => 220,
-            'weekly_hours'      => 44,
-            'entry_time'        => '08:00:00',
-            'left_time'         => '18:00:00',
-            'interval_start_at' => '12:00:00',
-            'interval_end_at'   => '13:00:00',
+            'monthlyHours'     => 220,
+            'weeklyHours'      => 44,
+            'entryTime'        => '08:00:00',
+            'leftTime'         => '18:00:00',
+            'intervalStartAt' => '12:00:00',
+            'intervalEndAt'   => '13:00:00',
         ];
     }
 
@@ -107,7 +107,7 @@ class WorkloadTest extends DBTestCase
 
         $payload = array_merge(
             $this->dadosWorkload($company->id),
-            ['description' => 'Jornada Reduzida 30h', 'weekly_hours' => 30]
+            ['description' => 'Jornada Reduzida 30h', 'weeklyHours' => 30]
         );
 
         $this->putJson("/api/v1/workloads/{$workload->id}", $payload)->assertOk();
@@ -115,7 +115,7 @@ class WorkloadTest extends DBTestCase
         $this->assertDatabaseHas('job.workloads', [
             'id'           => $workload->id,
             'description'  => 'Jornada Reduzida 30h',
-            'weekly_hours' => 30,
+            'weeklyHours' => 30,
         ]);
     }
 

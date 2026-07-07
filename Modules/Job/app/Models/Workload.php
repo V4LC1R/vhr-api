@@ -16,12 +16,12 @@ use Modules\Job\Http\Resources\WorkloadResource;
 #[Fillable([
     'companyId',
     'description',
-    'monthly_hours',
-    'weekly_hours',
-    'entry_time',
-    'left_time',
-    'interval_start_at',
-    'interval_end_at',
+    'monthlyHours',
+    'weeklyHours',
+    'entryTime',
+    'leftTime',
+    'intervalStartAt',
+    'intervalEndAt',
 ])]
 #[UseFactory(WorkloadFactory::class)]
 #[UseResource(WorkloadResource::class)]
@@ -36,8 +36,8 @@ class Workload extends Model
     protected function casts(): array
     {
         return [
-            'monthly_hours' => 'integer',
-            'weekly_hours'  => 'integer',
+            'monthlyHours' => 'integer',
+            'weeklyHours'  => 'integer',
         ];
     }
 
