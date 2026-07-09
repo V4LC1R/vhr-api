@@ -13,6 +13,9 @@ function applyTheme(theme: Theme) {
         (theme === 'system' && window.matchMedia(MEDIA_QUERY).matches);
 
     document.documentElement.classList.toggle('dark', isDark);
+
+    const favicon = document.getElementById('favicon') as HTMLLinkElement | null;
+    if (favicon) favicon.href = isDark ? '/favicon-light.svg' : '/favicon-dark.svg';
 }
 
 /** Lê/atualiza o tema persistido no store da UI. */

@@ -1,13 +1,31 @@
-import { Pages } from "@/components/pages";
+import { Page } from "@/components/pages";
+import { Button } from "@/components/ui/button";
+
 import AppLayout from "@/layouts/AppLayout";
+import { Link } from "@inertiajs/react";
 import { ReactNode } from "react";
 
-export default function EmployeeNew(){
+export default function EmployeeNewPage(){
     return (
-        <Pages.Container>
+        <Page.Dashboard
+            title="Cadastrar Colaborador"
+            action={
+                <Button render={<Link href="/dashboard/employees" />}>Voltar</Button>
+            }
+            breadcrumbs={[
+                {
+                    link:'/dashboard',
+                    name:"Dashboard"
+                },
+                {
+                    link:'/dashboard/employees',
+                    name:"Colaboradores"
+                }
+            ]}
+        >
             <></>
-        </Pages.Container>
+        </Page.Dashboard>
     )
 }
 
-EmployeeNew.layout = (page: ReactNode) => <AppLayout>{page}</AppLayout>;
+EmployeeNewPage.layout = (page: ReactNode) => <AppLayout>{page}</AppLayout>;
