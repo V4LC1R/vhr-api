@@ -71,6 +71,15 @@ class EmployeeController extends Controller
         return response()->json($employee);
     }
 
+    public function nextRegisterNumber()
+    {
+        $this->authorize('create', Employee::class);
+
+        $number = $this->service->previewNextRegisterNumber();
+
+        return response()->json(['registerNumber' => $number]);
+    }
+
     public function destroy(Employee $employee)
     {
         $this->service->delete($employee);

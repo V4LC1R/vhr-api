@@ -230,4 +230,15 @@ class EmployeeService
             ?? 0
         ) + 1;
     }
+
+    public function previewNextRegisterNumber(): int
+    {
+        $company = currentCompany();
+
+        if (! $company) {
+            throw new \RuntimeException('Empresa não encontrada.');
+        }
+
+        return $this->getNextRegisterNumber($company->companyId);
+    }
 }

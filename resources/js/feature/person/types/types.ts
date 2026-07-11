@@ -3,6 +3,7 @@
  */
 export interface Person {
     id: string;
+    cpf: string | null;
     name: string;
     email: string;
     cellphone: string;

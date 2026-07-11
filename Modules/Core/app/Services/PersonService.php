@@ -26,6 +26,15 @@ class PersonService
         }
     }
 
+    public function findByCpf(string $cpf)
+    {
+        $person = Person::query()
+            ->where('cpf', $cpf)
+            ->first();
+
+        return $person?->toResource();
+    }
+
     public function list(array $filters = [], int $perPage = 15)
     {
         return Person::query()

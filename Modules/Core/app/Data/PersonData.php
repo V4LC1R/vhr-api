@@ -11,6 +11,7 @@ class PersonData extends Data
     public function __construct(
         // No Create ele não vem, no Update ele vem.
         public ?string $id,
+        public string|Optional $cpf,
         // No Update, se o usuário não enviar o nome, ele vira uma instância de Optional
         public string|Optional $name,
         #[Email]

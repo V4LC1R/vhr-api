@@ -224,6 +224,7 @@ daily-engagements    index/show + submit · approve · reject · exception
 
 ### 🔄 Front-end (em andamento)
 - Inertia + React sobre os módulos Core, Job e Attendance
+- Colaboradores: listagem (filtros, paginação, responsivo) e cadastro (busca de pessoa por CPF com auto-preenchimento, jornada via modal)
 
 ### 🔮 Futuro
 - **Módulo Contract** — admissões, demissões, período de experiência, estágios, terceiros

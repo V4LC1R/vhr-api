@@ -5,6 +5,7 @@ namespace Modules\Job\Http\Requests\Employee;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Modules\Job\Data\EmployeeData;
+use Modules\Job\Enums\EmploymentTypeEnum;
 use Modules\Job\Models\Workload;
 
 class StoreEmployeeRequest extends FormRequest
@@ -46,6 +47,12 @@ class StoreEmployeeRequest extends FormRequest
                     $this->input('companyId')
                 ),
             ],
+
+            'kind' => [
+                'required',
+                'string',
+                Rule::in(EmploymentTypeEnum::values()),
+            ],
         ];
     }
 
@@ -60,6 +67,9 @@ class StoreEmployeeRequest extends FormRequest
 
         'workloadId.required' => 'A jornada é obrigatória.',
         'workloadId.uuid' => 'A jornada informada é inválida.',
+
+        'kind.required' => 'O tipo de contratação é obrigatório.',
+        'kind.in' => 'O tipo de contratação informado é inválido.',
         ];
     }
 

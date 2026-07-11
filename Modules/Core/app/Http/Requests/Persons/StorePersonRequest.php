@@ -2,8 +2,8 @@
 
 namespace Modules\Core\Http\Requests\Persons;
 
+use App\Rules\ValidCpf;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Modules\Core\Data\PersonData;
 
 class StorePersonRequest extends FormRequest
@@ -17,11 +17,33 @@ class StorePersonRequest extends FormRequest
     }
 
     /**
+     * Normaliza o CPF removendo qualquer máscara antes da validação.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('cpf')) {
+            $this->merge([
+                'cpf' => preg_replace('/\D/', '', (string) $this->input('cpf')),
+            ]);
+        }
+    }
+
+    /**
      * Regras de validação para a criação de uma pessoa.
      */
     public function rules(): array
     {
         return [
+            'cpf' => [
+                'required',
+                'string',
+                'size:11',
+                new ValidCpf(),
+                // Sem Rule::unique('core.persons', 'cpf'): a unicidade é garantida
+                // pela constraint do banco e tratada de forma genérica pelo
+                // PersonService (QueryException -> UniqueConstraintException),
+                // no mesmo padrão já usado pelo campo 'email'.
+            ],
             'name' => [
                 'required',
                 'string',
@@ -48,6 +70,8 @@ class StorePersonRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'cpf.required' => 'O CPF é obrigatório.',
+            'cpf.size' => 'O CPF deve conter 11 dígitos.',
             'name.required' => 'O nome é obrigatório.',
             'email.required' => 'O e-mail é obrigatório.',
             'email.email' => 'Insira um endereço de e-mail válido.',

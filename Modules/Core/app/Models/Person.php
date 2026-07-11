@@ -14,6 +14,7 @@ use Modules\Core\Database\Factories\PersonFactory;
 use Modules\Core\Http\Resources\PersonResource;
 
 #[Fillable([
+    'cpf',
     'name',
     'email',
     'cellphone',

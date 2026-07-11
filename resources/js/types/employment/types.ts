@@ -1,4 +1,4 @@
-import type { Workload } from '@/types/workload/types';
+import type { Workload } from '@/feature/workload/types/types';
 
 /**
  * Resource somente-leitura — EmploymentResource. Não há EmploymentData (request)

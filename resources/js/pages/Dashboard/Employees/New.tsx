@@ -1,5 +1,6 @@
 import { Page } from "@/components/pages";
 import { Button } from "@/components/ui/button";
+import { EmployeeNewView } from "@/feature/employee/views/employee-new-view";
 
 import AppLayout from "@/layouts/AppLayout";
 import { Link } from "@inertiajs/react";
@@ -23,7 +24,7 @@ export default function EmployeeNewPage(){
                 }
             ]}
         >
-            <></>
+            <EmployeeNewView />
         </Page.Dashboard>
     )
 }

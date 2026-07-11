@@ -4,6 +4,7 @@ namespace Modules\Core\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Validator;
 use Modules\Core\Models\Person;
 use App\Http\Controllers\Controller;
 use Modules\Core\Services\PersonService;
@@ -26,6 +27,28 @@ class PersonController extends Controller
         );
 
         return response()->json($persons);
+    }
+
+    public function lookup(Request $request)
+    {
+        $this->authorize('viewAny', Person::class);
+
+        $cpf = preg_replace('/\D/', '', (string) $request->query('cpf'));
+
+        Validator::make(
+            ['cpf' => $cpf],
+            ['cpf' => ['required', 'string', 'size:11']],
+        )->validate();
+
+        $person = $this->service->findByCpf($cpf);
+
+        if (!$person) {
+            return response()->json([
+                'message' => 'Nenhuma pessoa encontrada para o CPF informado.',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json($person);
     }
 
     public function store(StorePersonRequest $request)
