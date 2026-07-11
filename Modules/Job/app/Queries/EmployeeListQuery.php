@@ -22,7 +22,7 @@ class EmployeeListQuery
                 AllowedFilter::custom('kind', new EmploymentKindFilter()),
                 AllowedFilter::custom('registerAt', new RegisterAtFilter()),
             )
-            ->allowedSorts(['registerNumber','registerAt'])
+            ->allowedSorts('registerNumber', 'registerAt')
             ->defaultSort('-registerNumber');
     }
 }

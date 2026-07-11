@@ -1,6 +1,41 @@
-# VHR 
+# VHR
 
-Sistema para gestão de recursos humanos. Digitaliza processos de RH como cadastro de funcionários, lançamento de pontos e contratos — substituindo planilhas por um sistema estruturado multi-empresa.
+Sistema de gestão de recursos humanos multi-empresa. Digitaliza processos de RH — cadastro de pessoas e funcionários, jornadas de trabalho e lançamento de ponto — substituindo planilhas por um sistema estruturado, com controle de acesso isolado por empresa.
+
+---
+
+## Documentação
+
+| Documento | Conteúdo |
+|---|---|
+| [FLUXO.md](FLUXO.md) | Visão de ponta a ponta: módulos, ciclo de requisição, multi-empresa/autorização, modelo de dados e fluxos |
+| [FRONTEND.md](FRONTEND.md) | Stack, arquitetura e workflow do front-end |
+| [DER.dbml](DER.dbml) | Modelo de dados (DBML) |
+| [Modules/Attendance/FLOW.md](Modules/Attendance/FLOW.md) | Detalhe do fluxo de ponto |
+
+---
+
+## Stack
+
+### Back-end
+- **Laravel 13** (PHP 8.3+) — framework base
+- **PostgreSQL 17** — banco principal; um schema por módulo (`core.*`, `job.*`, `attendance.*`)
+- **Redis** — cache, sessões e fila
+- **Laravel Sanctum** — autenticação via sessão/cookie
+- **Spatie Laravel Permission** — roles/permissões por empresa (teams)
+- **Spatie Laravel Data** — DTOs tipados
+- **Spatie Laravel Query Builder** — filtros nas listagens
+- **nwidart/laravel-modules** — arquitetura modular
+- **Resend** — envio de e-mail (recuperação de senha)
+
+### Front-end
+- **Inertia v3** — ponte servidor ↔ cliente
+- **React 19** + **TypeScript**
+- **Vite** + **Tailwind CSS v4**
+- **shadcn/ui** (sobre base-ui) — design system
+- **zustand** (estado de UI) · **Ziggy** (rotas tipadas)
+
+> Front unificado (não modular): a modularidade vive no back-end; o front é uma view layer fina que só apresenta as props do Inertia. Detalhes em [FRONTEND.md](FRONTEND.md).
 
 ---
 
@@ -8,175 +43,189 @@ Sistema para gestão de recursos humanos. Digitaliza processos de RH como cadast
 
 | Dependência | Versão mínima |
 |---|---|
+| Docker + Docker Compose | 24+ / 2.x |
 | PHP | 8.3+ |
 | Composer | 2.x |
-| Docker | 24+ |
-| Docker Compose | 2.x |
+| Node | 20+ |
+| pnpm | 9+ |
 
-> Os testes sobem um container PostgreSQL automaticamente via **Testcontainers**. Docker precisa estar rodando durante a execução dos testes.
-
----
-
-## Stack
-
-- **Laravel** 13 — framework base
-- **PostgreSQL** 17 — banco de dados principal
-- **Redis** — cache e sessões
-- **Laravel Sanctum** — autenticação via sessão/cookie
-- **Spatie Laravel Permission** — controle de acesso baseado em roles/permissões por empresa
-- **Spatie Laravel Data** — DTOs tipados
-- **Spatie Laravel Query Builder** — filtros nas listagens
-- **nwidart/laravel-modules** — arquitetura modular
+> **Ambiente:** PHP, PostgreSQL, Nginx e Redis rodam no **Docker**; Node/Vite roda no **host** (o container `app` não tem Node).
+> Os testes sobem um PostgreSQL efêmero via **Testcontainers** — o Docker precisa estar rodando durante a execução.
 
 ---
 
 ## Instalação
 
-### 1. Clonar e instalar dependências
+### 1. Clonar e subir a infraestrutura
 
 ```bash
 git clone <repo-url> vhr-api
 cd vhr-api
-composer install
+docker compose up -d          # PostgreSQL (5432), Redis (6379), PHP-FPM + Nginx (80)
 ```
 
-### 2. Configurar ambiente
+### 2. Instalar dependências
+
+```bash
+docker compose exec -u root app composer install   # back-end (dentro do container)
+pnpm install                                        # front-end (no host)
+```
+
+### 3. Configurar ambiente e migrar
 
 ```bash
 cp .env.example .env
-php artisan key:generate
+docker compose exec -u root app php artisan key:generate
+docker compose exec -u root app php artisan migrate --force
 ```
 
-Edite o `.env` com as credenciais do banco (ou use os valores padrão do Docker Compose):
+Valores padrão do Docker Compose:
 
 ```env
 DB_CONNECTION=pgsql
-DB_HOST=127.0.0.1
+DB_HOST=db
 DB_PORT=5432
 DB_DATABASE=central
 DB_USERNAME=admin
 DB_PASSWORD=admin
 
-SESSION_DRIVER=database
-CACHE_STORE=database
+SESSION_DRIVER=redis
+CACHE_STORE=redis
+QUEUE_CONNECTION=redis
+REDIS_HOST=redis
 ```
 
-### 3. Subir a infraestrutura
-
-```bash
-docker compose up -d
-```
-
-Isso sobe: **PostgreSQL** (porta 5432), **Redis** (porta 6379) e **Nginx + PHP-FPM** (porta 80).
-
-### 4. Migrar e popular o banco
-
-```bash
-# Dentro do container
-docker exec -it vhr-api php artisan migrate --force
-
-# Ou localmente (com PHP instalado)
-php artisan migrate --force
-```
+> Sessão, cache e fila usam **Redis** (serviço `redis` do Compose). Para enviar e-mail de verdade: `MAIL_MAILER=resend` + `RESEND_API_KEY=...` no `.env`.
 
 ---
 
 ## Desenvolvimento local
 
+O app é servido pelo Nginx do Docker em **http://localhost** (porta 80). Para hot reload do front, rode o Vite no host:
+
 ```bash
-composer run dev
+pnpm dev                      # Vite + HMR (deixe rodando em outro terminal)
 ```
 
-Sobe em paralelo: servidor PHP, queue worker, log watcher e Vite.
+Editar um `.tsx` atualiza a tela ao vivo. Sem o Vite rodando, gere o build estático com `pnpm build`.
+
+---
+
+## Massa de demonstração
+
+```bash
+# Popula uma empresa Demo com usuários (owner/rh/contador), jornadas,
+# funcionários e alguns dias de ponto (idempotente):
+docker compose exec -u root app php artisan dev:seed
+
+# Recriar o banco do zero antes de semear (APAGA tudo):
+docker compose exec -u root app php artisan dev:seed --fresh --force
+
+# Criar uma empresa e definir o owner de forma interativa:
+docker compose exec -u root app php artisan company:create
+```
 
 ---
 
 ## Testes
 
-Os testes usam **Testcontainers** — um container PostgreSQL é criado automaticamente por suite, isolando completamente o banco de teste do banco de desenvolvimento. **Docker precisa estar rodando.**
+Testes de integração usam **Testcontainers** — um PostgreSQL efêmero é criado por suite, isolando o banco de teste do de desenvolvimento. **Docker precisa estar rodando.**
 
 ```bash
-# Rodar todos os testes
-php artisan test
+# Todos os testes
+docker compose exec -u root app php artisan test
 
-# Ou via composer
-composer run test
-
-# Rodar apenas um módulo
-php artisan test --filter=EmployeeTest
-php artisan test --filter=UserTest
-php artisan test --filter=CompanyTest
-php artisan test --filter=AuthTest
+# Um módulo / arquivo específico
+docker compose exec -u root app php artisan test --filter=EmployeeTest
+docker compose exec -u root app php artisan test --filter=DailyEngagementTest
+docker compose exec -u root app php artisan test --filter=AuthTest
 ```
 
 ---
 
-## Estrutura de Módulos
+## Módulos
 
 ```
 Modules/
-├── Auth/       — login, logout, seleção de empresa
-├── Core/       — usuários, empresas, pessoas
-└── Job/        — funcionários, carga horária
+├── Core/            — pessoas, empresas, usuários e vínculo usuário↔empresa (userCompanies)
+├── Auth/            — login, seleção de empresa, logout, recuperação de senha
+├── Job/             — funcionários (employees), vínculos (employments) e jornadas (workloads)
+├── Attendance/      — lançamento de ponto (daily_engagements, time_entries)
+└── Communication/   — envio de e-mail (contrato de mailer)
 ```
 
-Cada módulo é autônomo: controllers, services, repositories, models, migrations, factories e testes próprios.
+Cada módulo é autônomo — controllers, services, repositories, models, migrations, factories, policies e testes próprios — e tem schema Postgres próprio.
+
+**Camadas** (fixas em todos os módulos): `Request` (valida → DTO) → `Controller` (fino, `authorizeResource`) → `Policy` (`currentCompany()->can/hasRole`) → `Service` (regra de negócio, `DB::transaction`, escopo por empresa) → `Repository` → `Model`. Listagens sempre paginadas. Detalhes em [FLUXO.md](FLUXO.md).
 
 ---
 
 ## Autenticação
 
-O sistema usa autenticação via **sessão** (cookie) com Sanctum.
+Autenticação via **sessão** (cookie) com Sanctum.
 
 ```
-POST /auth/login              — autenticação com email e senha
-POST /auth/select-company     — seleciona a empresa ativa (multi-empresa)
-GET  /auth/me                 — dados do usuário autenticado
-POST /auth/logout             — encerrar sessão
+POST /api/auth/login              — login com email e senha
+POST /api/auth/forgot-password    — solicita recuperação de senha (throttle)
+POST /api/auth/reset-password     — redefine a senha via token
+POST /api/auth/select-company     — seleciona a empresa ativa (multi-empresa)
+GET  /api/auth/me                 — dados do usuário autenticado
+POST /api/auth/logout             — encerra a sessão
 ```
 
-Após o login, todas as requisições às rotas protegidas precisam da empresa ativa definida na sessão. Se o usuário pertence a apenas uma empresa, ela é selecionada automaticamente.
+Após o login, as rotas protegidas exigem uma empresa ativa na sessão. Se o usuário pertence a uma única empresa, ela é selecionada automaticamente.
 
 ---
 
-## Controle de Acesso
+## Controle de acesso
 
-Permissões e roles são **isoladas por empresa** via Spatie Permission com teams. Cada usuário tem um vínculo `UserCompany` por empresa, e as permissões são atribuídas a esse vínculo — não diretamente ao usuário.
+Roles e permissões são **isoladas por empresa** via Spatie Permission com *teams*. O sujeito autorizável é o vínculo **`UserCompany`** (não o `User`): as permissões são atribuídas ao vínculo, e o middleware `current.company` fixa o team da empresa ativa a cada requisição. Todo acesso é escopado por empresa — `companyId` vem do contexto, nunca do payload.
 
-Roles disponíveis: `owner`, `humanResource`, `accountant`.
+Roles: `owner` · `humanResource` · `accountant` · `employee`. Matriz completa de permissões em [FLUXO.md](FLUXO.md#3-multi-empresa--autorização).
+
+---
+
+## API (recursos)
+
+Rotas protegidas por `auth:sanctum` + `current.company`, sob o prefixo `/api/v1`:
+
+```
+persons              CRUD de pessoas
+users                CRUD de usuários
+companies            CRUD de empresas
+employees            CRUD de funcionários  (+ PATCH employees/{id}/dismiss)
+workloads            CRUD de jornadas
+time-entries         CRUD de marcações de ponto
+daily-engagements    index/show + submit · approve · reject · exception
+```
 
 ---
 
 ## Roadmap
 
-### ✅ v0.1 — Fundação (concluído)
-- Estrutura modular com autenticação via sessão
+### ✅ Fundação
+- Estrutura modular com autenticação via sessão (Sanctum)
 - Multi-empresa: vínculo `UserCompany` com isolamento de permissões por empresa
-- Controle de acesso com roles e permissões por empresa (Spatie Permission + teams)
-- Módulo **Auth** — login, seleção de empresa, logout
-- Módulo **Core** — cadastro de empresas, pessoas e usuários
+- Controle de acesso com roles/permissões por empresa (Spatie Permission + teams)
+- Módulos **Auth** (login, seleção de empresa, recuperação de senha) e **Core** (pessoas, empresas, usuários)
+- **Communication** — envio de e-mail (Resend)
 - Testes de integração com PostgreSQL via Testcontainers
 
----
+### ✅ Módulo Job
+- Funcionários com matrícula sequencial por empresa
+- Vínculo funcionário ↔ pessoa ↔ empresa, admissão e desligamento
+- Jornada de trabalho (Workload)
 
-### ✅ v0.2 — Módulo Job (concluído)
-- Cadastro de funcionários com matrícula sequencial por empresa
-- Vínculo funcionário ↔ pessoa ↔ empresa
-- Admissão e desligamento
-- **Cadastro de jornada de trabalho (Workload)** 
+### 🔄 Módulo Attendance (em andamento)
+- Lançamento manual de pontos diários por funcionário (substituição de planilhas)
+- Fluxo de aprovação: draft → pending → approved/rejected
+- Exceções: faltas, folgas, feriados, atestados
+- Consolidação mensal por funcionário
 
----
-
-### 🔜 v0.3 — Módulo Attendance (em andamento)
-- Lançamento manual de pontos diários por funcionário (substituição de planilhas)  ← etapa atual
-- Aprovação dos lançamentos pelo owner
-- Visualização mensal consolidada por funcionário
-- Exceções: faltas, folgas e feriados _(bônus)_
-
----
+### 🔄 Front-end (em andamento)
+- Inertia + React sobre os módulos Core, Job e Attendance
 
 ### 🔮 Futuro
-- **Front-end** — interface para Job + Attendance
 - **Módulo Contract** — admissões, demissões, período de experiência, estágios, terceiros
 
 ---

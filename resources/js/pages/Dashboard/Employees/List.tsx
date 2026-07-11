@@ -11,7 +11,7 @@ export default function EmployeeListPage(){
         <Page.Dashboard
             title="Colaboradores"
             action={
-                <Button render={<Link href="/dashboard/employees/create" />}>Novo colaborador</Button>
+                <Button nativeButton={false} render={<Link href="/dashboard/employees/create" />}>Novo colaborador</Button>
             }
             breadcrumbs={[
                 {

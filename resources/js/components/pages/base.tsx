@@ -1,4 +1,4 @@
-import { type ReactNode } from "react"
+import { Fragment, type ReactNode } from "react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "../ui/breadcrumb"
 import { Link } from "@inertiajs/react"
 
@@ -8,7 +8,7 @@ type Props = {
 
 export function ContainerPage({children}:Props) {
     return (
-        <div className="mx-auto w-full md:max-w-225 h-full pt-3 md:px-0 px-2">
+        <div className="mx-auto flex h-full min-h-0 w-full flex-col md:max-w-225 pt-3 pb-3 md:px-0 px-2">
             {children}
         </div>
     )
@@ -42,7 +42,7 @@ export function BreadcrumbPage({chain}:BreadcrumbPageProps) {
                 <BreadcrumbList>
                     {
                         chain.map((it,idx)=>(
-                            <>
+                            <Fragment key={it.link}>
                                 <BreadcrumbItem>
                                     <BreadcrumbLink render={<Link href={it.link} />}>{it.name}</BreadcrumbLink>
                                 </BreadcrumbItem>
@@ -51,7 +51,7 @@ export function BreadcrumbPage({chain}:BreadcrumbPageProps) {
                                         <BreadcrumbSeparator />
                                     )
                                 }
-                            </>
+                            </Fragment>
                         ))
                     }
                 </BreadcrumbList>

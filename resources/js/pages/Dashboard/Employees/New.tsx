@@ -10,7 +10,7 @@ export default function EmployeeNewPage(){
         <Page.Dashboard
             title="Cadastrar Colaborador"
             action={
-                <Button render={<Link href="/dashboard/employees" />}>Voltar</Button>
+                <Button nativeButton={false} render={<Link href="/dashboard/employees" />}>Voltar</Button>
             }
             breadcrumbs={[
                 {

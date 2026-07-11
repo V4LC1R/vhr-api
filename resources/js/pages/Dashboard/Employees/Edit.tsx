@@ -10,7 +10,7 @@ export default function EmployeeEditPage(){
         <Page.Dashboard
             title="Editar Colaborador"
             action={
-                <Button render={<Link href="/dashboard/employees" />}>Voltar</Button>
+                <Button nativeButton={false} render={<Link href="/dashboard/employees" />}>Voltar</Button>
             }
             breadcrumbs={[
                 {

@@ -28,6 +28,7 @@ export function Cta() {
                         size="lg"
                         variant="secondary"
                         className="h-11 px-5 text-base"
+                        nativeButton={false}
                         render={<Link href="/auth/login" />}
                     >
                         Começar agora
@@ -37,6 +38,7 @@ export function Cta() {
                         size="lg"
                         variant="ghost"
                         className="h-11 px-5 text-base text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                        nativeButton={false}
                         render={<a href="#funcionalidades" />}
                     >
                         Ver funcionalidades
