@@ -93,6 +93,85 @@ class TimeEntryTest extends DBTestCase
         $this->assertDatabaseCount('attendance.time_entries', 2);
     }
 
+    public function testLancaLoteDeMarcacoesDeUmaVez(): void
+    {
+        $company = Company::factory()->create();
+        $this->autenticarComPermissao('attendance.timeEntries.create', company: $company);
+
+        $employee = $this->funcionarioComJornada($company);
+
+        // "Dia completo": os 4 punches da jornada num request só.
+        $this->postJson('/api/v1/time-entries/batch', [
+            'employeeId' => $employee->id,
+            'entries'    => [
+                ['punchedAt' => '2026-06-25T08:00:00-03:00', 'type' => 'entry'],
+                ['punchedAt' => '2026-06-25T12:00:00-03:00', 'type' => 'exit'],
+                ['punchedAt' => '2026-06-25T13:00:00-03:00', 'type' => 'entry'],
+                ['punchedAt' => '2026-06-25T18:00:00-03:00', 'type' => 'exit'],
+            ],
+        ])->assertCreated();
+
+        $this->assertDatabaseCount('attendance.time_entries', 4);
+        $this->assertDatabaseCount('attendance.daily_engagements', 1);
+
+        // 08–12 + 13–18 = 9h trabalhadas, num único recálculo.
+        $this->assertDatabaseHas('attendance.daily_engagements', [
+            'employeeId'     => $employee->id,
+            'status'         => 'draft',
+            'workedMinutes' => 540,
+        ]);
+    }
+
+    public function testLoteComReplaceSubstituiMarcacoesDoDia(): void
+    {
+        $company = Company::factory()->create();
+        $this->autenticarComPermissao('attendance.timeEntries.create', company: $company);
+
+        $employee = $this->funcionarioComJornada($company);
+
+        // Dia com uma marcação avulsa lançada antes.
+        $this->postJson('/api/v1/time-entries', [
+            'employeeId' => $employee->id,
+            'punchedAt' => '2026-06-25T09:30:00-03:00',
+            'type'       => 'entry',
+        ])->assertCreated();
+
+        // "Dia completo" com replace: troca tudo pelas marcações da jornada.
+        $this->postJson('/api/v1/time-entries/batch', [
+            'employeeId' => $employee->id,
+            'replace'    => true,
+            'entries'    => [
+                ['punchedAt' => '2026-06-25T08:00:00-03:00', 'type' => 'entry'],
+                ['punchedAt' => '2026-06-25T12:00:00-03:00', 'type' => 'exit'],
+                ['punchedAt' => '2026-06-25T13:00:00-03:00', 'type' => 'entry'],
+                ['punchedAt' => '2026-06-25T18:00:00-03:00', 'type' => 'exit'],
+            ],
+        ])->assertCreated();
+
+        // Só as 4 do lote — a avulsa das 09:30 foi substituída.
+        $this->assertDatabaseCount('attendance.time_entries', 4);
+        $this->assertDatabaseMissing('attendance.time_entries', [
+            'punchedAt' => '2026-06-25 12:30:00',
+        ]);
+
+        $this->assertDatabaseHas('attendance.daily_engagements', [
+            'employeeId'     => $employee->id,
+            'workedMinutes' => 540,
+        ]);
+    }
+
+    public function testUsuarioSemPermissaoNaoPodeLancarLote(): void
+    {
+        $this->autenticarSemPermissao();
+
+        $this->postJson('/api/v1/time-entries/batch', [
+            'employeeId' => fake()->uuid(),
+            'entries'    => [
+                ['punchedAt' => '2026-06-25T08:00:00-03:00', 'type' => 'entry'],
+            ],
+        ])->assertForbidden();
+    }
+
     public function testLancarMarcacaoCriaDiaComoRascunho(): void
     {
         $company = Company::factory()->create();

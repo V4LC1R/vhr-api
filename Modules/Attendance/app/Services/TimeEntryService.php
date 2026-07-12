@@ -8,12 +8,11 @@ use App\Contracts\TimeEntryRepositoryInterface;
 use Illuminate\Support\Carbon;
 use Modules\Attendance\Data\TimeEntryData;
 use Modules\Attendance\Enums\DailyEngagementStatusEnum;
-use Modules\Attendance\Enums\DailyEngagementTypeEnum;
 use Modules\Attendance\Enums\TimeEntrySourceEnum;
 use Modules\Attendance\Models\DailyEngagement;
 use Modules\Attendance\Models\TimeEntry;
 use Modules\Attendance\Support\AttendanceCalculator;
-use Modules\Job\Models\Employee;
+use Modules\Attendance\Support\DayResolver;
 use Spatie\LaravelData\Optional;
 
 class TimeEntryService
@@ -22,18 +21,19 @@ class TimeEntryService
         protected TimeEntryRepositoryInterface $timeEntryRepository,
         protected DailyEngagementRepositoryInterface $dailyEngagementRepository,
         protected AttendanceCalculator $calculator,
+        protected DayResolver $dayResolver,
     ) {
     }
 
     public function create(TimeEntryData $data)
     {
         $company   = $this->resolveCompany();
-        $employee  = $this->findEmployee($data->employeeId, $company->companyId);
+        $employee  = $this->dayResolver->findEmployee($data->employeeId, $company->companyId);
         $punchedAt = $this->normalizePunchedAt($data->punchedAt);
         $date      = substr($punchedAt, 0, 10);
 
         return DB::transaction(function () use ($data, $company, $employee, $date, $punchedAt) {
-            $day = $this->resolveDay($company->companyId, $employee, $date);
+            $day = $this->dayResolver->resolve($company->companyId, $employee, $date);
 
             $timeEntry = $this->timeEntryRepository->create([
                 'companyId'         => $company->companyId,
@@ -48,6 +48,61 @@ class TimeEntryService
             $this->calculator->recalculate($day);
 
             return $timeEntry->fresh()->toResource();
+        });
+    }
+
+    /**
+     * Lança várias marcações de uma vez (ex.: "dia completo" a partir da
+     * jornada). Agrupa por data, cria os dias necessários e recalcula cada
+     * dia uma única vez. Com `$replace`, as marcações existentes de cada dia
+     * afetado são substituídas pelas do lote.
+     */
+    public function createBatch(string $employeeId, array $entries, bool $replace = false)
+    {
+        $company  = $this->resolveCompany();
+        $employee = $this->dayResolver->findEmployee($employeeId, $company->companyId);
+
+        return DB::transaction(function () use ($entries, $company, $employee, $replace) {
+            /** @var array<string, DailyEngagement> $days */
+            $days = [];
+
+            foreach ($entries as $entry) {
+                $punchedAt = $this->normalizePunchedAt($entry['punchedAt']);
+                $date      = substr($punchedAt, 0, 10);
+
+                if (! isset($days[$date])) {
+                    $days[$date] = $this->dayResolver->resolve(
+                        $company->companyId,
+                        $employee,
+                        $date
+                    );
+
+                    if ($replace) {
+                        $days[$date]->timeEntries()->delete();
+                    }
+                }
+
+                $day = $days[$date];
+
+                $this->timeEntryRepository->create([
+                    'companyId'         => $company->companyId,
+                    'dailyEngagementId' => $day->id,
+                    'punchedAt'        => $punchedAt,
+                    'type'              => $entry['type'],
+                    'source'            => TimeEntrySourceEnum::MANUAL->value,
+                    'note'              => $entry['note'] ?? null,
+                ]);
+            }
+
+            foreach ($days as $day) {
+                $this->revertToDraft($day);
+                $this->calculator->recalculate($day);
+            }
+
+            return array_map(
+                fn (DailyEngagement $day) => $day->fresh(['timeEntries'])->toResource(),
+                array_values($days)
+            );
         });
     }
 
@@ -103,31 +158,6 @@ class TimeEntryService
             ->through(fn (TimeEntry $timeEntry) => $timeEntry->toResource());
     }
 
-    private function resolveDay(string $companyId, Employee $employee, string $date): DailyEngagement
-    {
-        $existing = $this->dailyEngagementRepository
-            ->getModel()
-            ->newQuery()
-            ->where('companyId', $companyId)
-            ->where('employeeId', $employee->id)
-            ->whereDate('date', $date)
-            ->first();
-
-        if ($existing) {
-            return $existing;
-        }
-
-        return $this->dailyEngagementRepository->create([
-            'companyId'  => $companyId,
-            'employeeId' => $employee->id,
-            'workloadId' => $employee->activeEmployment?->workloadId,
-            'date'       => $date,
-            'type'       => DailyEngagementTypeEnum::WORK->value,
-            'status'     => DailyEngagementStatusEnum::DRAFT->value,
-            'draftedBy'  => currentCompany()?->id,
-        ]);
-    }
-
     /**
      * Toda edição de marcação devolve o dia para rascunho (precisa reenviar/reaprovar)
      * e marca o autor atual como quem está draftando.
@@ -144,21 +174,6 @@ class TimeEntryService
             'approvedBy' => null,
             'approvedAt' => null,
         ])->save();
-    }
-
-    private function findEmployee(string $employeeId, string $companyId): Employee
-    {
-        $employee = Employee::query()// usar o bind employRepo()
-            ->where('id', $employeeId)
-            ->where('companyId', $companyId)
-            ->with('activeEmployment')
-            ->first();
-
-        if (! $employee) {
-            throw new \RuntimeException('Funcionário não encontrado na empresa atual.');
-        }
-
-        return $employee;
     }
 
     private function resolveCompany()

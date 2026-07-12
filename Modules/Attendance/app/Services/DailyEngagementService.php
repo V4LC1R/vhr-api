@@ -4,11 +4,13 @@ namespace Modules\Attendance\Services;
 
 use DB;
 use App\Contracts\DailyEngagementRepositoryInterface;
+use App\Exceptions\DomainException;
 use Modules\Attendance\Data\DailyEngagementData;
 use Modules\Attendance\Enums\DailyEngagementStatusEnum;
 use Modules\Attendance\Models\DailyEngagement;
 use Modules\Attendance\Queries\DailyEngagementListQuery;
 use Modules\Attendance\Support\AttendanceCalculator;
+use Modules\Attendance\Support\DayResolver;
 use Spatie\LaravelData\Optional;
 
 class DailyEngagementService
@@ -16,6 +18,7 @@ class DailyEngagementService
     public function __construct(
         protected DailyEngagementRepositoryInterface $dailyEngagementRepository,
         protected AttendanceCalculator $calculator,
+        protected DayResolver $dayResolver,
     ) {
     }
 
@@ -53,7 +56,7 @@ class DailyEngagementService
     public function show(DailyEngagement $day)
     {
         return $day
-            ->load(['timeEntries', 'employee.person', 'workload'])
+            ->load(['timeEntries', 'employee.person', 'workload', 'approvedByUserCompany.person'])
             ->toResource();
     }
 
@@ -83,10 +86,26 @@ class DailyEngagementService
         });
     }
 
+    /**
+     * Exceção lançada por funcionário+data: cria o dia como rascunho se ele
+     * ainda não existir (ex.: marcar falta num dia sem nenhuma marcação).
+     */
+    public function upsertExceptionByDate(string $employeeId, string $date, DailyEngagementData $data)
+    {
+        $company  = $this->resolveCompany();
+        $employee = $this->dayResolver->findEmployee($employeeId, $company->companyId);
+
+        return DB::transaction(function () use ($company, $employee, $date, $data) {
+            $day = $this->dayResolver->resolve($company->companyId, $employee, $date);
+
+            return $this->upsertException($day, $data);
+        });
+    }
+
     public function submit(DailyEngagement $day)
     {
         if ($day->status !== DailyEngagementStatusEnum::DRAFT) {
-            throw new \RuntimeException('Apenas rascunhos podem ser enviados para aprovação.');
+            throw new DomainException('Apenas rascunhos podem ser enviados para aprovação.');
         }
 
         $day->forceFill([
@@ -108,7 +127,7 @@ class DailyEngagementService
             'approvedAt' => now()->utc(),
         ])->save();
 
-        return $day->fresh(['timeEntries'])->toResource();
+        return $day->fresh(['timeEntries', 'approvedByUserCompany.person'])->toResource();
     }
 
     public function reject(DailyEngagement $day, ?string $note = null)
@@ -124,13 +143,77 @@ class DailyEngagementService
             'note'       => $note ?? $day->note,
         ])->save();
 
-        return $day->fresh(['timeEntries'])->toResource();
+        return $day->fresh(['timeEntries', 'approvedByUserCompany.person'])->toResource();
+    }
+
+    /**
+     * Aprova em lote os dias PENDENTES da seleção (ignora os demais e dias de
+     * outra empresa). Retorna quantos foram aprovados e quantos pulados.
+     */
+    public function approveBatch(array $ids): array
+    {
+        $company = $this->resolveCompany();
+        $ids     = array_values(array_unique($ids));
+
+        return DB::transaction(function () use ($ids, $company) {
+            $approved = $this->pendingInCompany($ids, $company->companyId)
+                ->update([
+                    'status'     => DailyEngagementStatusEnum::APPROVED->value,
+                    'approvedBy' => $company->id,
+                    'approvedAt' => now()->utc(),
+                ]);
+
+            return [
+                'approved' => $approved,
+                'skipped'  => count($ids) - $approved,
+            ];
+        });
+    }
+
+    /**
+     * Rejeita em lote os dias PENDENTES da seleção; o motivo (quando enviado)
+     * é aplicado a todos.
+     */
+    public function rejectBatch(array $ids, ?string $note = null): array
+    {
+        $company = $this->resolveCompany();
+        $ids     = array_values(array_unique($ids));
+
+        return DB::transaction(function () use ($ids, $company, $note) {
+            $payload = [
+                'status'     => DailyEngagementStatusEnum::REJECTED->value,
+                'approvedBy' => $company->id,
+                'approvedAt' => now()->utc(),
+            ];
+
+            if ($note !== null && $note !== '') {
+                $payload['note'] = $note;
+            }
+
+            $rejected = $this->pendingInCompany($ids, $company->companyId)
+                ->update($payload);
+
+            return [
+                'rejected' => $rejected,
+                'skipped'  => count($ids) - $rejected,
+            ];
+        });
+    }
+
+    private function pendingInCompany(array $ids, string $companyId)
+    {
+        return $this->dailyEngagementRepository
+            ->getModel()
+            ->newQuery()
+            ->where('companyId', $companyId)
+            ->whereIn('id', $ids)
+            ->where('status', DailyEngagementStatusEnum::PENDING->value);
     }
 
     private function ensurePending(DailyEngagement $day): void
     {
         if ($day->status !== DailyEngagementStatusEnum::PENDING) {
-            throw new \RuntimeException('Apenas dias pendentes podem ser aprovados ou rejeitados.');
+            throw new DomainException('Apenas dias pendentes podem ser aprovados ou rejeitados.');
         }
     }
 

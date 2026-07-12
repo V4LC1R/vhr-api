@@ -8,10 +8,25 @@ Route::middleware(['auth:sanctum', 'current.company'])
     ->prefix('v1')
     ->group(function () {
 
+        Route::post(
+            'time-entries/batch',
+            [TimeEntryController::class, 'storeBatch']
+        );
+
         Route::apiResource(
             'time-entries',
             TimeEntryController::class
         )->names('time-entries');
+
+        Route::post(
+            'daily-engagements/approve-batch',
+            [DailyEngagementController::class, 'approveBatch']
+        );
+
+        Route::post(
+            'daily-engagements/reject-batch',
+            [DailyEngagementController::class, 'rejectBatch']
+        );
 
         Route::patch(
             'daily-engagements/{daily_engagement}/exception',
@@ -36,5 +51,5 @@ Route::middleware(['auth:sanctum', 'current.company'])
         Route::apiResource(
             'daily-engagements',
             DailyEngagementController::class
-        )->only(['index', 'show'])->names('daily-engagements');
+        )->only(['index', 'show', 'store'])->names('daily-engagements');
     });

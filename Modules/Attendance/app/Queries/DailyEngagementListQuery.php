@@ -13,7 +13,7 @@ class DailyEngagementListQuery
     {
         return QueryBuilder::for(DailyEngagement::class)
             ->where('companyId', $companyId)
-            ->with(['employee.person', 'timeEntries'])
+            ->with(['employee.person', 'timeEntries', 'approvedByUserCompany.person'])
             ->allowedFilters(
                 AllowedFilter::exact('employeeId'),
                 AllowedFilter::exact('status'),

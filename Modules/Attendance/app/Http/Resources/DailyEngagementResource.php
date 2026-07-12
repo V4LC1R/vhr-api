@@ -24,8 +24,13 @@ class DailyEngagementResource extends JsonResource
             'note'            => $this->note,
             'draftedBy'       => $this->draftedBy,
             'approval'        => [
-                'by' => $this->approvedBy,
-                'at' => $this->approvedAt,
+                'by'     => $this->approvedBy,
+                'byName' => $this->whenLoaded(
+                    'approvedByUserCompany',
+                    fn () => $this->approvedByUserCompany?->person?->name,
+                    null
+                ),
+                'at'     => $this->approvedAt,
             ],
             'timeEntries'     => TimeEntryResource::collection(
                 $this->whenLoaded('timeEntries')

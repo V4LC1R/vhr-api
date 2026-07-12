@@ -5,6 +5,7 @@ namespace Modules\Attendance\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Attendance\Http\Requests\TimeEntry\BatchStoreTimeEntryRequest;
 use Modules\Attendance\Http\Requests\TimeEntry\StoreTimeEntryRequest;
 use Modules\Attendance\Http\Requests\TimeEntry\UpdateTimeEntryRequest;
 use Modules\Attendance\Models\TimeEntry;
@@ -32,6 +33,20 @@ class TimeEntryController extends Controller
         $timeEntry = $this->service->create($request->toDTO());
 
         return response()->json($timeEntry, Response::HTTP_CREATED);
+    }
+
+    /**
+     * Lote de marcações de uma vez (ex.: "dia completo" a partir da jornada).
+     */
+    public function storeBatch(BatchStoreTimeEntryRequest $request)
+    {
+        $days = $this->service->createBatch(
+            $request->validated('employeeId'),
+            $request->validated('entries'),
+            (bool) $request->validated('replace', false)
+        );
+
+        return response()->json($days, Response::HTTP_CREATED);
     }
 
     public function show(TimeEntry $timeEntry)

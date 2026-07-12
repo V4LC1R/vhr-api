@@ -12,7 +12,8 @@ export const DAILY_ENGAGEMENT_TYPES = ['work', 'day_off', 'holiday', 'medical', 
 export type DailyEngagementType = (typeof DAILY_ENGAGEMENT_TYPES)[number];
 
 export interface DailyEngagementApproval {
-    by: string | null; // UUID do aprovador
+    by: string | null; // UUID do UserCompany aprovador
+    byName?: string | null; // nome do aprovador (whenLoaded approvedByUserCompany)
     at: string | null; // ISO 8601
 }
 

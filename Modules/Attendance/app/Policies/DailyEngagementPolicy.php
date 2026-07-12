@@ -48,6 +48,11 @@ class DailyEngagementPolicy
         return true;
     }
 
+    public function create(User $auth): bool
+    {
+        return $this->canManage();
+    }
+
     public function upsertException(User $auth, DailyEngagement $day): bool
     {
         return $this->canManage();
@@ -70,6 +75,20 @@ class DailyEngagementPolicy
     public function reject(User $auth, DailyEngagement $day): bool
     {
         return $this->approve($auth, $day);
+    }
+
+    public function approveBatch(User $auth): bool
+    {
+        if (! currentCompany()) {
+            return false;
+        }
+
+        return currentCompany()?->can('attendance.dailyEngagements.approve');
+    }
+
+    public function rejectBatch(User $auth): bool
+    {
+        return $this->approveBatch($auth);
     }
 
     private function canManage(): bool

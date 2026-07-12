@@ -4,7 +4,7 @@ namespace Modules\Attendance\Http\Requests\DailyEngagement;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class RejectRequest extends FormRequest
+class BatchApproveRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,15 +14,17 @@ class RejectRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'note' => ['required', 'string', 'max:255'],
+            'ids'   => ['required', 'array', 'min:1'],
+            'ids.*' => ['uuid'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'note.required' => 'O motivo da rejeição é obrigatório.',
-            'note.max'      => 'O motivo não pode ter mais de 255 caracteres.',
+            'ids.required' => 'Informe ao menos um dia.',
+            'ids.min'      => 'Informe ao menos um dia.',
+            'ids.*.uuid'   => 'Dia inválido na seleção.',
         ];
     }
 }
