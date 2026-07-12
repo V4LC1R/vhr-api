@@ -45,7 +45,7 @@ class StoreEmployeeRequest extends FormRequest
                 )->where(
                     'companyId',
                     $this->input('companyId')
-                ),
+                )->withoutTrashed(),
             ],
 
             'kind' => [

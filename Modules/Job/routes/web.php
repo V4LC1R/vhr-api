@@ -11,3 +11,9 @@ Route::middleware(['auth:sanctum', 'current.company', 'no-store'])
         Route::get('/{id}/edit', fn (string $id) => Inertia::render('Dashboard/Employees/Edit', ['id' => $id]))
             ->name('employees.edit');
     });
+
+Route::middleware(['auth:sanctum', 'current.company', 'no-store'])
+    ->prefix('dashboard/workloads')
+    ->group(function () {
+        Route::inertia('/', 'Dashboard/Workloads/List')->name('workloads.list');
+    });

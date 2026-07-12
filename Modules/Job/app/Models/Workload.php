@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Job\Database\Factories\WorkloadFactory;
 use Modules\Job\Http\Resources\WorkloadResource;
 
@@ -30,6 +31,7 @@ class Workload extends Model
     use HasUuids;
     use HasFactory;
     use BelongsToCompany;
+    use SoftDeletes;
 
     protected $table = 'job.workloads';
 

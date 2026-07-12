@@ -328,6 +328,28 @@ class EmployeeTest extends DBTestCase
         ]);
     }
 
+    public function testNaoPodeAtribuirJornadaExcluida(): void
+    {
+        $company = Company::factory()->create();
+
+        $this->autenticarComRole('owner', company: $company);
+
+        ['employee' => $employee] = $this->criarFuncionarioComVinculo($company);
+
+        $workload = Workload::factory()->create(['companyId' => $employee->companyId]);
+        $workload->delete();
+
+        $this->putJson(
+            "/api/v1/employees/{$employee->id}",
+            [
+                'status'     => 'hired',
+                'workloadId' => $workload->id,
+                'kind'       => EmploymentTypeEnum::CLT->value,
+            ]
+        )->assertUnprocessable()
+            ->assertJsonValidationErrors('workloadId');
+    }
+
     public function testOwnerPodeAtualizarTipoDeContratacao(): void
     {
         $company = Company::factory()->create();

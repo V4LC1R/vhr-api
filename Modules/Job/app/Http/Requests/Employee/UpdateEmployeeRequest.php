@@ -31,7 +31,8 @@ class UpdateEmployeeRequest extends FormRequest
                 'required',
                 'uuid',
                 Rule::exists(Workload::class, 'id')
-                    ->where('companyId', $employee->companyId),
+                    ->where('companyId', $employee->companyId)
+                    ->withoutTrashed(),
             ],
             'kind' => [
                 'required',

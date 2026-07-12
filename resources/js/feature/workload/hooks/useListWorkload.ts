@@ -10,12 +10,28 @@ type WorkloadListParams = {
 type WorkloadResponsePaginated = PaginatedResponse<Workload>;
 
 export function useListWorkload(defaultParams: WorkloadListParams = {}) {
-    const { get, processing, setData, response } = useHttp<WorkloadListParams, WorkloadResponsePaginated>();
+    const { get, processing, setData, data, response } = useHttp<WorkloadListParams, WorkloadResponsePaginated>();
 
     async function list(params?: WorkloadListParams) {
         setData({ ...defaultParams, ...params });
         return await get("/api/v1/workloads");
     }
 
-    return { list, isLoadingWorkloads: processing, ...response };
+    async function nextPage() {
+        if (processing || !response || response.current_page >= response.last_page) {
+            return;
+        }
+
+        return await list({ ...data, page: response.current_page + 1 });
+    }
+
+    async function prevPage() {
+        if (processing || !response || response.current_page <= 1) {
+            return;
+        }
+
+        return await list({ ...data, page: response.current_page - 1 });
+    }
+
+    return { list, nextPage, prevPage, isLoadingWorkloads: processing, ...response };
 }

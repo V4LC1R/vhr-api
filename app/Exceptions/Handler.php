@@ -19,6 +19,13 @@ class Handler
             'message' => $e->getMessage(),
         ], Response::HTTP_CONFLICT));
 
+        // Regras de negócio violadas (ex.: excluir jornada em uso) → 409 com a
+        // mensagem da exceção. Registrada depois da UniqueConstraintException
+        // pra subclasse mais específica casar primeiro.
+        $exceptions->renderable(fn (DomainException $e) => response()->json([
+            'message' => $e->getMessage(),
+        ], Response::HTTP_CONFLICT));
+
         $exceptions->renderable(fn (ModelNotFoundException $e) => response()->json([
             'message' => 'Registro não encontrado.',
         ], Response::HTTP_NOT_FOUND));
