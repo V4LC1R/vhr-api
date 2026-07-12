@@ -24,6 +24,7 @@ export function EmployeeTable({ data, currentPage, lastPage, total, isLoading, n
         <DataTable
             data={data}
             columns={columns}
+            isLoading={isLoading}
             renderExpandedRow={(row) => <EmployeeDetail employee={row.original} />}
             footer={
                 <TablePagination

@@ -55,9 +55,11 @@ class EmployeeTest extends DBTestCase
         $response = $this->postJson(
             '/api/v1/employees',
             [
-                'companyId'  => $data['company']->id,
-                'personId'   => $data['person']->id,
-                'workloadId' => $data['workload']->id,
+                'companyId'      => $data['company']->id,
+                'personId'       => $data['person']->id,
+                'workloadId'     => $data['workload']->id,
+                'kind'           => EmploymentTypeEnum::CLT->value,
+                'isProbationary' => true,
             ]
         );
 
@@ -71,6 +73,40 @@ class EmployeeTest extends DBTestCase
         $this->assertDatabaseHas('job.employments', [
             'employeeId' => $employee->id,
             'status'     => 'experience',
+            'workloadId' => $data['workload']->id,
+        ]);
+    }
+
+    public function testContratacaoSemExperienciaComecaComoContratado(): void
+    {
+        $data = $this->criarDadosFuncionario();
+
+        $this->autenticarComPermissao(
+            'job.employees.create',
+            company: $data['company'],
+        );
+
+        $response = $this->postJson(
+            '/api/v1/employees',
+            [
+                'companyId'      => $data['company']->id,
+                'personId'       => $data['person']->id,
+                'workloadId'     => $data['workload']->id,
+                'kind'           => EmploymentTypeEnum::CLT->value,
+                'isProbationary' => false,
+            ]
+        );
+
+        $response->assertCreated();
+
+        $employee = Employee::query()
+            ->where('companyId', $data['company']->id)
+            ->where('personId', $data['person']->id)
+            ->firstOrFail();
+
+        $this->assertDatabaseHas('job.employments', [
+            'employeeId' => $employee->id,
+            'status'     => 'hired',
             'workloadId' => $data['workload']->id,
         ]);
     }
@@ -103,9 +139,11 @@ class EmployeeTest extends DBTestCase
         $this->postJson(
             '/api/v1/employees',
             [
-                'companyId'  => $data['company']->id,
-                'personId'   => $data['person']->id,
-                'workloadId' => $data['workload']->id,
+                'companyId'      => $data['company']->id,
+                'personId'       => $data['person']->id,
+                'workloadId'     => $data['workload']->id,
+                'kind'           => EmploymentTypeEnum::CLT->value,
+                'isProbationary' => true,
             ]
         )->assertCreated();
 
@@ -114,9 +152,11 @@ class EmployeeTest extends DBTestCase
         $this->postJson(
             '/api/v1/employees',
             [
-                'companyId'  => $data['company']->id,
-                'personId'   => $person2->id,
-                'workloadId' => $data['workload']->id,
+                'companyId'      => $data['company']->id,
+                'personId'       => $person2->id,
+                'workloadId'     => $data['workload']->id,
+                'kind'           => EmploymentTypeEnum::CLT->value,
+                'isProbationary' => true,
             ]
         )->assertCreated();
 
@@ -150,9 +190,11 @@ class EmployeeTest extends DBTestCase
         $this->postJson(
             '/api/v1/employees',
             [
-                'companyId'  => $employee->companyId,
-                'personId'   => $employee->personId,
-                'workloadId' => $workload->id,
+                'companyId'      => $employee->companyId,
+                'personId'       => $employee->personId,
+                'workloadId'     => $workload->id,
+                'kind'           => EmploymentTypeEnum::CLT->value,
+                'isProbationary' => true,
             ]
         )->assertConflict();
     }
@@ -178,9 +220,11 @@ class EmployeeTest extends DBTestCase
         $workload2 = Workload::factory()->create(['companyId' => $company->id]);
 
         $this->postJson('/api/v1/employees', [
-            'companyId'  => $employee->companyId,
-            'personId'   => $employee->personId,
-            'workloadId' => $workload2->id,
+            'companyId'      => $employee->companyId,
+            'personId'       => $employee->personId,
+            'workloadId'     => $workload2->id,
+            'kind'           => EmploymentTypeEnum::CLT->value,
+            'isProbationary' => true,
         ])->assertCreated();
     }
 
@@ -204,9 +248,11 @@ class EmployeeTest extends DBTestCase
         $this->postJson(
             '/api/v1/employees',
             [
-                'companyId'  => $employee->companyId,
-                'personId'   => $employee->personId,
-                'workloadId' => $workload->id,
+                'companyId'      => $employee->companyId,
+                'personId'       => $employee->personId,
+                'workloadId'     => $workload->id,
+                'kind'           => EmploymentTypeEnum::CLT->value,
+                'isProbationary' => true,
             ]
         )->assertCreated();
 

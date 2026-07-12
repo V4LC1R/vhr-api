@@ -53,6 +53,11 @@ class StoreEmployeeRequest extends FormRequest
                 'string',
                 Rule::in(EmploymentTypeEnum::values()),
             ],
+
+            'isProbationary' => [
+                'required',
+                'boolean',
+            ],
         ];
     }
 
@@ -70,6 +75,9 @@ class StoreEmployeeRequest extends FormRequest
 
         'kind.required' => 'O tipo de contratação é obrigatório.',
         'kind.in' => 'O tipo de contratação informado é inválido.',
+
+        'isProbationary.required' => 'Informe se é um contrato de experiência.',
+        'isProbationary.boolean' => 'O valor de contrato de experiência é inválido.',
         ];
     }
 

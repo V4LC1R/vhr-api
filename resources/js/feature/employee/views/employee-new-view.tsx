@@ -1,5 +1,7 @@
 import { Loader2Icon } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 import { useEmployeeForm } from "../hooks/useEmployeeForm"
 import { EmployeeHero } from "../components/create/hero"
 import { PersonSection } from "../components/create/person-section"
@@ -19,6 +21,8 @@ export function EmployeeNewView() {
         setEmail,
         cellphone,
         setCellphone,
+        pixKey,
+        setPixKey,
         matchedPerson,
         handleMatch,
         personErrors,
@@ -30,6 +34,9 @@ export function EmployeeNewView() {
         kind,
         selectKind,
         kindError,
+
+        isProbationary,
+        setIsProbationary,
 
         submit,
         isSubmitting,
@@ -48,18 +55,35 @@ export function EmployeeNewView() {
                 onEmailChange={setEmail}
                 cellphone={cellphone}
                 onCellphoneChange={setCellphone}
+                pixKey={pixKey}
+                onPixKeyChange={setPixKey}
                 matchedPerson={matchedPerson}
                 onMatch={handleMatch}
                 errors={personErrors}
             />
 
-            <ContractTypeSection value={kind} onChange={selectKind} error={kindError} />
+            <Card>
+                <CardHeader>
+                    <CardTitle>Vínculo e jornada</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-5">
+                    <ContractTypeSection
+                        value={kind}
+                        onChange={selectKind}
+                        error={kindError}
+                        isProbationary={isProbationary}
+                        onIsProbationaryChange={setIsProbationary}
+                    />
 
-            <WorkloadSection
-                selectedWorkloadId={selectedWorkloadId}
-                onSelectWorkload={selectWorkload}
-                workloadIdError={workloadIdError}
-            />
+                    <Separator />
+
+                    <WorkloadSection
+                        selectedWorkloadId={selectedWorkloadId}
+                        onSelectWorkload={selectWorkload}
+                        workloadIdError={workloadIdError}
+                    />
+                </CardContent>
+            </Card>
 
             <div className="flex justify-end">
                 <Button disabled={isSubmitting} onClick={submit} className="min-w-40">

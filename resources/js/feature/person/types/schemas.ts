@@ -8,5 +8,6 @@ export const personSchema = z.object({
     name: z.string().nonempty('Informe o nome'),
     email: z.email('E-mail inválido'),
     cellphone: z.string().nonempty('Informe o celular'),
+    pixKey: z.string().optional(),
 });
 export type PersonPayload = z.infer<typeof personSchema>;

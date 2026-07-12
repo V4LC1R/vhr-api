@@ -1,7 +1,7 @@
 import * as React from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema"
-import { CalendarClockIcon, PlusIcon } from "lucide-react"
+import { CalendarClockIcon, Loader2Icon, MinusIcon, PlusIcon } from "lucide-react"
 import toast from "react-hot-toast"
 
 import { extractErrorMessage } from "@/lib/http"
@@ -9,10 +9,10 @@ import { Workload } from "@/feature/workload/types/types"
 import { workloadSchema, WorkloadPayload } from "@/feature/workload/types/schemas"
 import { useListWorkload } from "@/feature/workload/hooks/useListWorkload"
 import { useCreateWorkload } from "@/feature/workload/hooks/useCreateWorkload"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { RHF } from "@/components/rhf-fields"
-import { FieldError, FieldGroup } from "@/components/ui/field"
+import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend } from "@/components/ui/field"
 import {
     Dialog,
     DialogClose,
@@ -45,10 +45,60 @@ function formatTime(time: string) {
     return time.slice(0, 5)
 }
 
+const DEFAULT_WEEKLY_HOURS = 40
+const WEEKLY_HOURS_PRESETS = [20, 30, 36, 40, 44]
+
+/** Convenção usual no Brasil pra equivalência semanal → mensal (ex: 40h → 200h, 44h → 220h). */
+function monthlyHoursFromWeekly(weeklyHours: number) {
+    return weeklyHours * 5
+}
+
+interface HoursStepperProps {
+    id: string
+    value: number
+    onChange: (value: number) => void
+    min?: number
+    max?: number
+}
+
+function HoursStepper({ id, value, onChange, min = 0, max = 744 }: HoursStepperProps) {
+    return (
+        <div className="flex items-center gap-1.5">
+            <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                onClick={() => onChange(Math.max(min, value - 1))}
+                disabled={value <= min}
+                aria-label="Diminuir"
+            >
+                <MinusIcon />
+            </Button>
+            <Input
+                id={id}
+                type="number"
+                value={value}
+                onChange={(e) => onChange(Number(e.target.value))}
+                className="text-center"
+            />
+            <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                onClick={() => onChange(Math.min(max, value + 1))}
+                disabled={value >= max}
+                aria-label="Aumentar"
+            >
+                <PlusIcon />
+            </Button>
+        </div>
+    )
+}
+
 const emptyWorkload: WorkloadPayload = {
     description: "",
-    monthlyHours: 0,
-    weeklyHours: 0,
+    monthlyHours: monthlyHoursFromWeekly(DEFAULT_WEEKLY_HOURS),
+    weeklyHours: DEFAULT_WEEKLY_HOURS,
     entryTime: "",
     leftTime: "",
     intervalStartAt: "",
@@ -57,7 +107,7 @@ const emptyWorkload: WorkloadPayload = {
 
 export function WorkloadSection({ selectedWorkloadId, onSelectWorkload, workloadIdError }: WorkloadSectionProps) {
     const [open, setOpen] = React.useState(false)
-    const { list, data: workloads } = useListWorkload({ per_page: 50 })
+    const { list, data: workloads, isLoadingWorkloads } = useListWorkload({ per_page: 50 })
     const { create: createWorkload, isCreatingWorkload } = useCreateWorkload()
 
     const form = useForm<WorkloadPayload>({
@@ -84,9 +134,9 @@ export function WorkloadSection({ selectedWorkloadId, onSelectWorkload, workload
     }
 
     return (
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Jornada</CardTitle>
+        <div className="flex flex-col gap-3">
+            <div className="flex flex-row items-center justify-between">
+                <FieldLegend variant="label">Jornada</FieldLegend>
                 <Dialog
                     open={open}
                     onOpenChange={(next) => {
@@ -113,38 +163,92 @@ export function WorkloadSection({ selectedWorkloadId, onSelectWorkload, workload
                                 control={form.control}
                                 placeholder="Jornada 44h (Seg-Sex 08-18)"
                             />
+                            <div className="flex flex-wrap gap-1.5">
+                                {WEEKLY_HOURS_PRESETS.map((preset) => (
+                                    <Button
+                                        key={preset}
+                                        type="button"
+                                        variant={form.watch("weeklyHours") === preset ? "secondary" : "outline"}
+                                        size="sm"
+                                        onClick={() => {
+                                            form.setValue("weeklyHours", preset, { shouldValidate: true })
+                                            form.setValue("monthlyHours", monthlyHoursFromWeekly(preset), {
+                                                shouldValidate: true,
+                                            })
+                                        }}
+                                    >
+                                        {preset}h
+                                    </Button>
+                                ))}
+                            </div>
                             <div className="grid grid-cols-2 gap-4">
-                                <RHF.Input
+                                <Controller
+                                    control={form.control}
                                     name="weeklyHours"
-                                    label="Horas semanais"
-                                    type="number"
-                                    control={form.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel htmlFor="weeklyHours">Horas semanais</FieldLabel>
+                                            <HoursStepper
+                                                id="weeklyHours"
+                                                max={44}
+                                                value={field.value}
+                                                onChange={(weeklyHours) => {
+                                                    field.onChange(weeklyHours)
+                                                    form.setValue("monthlyHours", monthlyHoursFromWeekly(weeklyHours), {
+                                                        shouldValidate: true,
+                                                    })
+                                                }}
+                                            />
+                                            <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
+                                        </Field>
+                                    )}
                                 />
-                                <RHF.Input
+                                <Controller
+                                    control={form.control}
                                     name="monthlyHours"
-                                    label="Horas mensais"
-                                    type="number"
-                                    control={form.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel htmlFor="monthlyHours">Horas mensais</FieldLabel>
+                                            <HoursStepper id="monthlyHours" value={field.value} onChange={field.onChange} />
+                                            <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
+                                        </Field>
+                                    )}
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <RHF.Input name="entryTime" label="Entrada" type="time" step={1} control={form.control} />
-                                <RHF.Input name="leftTime" label="Saída" type="time" step={1} control={form.control} />
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <RHF.TimePicker
+                                    name="entryTime"
+                                    label="Entrada"
+                                    control={form.control}
+                                    stepMinutes={15}
+                                    format={(v) => (v ? String(v).slice(0, 5) : null)}
+                                    parse={(t) => (t ? `${t}:00` : "")}
+                                />
+                                <RHF.TimePicker
+                                    name="leftTime"
+                                    label="Saída"
+                                    control={form.control}
+                                    stepMinutes={15}
+                                    format={(v) => (v ? String(v).slice(0, 5) : null)}
+                                    parse={(t) => (t ? `${t}:00` : "")}
+                                />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <RHF.Input
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <RHF.TimePicker
                                     name="intervalStartAt"
                                     label="Início do intervalo"
-                                    type="time"
-                                    step={1}
                                     control={form.control}
+                                    stepMinutes={15}
+                                    format={(v) => (v ? String(v).slice(0, 5) : null)}
+                                    parse={(t) => (t ? `${t}:00` : "")}
                                 />
-                                <RHF.Input
+                                <RHF.TimePicker
                                     name="intervalEndAt"
                                     label="Fim do intervalo"
-                                    type="time"
-                                    step={1}
                                     control={form.control}
+                                    stepMinutes={15}
+                                    format={(v) => (v ? String(v).slice(0, 5) : null)}
+                                    parse={(t) => (t ? `${t}:00` : "")}
                                 />
                             </div>
                         </FieldGroup>
@@ -157,8 +261,8 @@ export function WorkloadSection({ selectedWorkloadId, onSelectWorkload, workload
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
+            </div>
+            <div className="flex flex-col gap-3">
                 <Select
                     items={Object.fromEntries((workloads ?? []).map((w) => [w.id, w.description]))}
                     value={selectedWorkloadId}
@@ -167,8 +271,13 @@ export function WorkloadSection({ selectedWorkloadId, onSelectWorkload, workload
                         if (workload) onSelectWorkload(workload)
                     }}
                 >
-                    <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Selecione uma jornada" />
+                    <SelectTrigger className="w-full" disabled={isLoadingWorkloads}>
+                        <SelectValue
+                            placeholder={isLoadingWorkloads ? "Carregando jornadas..." : "Selecione uma jornada"}
+                        />
+                        {isLoadingWorkloads && (
+                            <Loader2Icon className="size-4 shrink-0 animate-spin text-muted-foreground" />
+                        )}
                     </SelectTrigger>
                     <SelectContent>
                         {(workloads ?? []).map((workload) => (
@@ -213,7 +322,7 @@ export function WorkloadSection({ selectedWorkloadId, onSelectWorkload, workload
                         </div>
                     </div>
                 )}
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     )
 }

@@ -18,6 +18,7 @@ use Modules\Core\Http\Resources\PersonResource;
     'name',
     'email',
     'cellphone',
+    'pixKey',
 ])]
 #[UseFactory(PersonFactory::class)]
 #[UseResource(PersonResource::class)]

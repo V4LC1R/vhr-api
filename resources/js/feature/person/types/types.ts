@@ -7,6 +7,7 @@ export interface Person {
     name: string;
     email: string;
     cellphone: string;
+    pixKey: string | null;
     createdAt: string | null;
     updatedAt: string | null;
 }

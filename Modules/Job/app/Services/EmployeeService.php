@@ -47,7 +47,9 @@ class EmployeeService
                 'kind'        => $data->kind instanceof Optional
                     ? EmploymentTypeEnum::CLT->value
                     : $data->kind,
-                'status'      => EmploymentStatusEnum::EXPERIENCE->value,
+                'status'      => ! ($data->isProbationary instanceof Optional) && $data->isProbationary
+                    ? EmploymentStatusEnum::EXPERIENCE->value
+                    : EmploymentStatusEnum::HIRED->value,
                 'registerAt' => now()->utc(),
             ]);
 

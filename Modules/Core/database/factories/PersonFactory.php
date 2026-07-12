@@ -21,6 +21,7 @@ class PersonFactory extends Factory
             'name'      => fake()->name(),
             'email'     => fake()->unique()->safeEmail(),
             'cellphone' => fake()->phoneNumber(),
+            'pixKey'    => fake()->optional(0.7)->email(),
         ];
     }
 }

@@ -26,7 +26,10 @@ export function Dashboard({children,action,title,breadcrumbs}:Props) {
                
             </BasePages.Breadcrumb>
             
-            {children}
+            <BasePages.Content>
+               {children}
+            </BasePages.Content>
+            
         </BasePages.Container>
     )
 }

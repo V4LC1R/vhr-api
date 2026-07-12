@@ -12,7 +12,7 @@ import { Workload } from "@/feature/workload/types/types"
 import { useCreateEmployee } from "./useCreateEmployee"
 import { useNextRegisterNumber } from "./useNextRegisterNumber"
 
-type PersonErrors = { cpf?: string; name?: string; email?: string; cellphone?: string }
+type PersonErrors = { cpf?: string; name?: string; email?: string; cellphone?: string; pixKey?: string }
 
 export function useEmployeeForm() {
     const { current } = useAuth()
@@ -22,6 +22,7 @@ export function useEmployeeForm() {
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [cellphone, setCellphone] = useState("")
+    const [pixKey, setPixKey] = useState("")
     const [matchedPerson, setMatchedPerson] = useState<Person | null>(null)
     const [personErrors, setPersonErrors] = useState<PersonErrors>({})
 
@@ -30,6 +31,8 @@ export function useEmployeeForm() {
 
     const [kind, setKind] = useState<EmploymentType | null>(null)
     const [kindError, setKindError] = useState<string>()
+
+    const [isProbationary, setIsProbationary] = useState(false)
 
     const { create: createPerson, isCreatingPerson } = useCreatePerson()
     const { create: createEmployee, isCreatingEmployee } = useCreateEmployee()
@@ -44,6 +47,7 @@ export function useEmployeeForm() {
             setName(person.name)
             setEmail(person.email)
             setCellphone(person.cellphone)
+            setPixKey(person.pixKey ?? "")
             setPersonErrors({})
         }
     }
@@ -62,7 +66,7 @@ export function useEmployeeForm() {
         if (matchedPerson) return matchedPerson.id
 
         const digits = cpf.replace(/\D/g, "")
-        const result = personSchema.safeParse({ cpf: digits, name, email, cellphone })
+        const result = personSchema.safeParse({ cpf: digits, name, email, cellphone, pixKey: pixKey || undefined })
         if (!result.success) {
             const fieldErrors: PersonErrors = {}
             for (const issue of result.error.issues) {
@@ -113,6 +117,7 @@ export function useEmployeeForm() {
                 personId,
                 workloadId: selectedWorkload.id,
                 kind,
+                isProbationary,
             })
             toast.success("Colaborador cadastrado com sucesso!")
             router.visit("/dashboard/employees")
@@ -133,6 +138,8 @@ export function useEmployeeForm() {
         setEmail,
         cellphone,
         setCellphone,
+        pixKey,
+        setPixKey,
         matchedPerson,
         handleMatch,
         personErrors,
@@ -144,6 +151,9 @@ export function useEmployeeForm() {
         kind,
         selectKind,
         kindError,
+
+        isProbationary,
+        setIsProbationary,
 
         submit,
         isSubmitting: isCreatingPerson || isCreatingEmployee,

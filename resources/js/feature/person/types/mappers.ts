@@ -11,6 +11,7 @@ export function mapToForm(resource: Person): PersonPayload {
         name: resource.name,
         email: resource.email,
         cellphone: resource.cellphone,
+        pixKey: resource.pixKey ?? '',
     };
 }
 
@@ -20,5 +21,6 @@ export function mapToApi(form: PersonPayload): PersonPayload {
         name: form.name,
         email: form.email,
         cellphone: form.cellphone,
+        pixKey: form.pixKey,
     };
 }

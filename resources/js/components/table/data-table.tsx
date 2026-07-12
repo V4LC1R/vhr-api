@@ -8,7 +8,7 @@ import {
     getExpandedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
-import { ChevronRightIcon } from "lucide-react"
+import { ChevronRightIcon, Loader2Icon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -29,6 +29,7 @@ interface DataTableProps<TData> {
     renderExpandedRow?: (row: Row<TData>) => React.ReactNode
     emptyMessage?: string
     footer?: React.ReactNode
+    isLoading?: boolean
 }
 
 export function DataTable<TData>({
@@ -38,6 +39,7 @@ export function DataTable<TData>({
     renderExpandedRow,
     emptyMessage = "Sem resultados.",
     footer,
+    isLoading,
 }: DataTableProps<TData>) {
     const isMobile = useIsMobile()
     const [expanded, setExpanded] = React.useState<ExpandedState>({})
@@ -58,7 +60,12 @@ export function DataTable<TData>({
     })
 
     return (
-        <div className="flex min-h-0 flex-1 flex-col rounded-md border">
+        <div className="relative flex min-h-0 flex-1 flex-col rounded-md border">
+            {isLoading && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center rounded-md bg-background/60">
+                    <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+                </div>
+            )}
             <Table containerClassName="min-h-0 flex-1 overflow-y-auto">
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
@@ -106,7 +113,7 @@ export function DataTable<TData>({
                                 colSpan={resolvedColumns.length}
                                 className="h-24 text-center text-muted-foreground"
                             >
-                                {emptyMessage}
+                                {isLoading ? null : emptyMessage}
                             </TableCell>
                         </TableRow>
                     )}

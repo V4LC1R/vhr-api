@@ -61,6 +61,11 @@ class StorePersonRequest extends FormRequest
                 'string',
                 'max:20' // Espaço seguro caso usem máscaras como (XX) 9XXXX-XXXX
             ],
+            'pixKey' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
         ];
     }
 
@@ -77,6 +82,7 @@ class StorePersonRequest extends FormRequest
             'email.email' => 'Insira um endereço de e-mail válido.',
             'email.unique' => 'Este e-mail já está cadastrado.',
             'cellphone.required' => 'O celular é obrigatório.',
+            'pixKey.max' => 'A chave Pix não pode ter mais de 255 caracteres.',
         ];
     }
 

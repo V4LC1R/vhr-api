@@ -16,9 +16,11 @@ interface PersonSectionProps {
     onEmailChange: (email: string) => void
     cellphone: string
     onCellphoneChange: (cellphone: string) => void
+    pixKey: string
+    onPixKeyChange: (pixKey: string) => void
     matchedPerson: Person | null
     onMatch: (person: Person | null) => void
-    errors?: { cpf?: string; name?: string; email?: string; cellphone?: string }
+    errors?: { cpf?: string; name?: string; email?: string; cellphone?: string; pixKey?: string }
 }
 
 function formatCpf(digits: string) {
@@ -37,6 +39,8 @@ export function PersonSection({
     onEmailChange,
     cellphone,
     onCellphoneChange,
+    pixKey,
+    onPixKeyChange,
     matchedPerson,
     onMatch,
     errors,
@@ -100,7 +104,7 @@ export function PersonSection({
                     )}
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <Field>
                         <FieldLabel htmlFor="person-name">Nome</FieldLabel>
                         <Input
@@ -134,6 +138,17 @@ export function PersonSection({
                             aria-invalid={!!errors?.cellphone}
                         />
                         <FieldError errors={errors?.cellphone ? [{ message: errors.cellphone }] : undefined} />
+                    </Field>
+                    <Field>
+                        <FieldLabel htmlFor="person-pix-key">Chave Pix</FieldLabel>
+                        <Input
+                            id="person-pix-key"
+                            value={pixKey}
+                            readOnly={fieldsReadOnly}
+                            onChange={(e) => onPixKeyChange(e.target.value)}
+                            aria-invalid={!!errors?.pixKey}
+                        />
+                        <FieldError errors={errors?.pixKey ? [{ message: errors.pixKey }] : undefined} />
                     </Field>
                 </div>
             </CardContent>

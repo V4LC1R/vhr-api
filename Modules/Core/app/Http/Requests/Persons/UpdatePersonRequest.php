@@ -35,6 +35,7 @@ class UpdatePersonRequest extends FormRequest
             'name'      => ['required', 'string', 'max:255'],
             'email'     => ['required', 'string', 'email', 'max:255'],
             'cellphone' => ['required', 'string', 'max:20'],
+            'pixKey'    => ['nullable', 'string', 'max:255'],
         ];
     }
 

@@ -139,15 +139,36 @@ class PersonTest extends DBTestCase
             'name' => 'Bruce Wayne',
             'email' => 'bruce@waynecorp.com',
             'cellphone' => '11988888888',
+            'pixKey' => 'bruce@waynecorp.com',
         ];
 
-        $this->postJson('/api/v1/persons', $payload)
+        $response = $this->postJson('/api/v1/persons', $payload)
             ->assertCreated();
+
+        $response->assertJsonPath('pixKey', 'bruce@waynecorp.com');
 
         $this->assertDatabaseHas('core.persons', [
             'cpf' => '52998224725',
             'email' => 'bruce@waynecorp.com',
+            'pixKey' => 'bruce@waynecorp.com',
         ]);
+    }
+
+    public function testDeveCadastrarUmaPessoaSemChavePixComSucesso()
+    {
+        $this->autenticarComPermissao('core.persons.create');
+
+        $payload = [
+            'cpf' => '52998224725',
+            'name' => 'Bruce Wayne',
+            'email' => 'bruce@waynecorp.com',
+            'cellphone' => '11988888888',
+        ];
+
+        $response = $this->postJson('/api/v1/persons', $payload)
+            ->assertCreated();
+
+        $response->assertJsonPath('pixKey', null);
     }
 
     /*

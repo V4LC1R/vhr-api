@@ -6,6 +6,7 @@ export type CreateEmployeePayload = {
     personId: string;
     workloadId: string;
     kind: string;
+    isProbationary: boolean;
 };
 
 export function useCreateEmployee() {

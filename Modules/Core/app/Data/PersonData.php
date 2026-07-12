@@ -17,6 +17,7 @@ class PersonData extends Data
         #[Email]
         public string|Optional $email,
         public string|Optional $cellphone,
+        public string|null|Optional $pixKey,
     ) {
     }
 }

@@ -70,10 +70,18 @@ export function ActionsPage({children}:Props) {
 
 // intermediarios do conteudo e o header
 
+export function ContentPage({children}:Props) {
+    return (
+        <div className="flex min-h-0 flex-1 flex-col pt-4">
+            {children}
+        </div>
+    )
+}
 export const BasePages = {
     Container:ContainerPage,
     Header:HeaderPage,
     Action:ActionsPage,
     Breadcrumb:BreadcrumbPage,
-    Title:TitlePage
+    Title:TitlePage,
+    Content:ContentPage
 }
