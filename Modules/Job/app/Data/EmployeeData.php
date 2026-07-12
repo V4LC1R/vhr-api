@@ -20,6 +20,7 @@ class EmployeeData extends Data
         public string|Optional $workloadId,
         public string|Optional $kind,
         public string|Optional $status,
+        public bool|Optional $isProbationary,
     ) {
     }
 }

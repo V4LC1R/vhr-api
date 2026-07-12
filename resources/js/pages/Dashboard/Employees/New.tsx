@@ -1,13 +1,36 @@
-import { Pages } from "@/components/pages";
+import { Page } from "@/components/pages";
+import { Button } from "@/components/ui/button";
+import { EmployeeNewView } from "@/feature/employee/views/employee-new-view";
+
 import AppLayout from "@/layouts/AppLayout";
+import { Link } from "@inertiajs/react";
+import { ArrowLeftIcon } from "lucide-react";
 import { ReactNode } from "react";
 
-export default function EmployeeNew(){
+export default function EmployeeNewPage(){
     return (
-        <Pages.Container>
-            <></>
-        </Pages.Container>
+        <Page.Dashboard
+            title="Cadastrar Colaborador"
+            action={
+                <Button nativeButton={false} render={<Link href="/dashboard/employees" />}>
+                    <ArrowLeftIcon />
+                    Voltar
+                </Button>
+            }
+            breadcrumbs={[
+                {
+                    link:'/dashboard',
+                    name:"Dashboard"
+                },
+                {
+                    link:'/dashboard/employees',
+                    name:"Colaboradores"
+                }
+            ]}
+        >
+            <EmployeeNewView />
+        </Page.Dashboard>
     )
 }
 
-EmployeeNew.layout = (page: ReactNode) => <AppLayout>{page}</AppLayout>;
+EmployeeNewPage.layout = (page: ReactNode) => <AppLayout>{page}</AppLayout>;

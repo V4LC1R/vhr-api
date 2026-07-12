@@ -1,20 +1,23 @@
-import { Pages } from "@/components/pages";
+import { Page } from "@/components/pages";
 import { Button } from "@/components/ui/button";
+import { EmployeeListView } from "@/feature/employee/views/employee-list-view";
 
 import AppLayout from "@/layouts/AppLayout";
 import { Link } from "@inertiajs/react";
+import { PlusIcon } from "lucide-react";
 import { ReactNode } from "react";
 
-export default function EmployeeList(){
+export default function EmployeeListPage(){
     return (
-        <Pages.Container>
-            <Pages.Header>
-                <Pages.Title>Colaboradores</Pages.Title>
-                <Pages.Action>
-                    <Button render={<Link href="/dashboard/employees/create" />}>Novo colaborador</Button>
-                </Pages.Action>
-            </Pages.Header>
-            <Pages.Breadcrumb chain={[
+        <Page.Dashboard
+            title="Colaboradores"
+            action={
+                <Button nativeButton={false} render={<Link href="/dashboard/employees/create" />}>
+                    <PlusIcon />
+                    Novo colaborador
+                </Button>
+            }
+            breadcrumbs={[
                 {
                     link:'/dashboard',
                     name:"Dashboard"
@@ -23,12 +26,11 @@ export default function EmployeeList(){
                     link:'/dashboard/employees',
                     name:"Colaboradores"
                 }
-            ]}>
-               
-            </Pages.Breadcrumb>
-            
-        </Pages.Container>
+            ]}
+        >
+            <EmployeeListView/>
+        </Page.Dashboard>
     )
 }
 
-EmployeeList.layout = (page: ReactNode) => <AppLayout>{page}</AppLayout>;
+EmployeeListPage.layout = (page: ReactNode) => <AppLayout>{page}</AppLayout>;

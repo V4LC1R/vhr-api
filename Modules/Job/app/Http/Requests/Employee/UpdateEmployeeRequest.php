@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Modules\Job\Data\EmployeeData;
 use Modules\Job\Enums\EmploymentStatusEnum;
+use Modules\Job\Enums\EmploymentTypeEnum;
 use Modules\Job\Models\Employee;
 use Modules\Job\Models\Workload;
 
@@ -30,7 +31,13 @@ class UpdateEmployeeRequest extends FormRequest
                 'required',
                 'uuid',
                 Rule::exists(Workload::class, 'id')
-                    ->where('companyId', $employee->companyId),
+                    ->where('companyId', $employee->companyId)
+                    ->withoutTrashed(),
+            ],
+            'kind' => [
+                'required',
+                'string',
+                Rule::in(EmploymentTypeEnum::values()),
             ],
         ];
     }
@@ -48,6 +55,10 @@ class UpdateEmployeeRequest extends FormRequest
                 'A jornada informada é inválida.',
             'workloadId.exists' =>
                 'A jornada informada não pertence à empresa do funcionário.',
+            'kind.required' =>
+                'O tipo de contratação é obrigatório.',
+            'kind.in' =>
+                'O tipo de contratação informado é inválido.',
         ];
     }
 

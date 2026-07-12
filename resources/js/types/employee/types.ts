@@ -1,4 +1,4 @@
-import type { Person } from '@/types/person/types';
+import type { Person } from '@/feature/person/types/types';
 import type { Employment } from '@/types/employment/types';
 
 /**

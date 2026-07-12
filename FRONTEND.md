@@ -11,7 +11,7 @@ Setup, arquitetura e fluxo de trabalho do front-end.
 | Build | **Vite** + `@vitejs/plugin-react` |
 | Gerenciador de pacotes | **pnpm** |
 | Estilo | **Tailwind CSS v4** (CSS-first) |
-| Design system | **shadcn/ui** (sobre Radix) |
+| Design system | **shadcn/ui** (sobre base-ui) |
 | Estado de UI (cliente) | **zustand** |
 | Rotas tipadas | **Ziggy** (`tightenco/ziggy` + `ziggy-js`) |
 

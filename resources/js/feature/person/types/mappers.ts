@@ -7,16 +7,20 @@ import type { PersonPayload } from './schemas';
  */
 export function mapToForm(resource: Person): PersonPayload {
     return {
+        cpf: resource.cpf ?? '',
         name: resource.name,
         email: resource.email,
         cellphone: resource.cellphone,
+        pixKey: resource.pixKey ?? '',
     };
 }
 
 export function mapToApi(form: PersonPayload): PersonPayload {
     return {
+        cpf: form.cpf,
         name: form.name,
         email: form.email,
         cellphone: form.cellphone,
+        pixKey: form.pixKey,
     };
 }

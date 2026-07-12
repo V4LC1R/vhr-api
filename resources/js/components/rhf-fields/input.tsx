@@ -1,19 +1,19 @@
-import { Controller, type Control } from "react-hook-form";
+import { Controller, type Control, type FieldValues, type Path } from "react-hook-form";
 
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-type Props = {
-    name: string;
+type Props<T extends FieldValues> = {
+    name: Path<T>;
     label?: string;
-    control: Control;
+    control: Control<T>;
     containerClassName?: string;
     labelClassName?: string;
     errorClassName?: string;
 } & Omit<React.ComponentProps<typeof Input>, "name">;
 
-export function RHFInput({
+export function RHFInput<T extends FieldValues = FieldValues>({
     name,
     label,
     control,
@@ -21,7 +21,7 @@ export function RHFInput({
     labelClassName,
     errorClassName,
     ...props
-}: Props) {
+}: Props<T>) {
     return (
         <Controller
             control={control}

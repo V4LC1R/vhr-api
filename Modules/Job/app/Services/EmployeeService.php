@@ -47,7 +47,9 @@ class EmployeeService
                 'kind'        => $data->kind instanceof Optional
                     ? EmploymentTypeEnum::CLT->value
                     : $data->kind,
-                'status'      => EmploymentStatusEnum::EXPERIENCE->value,
+                'status'      => ! ($data->isProbationary instanceof Optional) && $data->isProbationary
+                    ? EmploymentStatusEnum::EXPERIENCE->value
+                    : EmploymentStatusEnum::HIRED->value,
                 'registerAt' => now()->utc(),
             ]);
 
@@ -79,6 +81,9 @@ class EmployeeService
                 ? $activeEmployment->status->value
                 : $data->status,
             'workloadId' => $data->workloadId,
+            'kind'       => $data->kind instanceof Optional
+                ? $activeEmployment->kind->value
+                : $data->kind,
         ]);
 
         return $employee
@@ -229,5 +234,16 @@ class EmployeeService
                 ->max('registerNumber')
             ?? 0
         ) + 1;
+    }
+
+    public function previewNextRegisterNumber(): int
+    {
+        $company = currentCompany();
+
+        if (! $company) {
+            throw new \RuntimeException('Empresa não encontrada.');
+        }
+
+        return $this->getNextRegisterNumber($company->companyId);
     }
 }

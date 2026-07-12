@@ -18,6 +18,7 @@ class PersonTest extends DBTestCase
     public function testDeveRetornarUnauthorizedQuandoUsuarioNaoEstiverAutenticado()
     {
         $payload = [
+            'cpf' => '52998224725',
             'name' => 'Bruce Wayne',
             'email' => 'bruce@waynecorp.com',
             'cellphone' => '11988888888',
@@ -31,6 +32,7 @@ class PersonTest extends DBTestCase
         $this->autenticarSemPermissao();
 
         $payload = [
+            'cpf' => '52998224725',
             'name' => 'Bruce Wayne',
             'email' => 'bruce@waynecorp.com',
             'cellphone' => '11988888888',
@@ -47,6 +49,7 @@ class PersonTest extends DBTestCase
         $this->postJson('/api/v1/persons', [])
             ->assertUnprocessable()
             ->assertJsonValidationErrors([
+                'cpf',
                 'name',
                 'email',
                 'cellphone',
@@ -58,6 +61,7 @@ class PersonTest extends DBTestCase
         $this->autenticarComPermissao('core.persons.create');
 
         $payload = [
+            'cpf' => '52998224725',
             'name' => 'Bruce Wayne',
             'email' => 'email-invalido',
             'cellphone' => '11988888888',
@@ -70,6 +74,24 @@ class PersonTest extends DBTestCase
             ]);
     }
 
+    public function testDeveRetornarErroDeValidacaoQuandoCpfForInvalido()
+    {
+        $this->autenticarComPermissao('core.persons.create');
+
+        $payload = [
+            'cpf' => '52998224724', // dígito verificador incorreto
+            'name' => 'Bruce Wayne',
+            'email' => 'bruce@waynecorp.com',
+            'cellphone' => '11988888888',
+        ];
+
+        $this->postJson('/api/v1/persons', $payload)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'cpf',
+            ]);
+    }
+
     public function testDeveRetornarConflitoQuandoEmailJaEstiverCadastrado()
     {
         $this->autenticarComPermissao('core.persons.create');
@@ -79,6 +101,26 @@ class PersonTest extends DBTestCase
         ]);
 
         $payload = [
+            'cpf' => '52998224725',
+            'name' => 'Bruce Wayne',
+            'email' => 'bruce@waynecorp.com',
+            'cellphone' => '11988888888',
+        ];
+
+        $this->postJson('/api/v1/persons', $payload)
+            ->assertStatus(409);
+    }
+
+    public function testDeveRetornarConflitoQuandoCpfJaEstiverCadastrado()
+    {
+        $this->autenticarComPermissao('core.persons.create');
+
+        Person::factory()->create([
+            'cpf' => '52998224725',
+        ]);
+
+        $payload = [
+            'cpf' => '52998224725',
             'name' => 'Bruce Wayne',
             'email' => 'bruce@waynecorp.com',
             'cellphone' => '11988888888',
@@ -93,17 +135,40 @@ class PersonTest extends DBTestCase
         $this->autenticarComPermissao('core.persons.create');
 
         $payload = [
+            'cpf' => '52998224725',
+            'name' => 'Bruce Wayne',
+            'email' => 'bruce@waynecorp.com',
+            'cellphone' => '11988888888',
+            'pixKey' => 'bruce@waynecorp.com',
+        ];
+
+        $response = $this->postJson('/api/v1/persons', $payload)
+            ->assertCreated();
+
+        $response->assertJsonPath('pixKey', 'bruce@waynecorp.com');
+
+        $this->assertDatabaseHas('core.persons', [
+            'cpf' => '52998224725',
+            'email' => 'bruce@waynecorp.com',
+            'pixKey' => 'bruce@waynecorp.com',
+        ]);
+    }
+
+    public function testDeveCadastrarUmaPessoaSemChavePixComSucesso()
+    {
+        $this->autenticarComPermissao('core.persons.create');
+
+        $payload = [
+            'cpf' => '52998224725',
             'name' => 'Bruce Wayne',
             'email' => 'bruce@waynecorp.com',
             'cellphone' => '11988888888',
         ];
 
-        $this->postJson('/api/v1/persons', $payload)
+        $response = $this->postJson('/api/v1/persons', $payload)
             ->assertCreated();
 
-        $this->assertDatabaseHas('core.persons', [
-            'email' => 'bruce@waynecorp.com',
-        ]);
+        $response->assertJsonPath('pixKey', null);
     }
 
     /*
@@ -146,6 +211,72 @@ class PersonTest extends DBTestCase
 
         $this->getJson("/api/v1/persons/{$person->id}")
             ->assertOk();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | LOOKUP (busca por CPF)
+    |--------------------------------------------------------------------------
+    */
+
+    public function testDeveRetornarUnauthorizedAoConsultarPessoaPorCpfSemAutenticacao()
+    {
+        $this->getJson('/api/v1/persons/lookup?cpf=52998224725')
+            ->assertUnauthorized();
+    }
+
+    public function testDeveRetornarForbiddenAoConsultarPessoaPorCpfSemPermissao()
+    {
+        $this->autenticarSemPermissao();
+
+        $this->getJson('/api/v1/persons/lookup?cpf=52998224725')
+            ->assertForbidden();
+    }
+
+    public function testDeveRetornarErroDeValidacaoAoConsultarPessoaPorCpfInvalido()
+    {
+        $this->autenticarComPermissao('core.persons.view');
+
+        $this->getJson('/api/v1/persons/lookup?cpf=123')
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'cpf',
+            ]);
+    }
+
+    public function testDeveRetornarNotFoundQuandoCpfNaoEstiverCadastrado()
+    {
+        $this->autenticarComPermissao('core.persons.view');
+
+        $this->getJson('/api/v1/persons/lookup?cpf=52998224725')
+            ->assertNotFound();
+    }
+
+    public function testDeveConsultarPessoaPorCpfComSucesso()
+    {
+        $this->autenticarComPermissao('core.persons.view');
+
+        $person = Person::factory()->create([
+            'cpf' => '52998224725',
+        ]);
+
+        $this->getJson('/api/v1/persons/lookup?cpf=52998224725')
+            ->assertOk()
+            ->assertJsonPath('id', $person->id)
+            ->assertJsonPath('cpf', '52998224725');
+    }
+
+    public function testDeveConsultarPessoaPorCpfComMascaraComSucesso()
+    {
+        $this->autenticarComPermissao('core.persons.view');
+
+        $person = Person::factory()->create([
+            'cpf' => '52998224725',
+        ]);
+
+        $this->getJson('/api/v1/persons/lookup?cpf=' . urlencode('529.982.247-25'))
+            ->assertOk()
+            ->assertJsonPath('id', $person->id);
     }
 
     /*
@@ -257,8 +388,29 @@ class PersonTest extends DBTestCase
         ]);
 
         $this->putJson("/api/v1/persons/{$personB->id}", [
+            'cpf' => $personB->cpf,
             'name' => $personB->name,
             'email' => $personA->email,
+            'cellphone' => $personB->cellphone,
+        ])->assertStatus(409);
+    }
+
+    public function testDeveRetornarConflitoAoAtualizarComCpfJaExistente()
+    {
+        $this->autenticarComPermissao('core.persons.update');
+
+        $personA = Person::factory()->create([
+            'cpf' => '52998224725',
+        ]);
+
+        $personB = Person::factory()->create([
+            'cpf' => '11144477735',
+        ]);
+
+        $this->putJson("/api/v1/persons/{$personB->id}", [
+            'cpf' => $personA->cpf,
+            'name' => $personB->name,
+            'email' => $personB->email,
             'cellphone' => $personB->cellphone,
         ])->assertStatus(409);
     }
@@ -270,6 +422,7 @@ class PersonTest extends DBTestCase
         $person = Person::factory()->create();
 
         $this->putJson("/api/v1/persons/{$person->id}", [
+            'cpf' => $person->cpf,
             'name' => 'Batman',
             'email' => $person->email,
             'cellphone' => $person->cellphone,

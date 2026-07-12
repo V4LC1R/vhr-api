@@ -39,7 +39,7 @@ export function Hero() {
                     </p>
 
                     <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
-                        <Button size="lg" className="h-11 px-5 text-base" render={<Link href="/auth/login" />}>
+                        <Button size="lg" className="h-11 px-5 text-base" nativeButton={false} render={<Link href="/auth/login" />}>
                             Começar agora
                             <ArrowRight />
                         </Button>
@@ -47,6 +47,7 @@ export function Hero() {
                             size="lg"
                             variant="outline"
                             className="h-11 px-5 text-base"
+                            nativeButton={false}
                             render={<a href="#funcionalidades" />}
                         >
                             Ver funcionalidades

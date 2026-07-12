@@ -44,7 +44,8 @@ function filterNav(items: NavItem[], can: (permission: string) => boolean): NavI
 
 export function NavMain() {
     const url = usePage().url.split('?')[0];
-    const isActive = (path: string) => url === path || url.startsWith(`${path}/`);
+    const isActive = (path: string) =>
+        url === path || (path !== '/dashboard' && url.startsWith(`${path}/`));
     const { can } = useAuth();
     const items = filterNav(navItems, can);
     return (

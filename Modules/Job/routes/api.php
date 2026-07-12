@@ -13,6 +13,11 @@ Route::middleware(['auth:sanctum','current.company'])
             [EmployeeController::class, 'dismiss']
         )->middleware('can:dismiss,employee');
 
+        Route::get(
+            'employees/next-register-number',
+            [EmployeeController::class, 'nextRegisterNumber']
+        )->name('employees.nextRegisterNumber');
+
         Route::apiResource(
             'employees',
             EmployeeController::class

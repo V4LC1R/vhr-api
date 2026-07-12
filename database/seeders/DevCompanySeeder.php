@@ -60,9 +60,9 @@ class DevCompanySeeder extends Seeder
     private function criarUsuarios(Company $company): void
     {
         $usuarios = [
-            ['email' => 'owner@demo.test',    'role' => 'owner',         'name' => 'Ana Owner'],
-            ['email' => 'rh@demo.test',       'role' => 'humanResource', 'name' => 'Rui RH'],
-            ['email' => 'contador@demo.test', 'role' => 'accountant',    'name' => 'Cida Contadora'],
+            ['email' => 'owner@demo.test',    'role' => 'owner',         'name' => 'Ana Owner',      'cpf' => '10020030088'],
+            ['email' => 'rh@demo.test',       'role' => 'humanResource', 'name' => 'Rui RH',         'cpf' => '10020030169'],
+            ['email' => 'contador@demo.test', 'role' => 'accountant',    'name' => 'Cida Contadora', 'cpf' => '10020030240'],
         ];
 
         foreach ($usuarios as $i => $u) {
@@ -73,7 +73,11 @@ class DevCompanySeeder extends Seeder
 
             $person = Person::firstOrCreate(
                 ['email' => $u['email']],
-                ['name' => $u['name'], 'cellphone' => '(11) 99999-00' . str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT)],
+                [
+                    'name'      => $u['name'],
+                    'cpf'       => $u['cpf'],
+                    'cellphone' => '(11) 99999-00' . str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT),
+                ],
             );
 
             $userCompany = UserCompany::firstOrCreate(
@@ -114,12 +118,12 @@ class DevCompanySeeder extends Seeder
         ]));
 
         $funcionarios = [
-            ['nome' => 'Bruno Alves',  'kind' => EmploymentTypeEnum::CLT],
-            ['nome' => 'Carla Dias',   'kind' => EmploymentTypeEnum::CLT],
-            ['nome' => 'Diego Farias', 'kind' => EmploymentTypeEnum::CLT],
-            ['nome' => 'Elisa Gomes',  'kind' => EmploymentTypeEnum::TEMPORARY],
-            ['nome' => 'Fabio Horta',  'kind' => EmploymentTypeEnum::FREELANCER],
-            ['nome' => 'Gina Lima',    'kind' => EmploymentTypeEnum::DAYLI],
+            ['nome' => 'Bruno Alves',  'kind' => EmploymentTypeEnum::CLT,        'cpf' => '10020030320'],
+            ['nome' => 'Carla Dias',   'kind' => EmploymentTypeEnum::CLT,        'cpf' => '10020030401'],
+            ['nome' => 'Diego Farias', 'kind' => EmploymentTypeEnum::CLT,        'cpf' => '10020030592'],
+            ['nome' => 'Elisa Gomes',  'kind' => EmploymentTypeEnum::TEMPORARY,  'cpf' => '10020030673'],
+            ['nome' => 'Fabio Horta',  'kind' => EmploymentTypeEnum::FREELANCER, 'cpf' => '10020030754'],
+            ['nome' => 'Gina Lima',    'kind' => EmploymentTypeEnum::DAYLI,      'cpf' => '10020030835'],
         ];
 
         $registerNumber = 1;
@@ -127,6 +131,7 @@ class DevCompanySeeder extends Seeder
         foreach ($funcionarios as $i => $f) {
             $person = Person::create([
                 'name'      => $f['nome'],
+                'cpf'       => $f['cpf'],
                 'email'     => 'func' . ($i + 1) . '@demo.test',
                 'cellphone' => '(11) 98888-00' . str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT),
             ]);

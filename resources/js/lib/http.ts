@@ -26,3 +26,59 @@ export function registerHttpInterceptors(): void {
         window.location.href = "/auth/login";
     });
 }
+
+/**
+ * `error.response.data` chega como STRING (JSON cru, não parseado) — não um
+ * objeto — por isso precisa de `JSON.parse` antes de ler seus campos.
+ */
+function parseErrorData(error: unknown): Record<string, unknown> | null {
+    if (!error || typeof error !== "object" || !("response" in error)) {
+        return null;
+    }
+
+    let data = (error as { response?: { data?: unknown } }).response?.data;
+
+    if (typeof data === "string") {
+        try {
+            data = JSON.parse(data);
+        } catch {
+            return null;
+        }
+    }
+
+    return data && typeof data === "object" ? (data as Record<string, unknown>) : null;
+}
+
+/**
+ * Extrai a mensagem de erro do back a partir do erro rejeitado por `useHttp`.
+ */
+export function extractErrorMessage(error: unknown, fallback: string): string {
+    const data = parseErrorData(error);
+
+    if (data && "message" in data && typeof data.message === "string") {
+        return data.message;
+    }
+
+    return fallback;
+}
+
+/**
+ * Extrai os erros de validação por campo (formato padrão do Laravel:
+ * `{ errors: { campo: ["mensagem"] } }`) a partir do erro rejeitado por `useHttp`.
+ */
+export function extractFieldErrors(error: unknown): Record<string, string> {
+    const data = parseErrorData(error);
+    const errors = data?.errors;
+
+    if (!errors || typeof errors !== "object") {
+        return {};
+    }
+
+    const fieldErrors: Record<string, string> = {};
+    for (const [field, messages] of Object.entries(errors as Record<string, unknown>)) {
+        if (Array.isArray(messages) && typeof messages[0] === "string") {
+            fieldErrors[field] = messages[0];
+        }
+    }
+    return fieldErrors;
+}

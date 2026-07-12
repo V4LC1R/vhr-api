@@ -3,6 +3,8 @@
 namespace Modules\Job\Tests\Feature;
 
 use Modules\Core\Models\Company;
+use Modules\Job\Models\Employee;
+use Modules\Job\Models\Employment;
 use Modules\Job\Models\Workload;
 use Tests\DBTestCase;
 
@@ -165,7 +167,7 @@ class WorkloadTest extends DBTestCase
 
         $this->deleteJson("/api/v1/workloads/{$workload->id}")->assertNoContent();
 
-        $this->assertDatabaseMissing('job.workloads', ['id' => $workload->id]);
+        $this->assertSoftDeleted('job.workloads', ['id' => $workload->id]);
     }
 
     public function testRhPodeExcluirWorkload(): void
@@ -178,7 +180,7 @@ class WorkloadTest extends DBTestCase
 
         $this->deleteJson("/api/v1/workloads/{$workload->id}")->assertNoContent();
 
-        $this->assertDatabaseMissing('job.workloads', ['id' => $workload->id]);
+        $this->assertSoftDeleted('job.workloads', ['id' => $workload->id]);
     }
 
     public function testFuncionarioComumNaoPodeExcluirWorkload(): void
@@ -190,5 +192,59 @@ class WorkloadTest extends DBTestCase
         $workload = Workload::factory()->create(['companyId' => $company->id]);
 
         $this->deleteJson("/api/v1/workloads/{$workload->id}")->assertForbidden();
+    }
+
+    public function testNaoPodeExcluirWorkloadComVinculoAtivo(): void
+    {
+        $company = Company::factory()->create();
+
+        $this->autenticarComRole('owner', company: $company);
+
+        $workload = Workload::factory()->create(['companyId' => $company->id]);
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
+
+        $employment = Employment::factory()->hired()->create([
+            'employeeId'  => $employee->id,
+            'workloadId' => $workload->id,
+        ]);
+
+        $this->deleteJson("/api/v1/workloads/{$workload->id}")
+            ->assertConflict()
+            ->assertJsonPath(
+                'message',
+                'Esta jornada está vinculada a colaboradores ativos e não pode ser excluída.'
+            );
+
+        $this->assertNotSoftDeleted('job.workloads', ['id' => $workload->id]);
+        $this->assertDatabaseHas('job.employments', ['id' => $employment->id]);
+    }
+
+    public function testPodeExcluirWorkloadComVinculoEncerrado(): void
+    {
+        $company = Company::factory()->create();
+
+        $this->autenticarComRole('owner', company: $company);
+
+        $workload = Workload::factory()->create(['companyId' => $company->id]);
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
+
+        $employment = Employment::factory()->left()->create([
+            'employeeId'  => $employee->id,
+            'workloadId' => $workload->id,
+        ]);
+
+        // Vínculo encerrado não bloqueia: soft delete some da listagem mas o
+        // histórico continua apontando pra jornada.
+        $this->deleteJson("/api/v1/workloads/{$workload->id}")->assertNoContent();
+
+        $this->assertSoftDeleted('job.workloads', ['id' => $workload->id]);
+        $this->assertDatabaseHas('job.employments', [
+            'id'          => $employment->id,
+            'workloadId' => $workload->id,
+        ]);
+
+        $this->getJson('/api/v1/workloads')
+            ->assertOk()
+            ->assertJsonMissing(['id' => $workload->id]);
     }
 }

@@ -4,7 +4,9 @@ namespace Modules\Job\Services;
 
 use DB;
 use App\Contracts\WorkloadRepositoryInterface;
+use App\Exceptions\DomainException;
 use Modules\Job\Data\WorkloadData;
+use Modules\Job\Enums\EmploymentStatusEnum;
 use Modules\Job\Models\Workload;
 
 class WorkloadService
@@ -42,6 +44,21 @@ class WorkloadService
 
     public function delete(Workload $workload): void
     {
+        // Só vínculo ATIVO bloqueia. Vínculos encerrados não impedem: a
+        // exclusão é soft delete, então o histórico segue apontando pra jornada.
+        $hasActiveEmployment = $workload->employments()
+            ->whereIn('status', [
+                EmploymentStatusEnum::HIRED->value,
+                EmploymentStatusEnum::EXPERIENCE->value,
+            ])
+            ->exists();
+
+        if ($hasActiveEmployment) {
+            throw new DomainException(
+                'Esta jornada está vinculada a colaboradores ativos e não pode ser excluída.'
+            );
+        }
+
         DB::transaction(fn () => $workload->delete());
     }
 

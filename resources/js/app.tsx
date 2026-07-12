@@ -1,6 +1,7 @@
 import { createInertiaApp } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
 import type { ComponentType } from 'react';
+import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import { registerHttpInterceptors } from '@/lib/http';
 
@@ -18,6 +19,7 @@ createInertiaApp({
         createRoot(el).render(
             <ThemeProvider>
                 <App {...props} />
+                <Toaster position="top-right" />
             </ThemeProvider>,
         );
     },

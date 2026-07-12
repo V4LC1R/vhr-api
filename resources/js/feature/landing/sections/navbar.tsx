@@ -36,6 +36,7 @@ export function Navbar() {
                             key={link.href}
                             variant="ghost"
                             size="sm"
+                            nativeButton={false}
                             render={<a href={link.href} />}
                         >
                             {link.label}
@@ -49,11 +50,12 @@ export function Navbar() {
                         variant="ghost"
                         size="sm"
                         className="hidden sm:inline-flex"
+                        nativeButton={false}
                         render={<Link href="/auth/login" />}
                     >
                         Entrar
                     </Button>
-                    <Button size="sm" render={<Link href="/auth/login" />}>
+                    <Button size="sm" nativeButton={false} render={<Link href="/auth/login" />}>
                         Começar agora
                     </Button>
                 </div>

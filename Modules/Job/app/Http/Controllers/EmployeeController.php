@@ -45,6 +45,8 @@ class EmployeeController extends Controller
 
     public function show(Employee $employee)
     {
+        $employee->load(['person', 'activeEmployment.workload']);
+
         return response()->json(
             $employee->toResource()
         );
@@ -69,6 +71,15 @@ class EmployeeController extends Controller
         );
 
         return response()->json($employee);
+    }
+
+    public function nextRegisterNumber()
+    {
+        $this->authorize('create', Employee::class);
+
+        $number = $this->service->previewNextRegisterNumber();
+
+        return response()->json(['registerNumber' => $number]);
     }
 
     public function destroy(Employee $employee)
