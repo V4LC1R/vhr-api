@@ -8,5 +8,6 @@ Route::middleware(['auth:sanctum', 'current.company', 'no-store'])
     ->group(function () {
         Route::inertia('/', 'Dashboard/Employees/List')->name('employees.list');
         Route::inertia('/create', 'Dashboard/Employees/New')->name('employees.create');
-        Route::inertia('/{id}/edit', 'Dashboard/Employees/Edit')->name('employees.edit');
+        Route::get('/{id}/edit', fn (string $id) => Inertia::render('Dashboard/Employees/Edit', ['id' => $id]))
+            ->name('employees.edit');
     });

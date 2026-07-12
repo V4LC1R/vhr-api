@@ -1,16 +1,25 @@
 import { Page } from "@/components/pages";
 import { Button } from "@/components/ui/button";
+import { EmployeeEditView } from "@/feature/employee/views/employee-edit-view";
 
 import AppLayout from "@/layouts/AppLayout";
 import { Link } from "@inertiajs/react";
+import { ArrowLeftIcon } from "lucide-react";
 import { ReactNode } from "react";
 
-export default function EmployeeEditPage(){
+interface Props {
+    id: string;
+}
+
+export default function EmployeeEditPage({ id }: Props){
     return (
         <Page.Dashboard
             title="Editar Colaborador"
             action={
-                <Button nativeButton={false} render={<Link href="/dashboard/employees" />}>Voltar</Button>
+                <Button nativeButton={false} render={<Link href="/dashboard/employees" />}>
+                    <ArrowLeftIcon />
+                    Voltar
+                </Button>
             }
             breadcrumbs={[
                 {
@@ -23,7 +32,7 @@ export default function EmployeeEditPage(){
                 }
             ]}
         >
-            <></>
+            <EmployeeEditView employeeId={id} />
         </Page.Dashboard>
     )
 }

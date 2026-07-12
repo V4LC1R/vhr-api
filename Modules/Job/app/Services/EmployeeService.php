@@ -81,6 +81,9 @@ class EmployeeService
                 ? $activeEmployment->status->value
                 : $data->status,
             'workloadId' => $data->workloadId,
+            'kind'       => $data->kind instanceof Optional
+                ? $activeEmployment->kind->value
+                : $data->kind,
         ]);
 
         return $employee

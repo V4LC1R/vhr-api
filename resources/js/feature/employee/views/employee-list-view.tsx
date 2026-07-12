@@ -26,6 +26,10 @@ export function EmployeeListView() {
         list({ filter: filters, page: 1 })
     }, [filters])
 
+    function handleDismissed() {
+        list({ filter: filters, page: current_page ?? 1 })
+    }
+
     return (
         <div className="flex min-h-0 flex-1 flex-col gap-3">
             <EmployeeFilters value={filters} onChange={setFilters} />
@@ -37,6 +41,7 @@ export function EmployeeListView() {
                 isLoading={isLoadingEmployees}
                 next={nextPage}
                 prev={prevPage}
+                onDismissed={handleDismissed}
             />
         </div>
     )

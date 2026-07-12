@@ -4,6 +4,7 @@ import { EmployeeListView } from "@/feature/employee/views/employee-list-view";
 
 import AppLayout from "@/layouts/AppLayout";
 import { Link } from "@inertiajs/react";
+import { PlusIcon } from "lucide-react";
 import { ReactNode } from "react";
 
 export default function EmployeeListPage(){
@@ -11,7 +12,10 @@ export default function EmployeeListPage(){
         <Page.Dashboard
             title="Colaboradores"
             action={
-                <Button nativeButton={false} render={<Link href="/dashboard/employees/create" />}>Novo colaborador</Button>
+                <Button nativeButton={false} render={<Link href="/dashboard/employees/create" />}>
+                    <PlusIcon />
+                    Novo colaborador
+                </Button>
             }
             breadcrumbs={[
                 {

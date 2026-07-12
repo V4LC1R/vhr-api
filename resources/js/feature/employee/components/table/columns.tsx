@@ -1,17 +1,10 @@
 import { ColumnDef } from "@tanstack/react-table"
-import { EllipsisIcon } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Employee } from "../../types/types"
 import { EmploymentStatus, EmploymentType } from "@/types/employment/types"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { EmployeeRowActions } from "./employee-row-actions"
 
 export const EMPLOYMENT_TYPE_LABELS: Record<EmploymentType, string> = {
     clt: "CLT",
@@ -35,7 +28,7 @@ export const EMPLOYMENT_STATUS_VARIANTS: Record<
     left: "outline",
 }
 
-export function getEmployeeColumns(isMobile: boolean): ColumnDef<Employee>[] {
+export function getEmployeeColumns(isMobile: boolean, onDismissed?: () => void): ColumnDef<Employee>[] {
     const columns: ColumnDef<Employee>[] = [
         {
             accessorKey: "registerNumber",
@@ -93,17 +86,7 @@ export function getEmployeeColumns(isMobile: boolean): ColumnDef<Employee>[] {
     columns.push({
         id: "actions",
         size: 56,
-        cell: () => (
-            <DropdownMenu>
-                <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
-                    <EllipsisIcon />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Ver detalhes</DropdownMenuItem>
-                    <DropdownMenuItem>Editar</DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        ),
+        cell: ({ row }) => <EmployeeRowActions employee={row.original} onDismissed={onDismissed} />,
     })
 
     return columns

@@ -14,11 +14,12 @@ type Props = {
     isLoading?: boolean
     next: () => void
     prev: () => void
+    onDismissed?: () => void
 }
 
-export function EmployeeTable({ data, currentPage, lastPage, total, isLoading, next, prev }: Props) {
+export function EmployeeTable({ data, currentPage, lastPage, total, isLoading, next, prev, onDismissed }: Props) {
     const isMobile = useIsMobile()
-    const columns = useMemo(() => getEmployeeColumns(isMobile), [isMobile])
+    const columns = useMemo(() => getEmployeeColumns(isMobile, onDismissed), [isMobile, onDismissed])
 
     return (
         <DataTable

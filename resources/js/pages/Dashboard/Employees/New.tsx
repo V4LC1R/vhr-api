@@ -4,6 +4,7 @@ import { EmployeeNewView } from "@/feature/employee/views/employee-new-view";
 
 import AppLayout from "@/layouts/AppLayout";
 import { Link } from "@inertiajs/react";
+import { ArrowLeftIcon } from "lucide-react";
 import { ReactNode } from "react";
 
 export default function EmployeeNewPage(){
@@ -11,7 +12,10 @@ export default function EmployeeNewPage(){
         <Page.Dashboard
             title="Cadastrar Colaborador"
             action={
-                <Button nativeButton={false} render={<Link href="/dashboard/employees" />}>Voltar</Button>
+                <Button nativeButton={false} render={<Link href="/dashboard/employees" />}>
+                    <ArrowLeftIcon />
+                    Voltar
+                </Button>
             }
             breadcrumbs={[
                 {

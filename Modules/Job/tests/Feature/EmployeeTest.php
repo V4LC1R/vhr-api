@@ -317,6 +317,7 @@ class EmployeeTest extends DBTestCase
             [
                 'status'     => 'hired',
                 'workloadId' => $workload->id,
+                'kind'       => EmploymentTypeEnum::CLT->value,
             ]
         )->assertOk();
 
@@ -324,6 +325,32 @@ class EmployeeTest extends DBTestCase
             'employeeId' => $employee->id,
             'workloadId' => $workload->id,
             'status'     => 'hired',
+        ]);
+    }
+
+    public function testOwnerPodeAtualizarTipoDeContratacao(): void
+    {
+        $company = Company::factory()->create();
+
+        $this->autenticarComRole('owner', company: $company);
+
+        ['employee' => $employee] = $this->criarFuncionarioComVinculo($company);
+
+        $workload = Workload::factory()->create(['companyId' => $employee->companyId]);
+
+        $this->putJson(
+            "/api/v1/employees/{$employee->id}",
+            [
+                'status'     => 'hired',
+                'workloadId' => $workload->id,
+                'kind'       => EmploymentTypeEnum::FREELANCER->value,
+            ]
+        )->assertOk();
+
+        $this->assertDatabaseHas('job.employments', [
+            'employeeId' => $employee->id,
+            'workloadId' => $workload->id,
+            'kind'       => 'freelancer',
         ]);
     }
 
@@ -342,6 +369,7 @@ class EmployeeTest extends DBTestCase
             [
                 'status'     => 'hired',
                 'workloadId' => $workload->id,
+                'kind'       => EmploymentTypeEnum::CLT->value,
             ]
         )->assertOk();
     }

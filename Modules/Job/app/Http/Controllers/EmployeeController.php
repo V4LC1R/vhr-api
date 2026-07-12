@@ -45,6 +45,8 @@ class EmployeeController extends Controller
 
     public function show(Employee $employee)
     {
+        $employee->load(['person', 'activeEmployment.workload']);
+
         return response()->json(
             $employee->toResource()
         );
