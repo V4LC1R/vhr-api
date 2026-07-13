@@ -17,6 +17,14 @@ export type ApprovalStatusTab = Extract<
     "pending" | "approved" | "rejected"
 >
 
+/** Divisão por vínculo: CLTs de um lado, temporários (dayli/temporary/freelancer) do outro. */
+export type ApprovalKindTab = "clt" | "temps"
+
+const KIND_TAB_FILTERS: Record<ApprovalKindTab, string> = {
+    clt: "clt",
+    temps: "dayli,temporary,freelancer",
+}
+
 /**
  * Toda a lógica da fila de aprovações (grupos por colaborador, abas de status,
  * busca por nome, seleção e os fluxos de aprovar/rejeitar em lote) — a view só
@@ -27,6 +35,7 @@ export function useApprovals() {
     const [approveIds, setApproveIds] = useState<string[] | null>(null)
     const [rejectIds, setRejectIds] = useState<string[] | null>(null)
     const [status, setStatus] = useState<ApprovalStatusTab>("pending")
+    const [kindTab, setKindTab] = useState<ApprovalKindTab>("clt")
     const [searchInput, setSearchInput] = useState("")
     const [search, setSearch] = useState("")
 
@@ -46,14 +55,18 @@ export function useApprovals() {
     }, [searchInput])
 
     function currentFilter(): DailyEngagementFilters {
-        return { status, ...(search ? { employeeName: search } : {}) }
+        return {
+            status,
+            employmentKind: KIND_TAB_FILTERS[kindTab],
+            ...(search ? { employeeName: search } : {}),
+        }
     }
 
     useEffect(() => {
         setSelectedIds(new Set())
         list({ filter: currentFilter(), page: 1 })
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [status, search])
+    }, [status, kindTab, search])
 
     const groups = useMemo<ApprovalGroup[]>(() => {
         const byEmployee = new Map<string, ApprovalGroup>()
@@ -148,6 +161,8 @@ export function useApprovals() {
         // abas + busca
         status,
         setStatus,
+        kindTab,
+        setKindTab,
         /** Só a fila pendente permite selecionar/aprovar/rejeitar. */
         isReadOnly: status !== "pending",
         search: searchInput,

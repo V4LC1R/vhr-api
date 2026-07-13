@@ -34,6 +34,20 @@ export type TimesheetTotals = {
     worked: number
     expected: number
     balance: number
+    diarias: number
+}
+
+export type TimesheetColumnOptions = {
+    /** Vínculo dayli: mostra a coluna Diária (valor por dia + total no rodapé). */
+    showDiaria?: boolean
+    /** Vínculo não-CLT: o lançamento rápido vira "Presente". */
+    presenceMode?: boolean
+}
+
+function formatDiaria(value: number | null | undefined): string {
+    if (value === null || value === undefined) return "—"
+
+    return value.toLocaleString("pt-BR")
 }
 
 export interface TimesheetColumnActions {
@@ -61,7 +75,8 @@ function statusTooltip(day: DailyEngagement): string | undefined {
 export function getTimesheetColumns(
     isMobile: boolean,
     totals: TimesheetTotals,
-    actions: TimesheetColumnActions
+    actions: TimesheetColumnActions,
+    options: TimesheetColumnOptions = {}
 ): ColumnDef<TimesheetRow>[] {
     const columns: ColumnDef<TimesheetRow>[] = [
         {
@@ -125,6 +140,7 @@ export function getTimesheetColumns(
                 date={row.original.date}
                 day={row.original.day}
                 canFullDay={actions.canFullDay}
+                presenceMode={options.presenceMode}
                 isSaving={actions.isSaving}
                 onAdd={actions.onAddPunch}
                 onUpdateTime={actions.onUpdatePunchTime}
@@ -196,6 +212,22 @@ export function getTimesheetColumns(
             )
         },
     })
+
+    if (options.showDiaria) {
+        columns.push({
+            id: "diaria",
+            header: () => <div className="text-right">Diária</div>,
+            size: 72,
+            footer: () => (
+                <div className="text-right tabular-nums">{formatDiaria(totals.diarias)}</div>
+            ),
+            cell: ({ row }) => (
+                <div className="text-right tabular-nums">
+                    {formatDiaria(row.original.day?.diariaValue)}
+                </div>
+            ),
+        })
+    }
 
     if (!isMobile) {
         columns.push({

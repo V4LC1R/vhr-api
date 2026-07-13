@@ -28,7 +28,6 @@ export const navItems: NavItem[] = [
         children: [
             { icon: 'lucide:clipboard-list', label: 'Lançamentos', path: '/dashboard/time-entries', permission: 'attendance.timeEntries.view' },
             { icon: 'lucide:file-check', label: 'Aprovações', path: '/dashboard/approvals', permission: 'attendance.dailyEngagements.approve' },
-            { icon: 'lucide:calendar-days', label: 'Diárias', path: '/daily-engagements', permission: 'attendance.dailyEngagements.view' },
         ],
     },
 

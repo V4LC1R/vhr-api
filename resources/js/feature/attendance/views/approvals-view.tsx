@@ -11,12 +11,21 @@ import { getApprovalColumns } from "../components/approvals/columns"
 import { EmployeeDays } from "../components/approvals/employee-days"
 import { RejectDialog } from "../components/approvals/reject-dialog"
 import { SelectionBar } from "../components/approvals/selection-bar"
-import { ApprovalStatusTab, useApprovals } from "../components/approvals/useApprovals"
+import {
+    ApprovalKindTab,
+    ApprovalStatusTab,
+    useApprovals,
+} from "../components/approvals/useApprovals"
 
 const TAB_LABELS: Record<ApprovalStatusTab, string> = {
     pending: "Pendentes",
     approved: "Aprovados",
     rejected: "Rejeitados",
+}
+
+const KIND_TAB_LABELS: Record<ApprovalKindTab, string> = {
+    clt: "CLTs",
+    temps: "Temporários",
 }
 
 const DAY_COUNT_LABELS: Record<ApprovalStatusTab, [string, string]> = {
@@ -37,18 +46,33 @@ export function ApprovalsView() {
     return (
         <div className="flex min-h-0 flex-1 flex-col gap-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-                <Tabs
-                    value={approvals.status}
-                    onValueChange={(value) => approvals.setStatus(value as ApprovalStatusTab)}
-                >
-                    <TabsList>
-                        {(Object.keys(TAB_LABELS) as ApprovalStatusTab[]).map((tab) => (
-                            <TabsTrigger key={tab} value={tab}>
-                                {TAB_LABELS[tab]}
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
-                </Tabs>
+                <div className="flex flex-wrap items-center gap-2">
+                    <Tabs
+                        value={approvals.kindTab}
+                        onValueChange={(value) => approvals.setKindTab(value as ApprovalKindTab)}
+                    >
+                        <TabsList>
+                            {(Object.keys(KIND_TAB_LABELS) as ApprovalKindTab[]).map((tab) => (
+                                <TabsTrigger key={tab} value={tab}>
+                                    {KIND_TAB_LABELS[tab]}
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
+                    </Tabs>
+
+                    <Tabs
+                        value={approvals.status}
+                        onValueChange={(value) => approvals.setStatus(value as ApprovalStatusTab)}
+                    >
+                        <TabsList>
+                            {(Object.keys(TAB_LABELS) as ApprovalStatusTab[]).map((tab) => (
+                                <TabsTrigger key={tab} value={tab}>
+                                    {TAB_LABELS[tab]}
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
+                    </Tabs>
+                </div>
 
                 <div className="relative w-full sm:w-64">
                     <SearchIcon className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />

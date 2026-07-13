@@ -1,4 +1,5 @@
 import { Employee } from "@/types/employee/types"
+import { EmploymentType } from "@/types/employment/types"
 import {
     Combobox,
     ComboboxContent,
@@ -13,14 +14,16 @@ interface EmployeeSelectProps {
     value: Employee | null
     /** Entrega o colaborador completo (com activeEmployment.workload); null ao limpar. */
     onChange: (employee: Employee | null) => void
+    /** Restringe aos vínculos informados (ex.: só CLT, ou só temporários). */
+    kinds?: EmploymentType[]
 }
 
 function employeeLabel(employee: Employee): string {
     return employee.person?.name ?? `Nº ${employee.registerNumber}`
 }
 
-export function EmployeeSelect({ value, onChange }: EmployeeSelectProps) {
-    const { employees, isLoadingEmployees, setQuery } = useEmployeeSearch()
+export function EmployeeSelect({ value, onChange, kinds }: EmployeeSelectProps) {
+    const { employees, isLoadingEmployees, setQuery } = useEmployeeSearch({ kinds })
 
     return (
         <Combobox

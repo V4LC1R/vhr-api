@@ -148,9 +148,15 @@ export function useTimesheet(employee: Employee | null, monthDate: Date) {
             type: index % 2 === 0 ? "entry" : "exit",
         }))
 
+        const isPresence = employee.activeEmployment?.kind !== "clt"
+
         try {
             await createBatch({ employeeId, entries, replace: true })
-            toast.success(`Dia completo lançado (${times.join(" · ")}).`)
+            toast.success(
+                isPresence
+                    ? `Presença lançada (${times.join(" · ")}).`
+                    : `Dia completo lançado (${times.join(" · ")}).`
+            )
             setFullDayToReplace(null)
             await refresh()
         } catch (error) {

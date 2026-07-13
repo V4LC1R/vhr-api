@@ -9,12 +9,18 @@ import { Person } from "@/feature/person/types/types"
 import { personSchema } from "@/feature/person/types/schemas"
 import { useCreatePerson } from "@/feature/person/hooks/useCreatePerson"
 import { Workload } from "@/feature/workload/types/types"
+import { Employee } from "../types/types"
 import { useCreateEmployee } from "./useCreateEmployee"
 import { useNextRegisterNumber } from "./useNextRegisterNumber"
 
 type PersonErrors = { cpf?: string; name?: string; email?: string; cellphone?: string; pixKey?: string }
 
-export function useEmployeeForm() {
+type UseEmployeeFormOptions = {
+    /** Quando informado, substitui o redirect padrão — usado nos fluxos em dialog. */
+    onSuccess?: (employee: Employee) => void
+}
+
+export function useEmployeeForm({ onSuccess }: UseEmployeeFormOptions = {}) {
     const { current } = useAuth()
     const { fetchNextRegisterNumber, isLoadingRegisterNumber, registerNumber } = useNextRegisterNumber()
 
@@ -112,7 +118,7 @@ export function useEmployeeForm() {
         }
 
         try {
-            await createEmployee({
+            const employee = await createEmployee({
                 companyId: current.companyId,
                 personId,
                 workloadId: selectedWorkload.id,
@@ -120,6 +126,12 @@ export function useEmployeeForm() {
                 isProbationary,
             })
             toast.success("Colaborador cadastrado com sucesso!")
+
+            if (onSuccess) {
+                onSuccess(employee)
+                return
+            }
+
             router.visit("/dashboard/employees")
         } catch (error) {
             toast.error(extractErrorMessage(error, "Não foi possível cadastrar o colaborador."))

@@ -1,5 +1,5 @@
 
-import { LogInIcon, LogOutIcon, XIcon, ZapIcon } from "lucide-react"
+import { CheckIcon, LogInIcon, LogOutIcon, XIcon, ZapIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { DailyEngagement } from "@/types/dailyEngagement/types"
@@ -14,6 +14,8 @@ interface PunchInlineProps {
     day?: DailyEngagement
     /** Colaborador tem jornada ativa (habilita o "dia completo"). */
     canFullDay: boolean
+    /** Vínculo não-CLT: o lançamento rápido vira "Presente" (1 clique = jornada do dia). */
+    presenceMode?: boolean
     isSaving?: boolean
     onAdd: (date: string, time: string, type: TimeEntryType) => Promise<boolean>
     onUpdateTime: (punch: TimeEntry, time: string) => void
@@ -85,6 +87,7 @@ export function PunchInline({
     date,
     day,
     canFullDay,
+    presenceMode,
     isSaving,
     onAdd,
     onUpdateTime,
@@ -155,11 +158,13 @@ export function PunchInline({
                     title={
                         punches.length > 0
                             ? "Substitui as marcações do dia pelas da jornada"
-                            : "Lança as marcações da jornada de uma vez"
+                            : presenceMode
+                              ? "Marca presença — lança a jornada do dia"
+                              : "Lança as marcações da jornada de uma vez"
                     }
                 >
-                    <ZapIcon className="size-3" />
-                    Completo
+                    {presenceMode ? <CheckIcon className="size-3" /> : <ZapIcon className="size-3" />}
+                    {presenceMode ? "Presente" : "Completo"}
                 </Button>
             )}
         </div>

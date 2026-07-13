@@ -226,8 +226,9 @@ daily-engagements    index/show + submit · approve · reject · exception
 - Inertia + React sobre os módulos Core, Job e Attendance
 - Colaboradores: listagem (filtros, paginação, responsivo) e cadastro (busca de pessoa por CPF com auto-preenchimento, jornada via modal)
 - Jornadas: listagem com criação, edição e exclusão via modal (soft delete; bloqueada no back quando há vínculo ativo)
-- Lançamento de ponto: grade mensal por colaborador com edição inline (sem modais), "dia completo" pela jornada, exceções folga/feriado/atestado/falta e envio p/ aprovação
-- Aprovações: fila agrupada por colaborador com pares entrada→saída, alerta de sequência inconsistente, aprovar/rejeitar por dia ou em lote (dias marcados)
+- Lançamento de ponto: grade mensal por colaborador (busca por nome) com edição inline (sem modais), tipo do dia direto na grade, "dia completo" pela jornada, exceções folga/feriado/atestado/falta (observação opcional) e envio p/ aprovação
+- Lançamento de temporários (diarista/freelancer/temporário) na mesma tela, em aba própria (CLTs × Temporários, como em Aprovações): presença com 1 clique, coluna/total de diárias pra vínculo dayli (regra provisória — ver DiariaRule) e contratação rápida em tela (CPF busca quem já passou pela empresa ou cadastra pessoa nova)
+- Aprovações: fila agrupada por colaborador com pares entrada→saída, alerta de sequência inconsistente, aprovar/rejeitar por dia ou em lote (dias marcados), histórico de aprovados/rejeitados com motivo e busca por nome
 
 ### 🔮 Futuro
 - **Módulo Contract** — admissões, demissões, período de experiência, estágios, terceiros

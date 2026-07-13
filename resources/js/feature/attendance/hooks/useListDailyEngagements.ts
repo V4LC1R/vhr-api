@@ -9,6 +9,7 @@ import {
 export type DailyEngagementFilters = {
     employeeId?: string;
     employeeName?: string; // busca parcial (ILIKE) pelo nome do colaborador
+    employmentKind?: string; // vínculo ativo do colaborador; aceita lista (clt ou dayli,temporary,freelancer)
     status?: DailyEngagementStatus;
     type?: DailyEngagementType;
     month?: string; // YYYY-MM

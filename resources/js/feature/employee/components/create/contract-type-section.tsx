@@ -18,6 +18,10 @@ interface ContractTypeSectionProps {
     error?: string
     isProbationary: boolean
     onIsProbationaryChange: (isProbationary: boolean) => void
+    /** Restringe os cards exibidos (ex.: só vínculos temporários). */
+    kinds?: EmploymentType[]
+    /** Esconde o checkbox de contrato de experiência (ex.: contratação de temporário). */
+    showProbationary?: boolean
 }
 
 const CONTRACT_TYPES: { value: EmploymentType; label: string; description: string; icon: LucideIcon }[] = [
@@ -53,12 +57,23 @@ export function ContractTypeSection({
     error,
     isProbationary,
     onIsProbationaryChange,
+    kinds,
+    showProbationary = true,
 }: ContractTypeSectionProps) {
+    const contractTypes = kinds
+        ? CONTRACT_TYPES.filter((type) => kinds.includes(type.value))
+        : CONTRACT_TYPES
+
     return (
         <div className="flex flex-col gap-3">
             <FieldLegend variant="label">Vínculo</FieldLegend>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {CONTRACT_TYPES.map((type) => {
+            <div
+                className={cn(
+                    "grid grid-cols-2 gap-3",
+                    contractTypes.length >= 4 ? "sm:grid-cols-4" : "sm:grid-cols-3"
+                )}
+            >
+                {contractTypes.map((type) => {
                     const Icon = type.icon
                     const isSelected = value === type.value
 
@@ -120,16 +135,18 @@ export function ContractTypeSection({
             </div>
             <FieldError errors={error ? [{ message: error }] : undefined} />
 
-            <div className="flex items-center gap-2">
-                <Checkbox
-                    id="isProbationary"
-                    checked={isProbationary}
-                    onCheckedChange={onIsProbationaryChange}
-                />
-                <FieldLabel htmlFor="isProbationary" className="font-normal">
-                    Contrato de experiência
-                </FieldLabel>
-            </div>
+            {showProbationary && (
+                <div className="flex items-center gap-2">
+                    <Checkbox
+                        id="isProbationary"
+                        checked={isProbationary}
+                        onCheckedChange={onIsProbationaryChange}
+                    />
+                    <FieldLabel htmlFor="isProbationary" className="font-normal">
+                        Contrato de experiência
+                    </FieldLabel>
+                </div>
+            )}
         </div>
     )
 }

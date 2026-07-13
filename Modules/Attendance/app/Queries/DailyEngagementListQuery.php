@@ -3,6 +3,7 @@
 namespace Modules\Attendance\Queries;
 
 use Modules\Attendance\Filters\EmployeeNameFilter;
+use Modules\Attendance\Filters\EmploymentKindFilter;
 use Modules\Attendance\Filters\MonthFilter;
 use Modules\Attendance\Models\DailyEngagement;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -21,6 +22,7 @@ class DailyEngagementListQuery
                 AllowedFilter::exact('type'),
                 AllowedFilter::custom('month', new MonthFilter()),
                 AllowedFilter::custom('employeeName', new EmployeeNameFilter()),
+                AllowedFilter::custom('employmentKind', new EmploymentKindFilter()),
                 AllowedFilter::exact('date'),
             )
             ->allowedSorts('date')
