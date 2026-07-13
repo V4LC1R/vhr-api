@@ -16,6 +16,8 @@ interface EmployeeDaysProps {
     group: ApprovalGroup
     selectedIds: Set<string>
     isBusy?: boolean
+    /** Histórico (aprovados/rejeitados): sem seleção nem ações, só consulta. */
+    readOnly?: boolean
     onToggle: (dayId: string) => void
     onToggleAll: (group: ApprovalGroup, checked: boolean) => void
     onApprove: (day: DailyEngagement) => void
@@ -58,6 +60,7 @@ export function EmployeeDays({
     group,
     selectedIds,
     isBusy,
+    readOnly,
     onToggle,
     onToggleAll,
     onApprove,
@@ -68,14 +71,16 @@ export function EmployeeDays({
 
     return (
         <div className="flex flex-col gap-1 p-3">
-            <label className="flex w-fit cursor-pointer items-center gap-2 px-1 pb-1 text-xs text-muted-foreground">
-                <Checkbox
-                    checked={allSelected}
-                    indeterminate={selectedInGroup > 0 && !allSelected}
-                    onCheckedChange={(checked) => onToggleAll(group, !!checked)}
-                />
-                Marcar todos os dias
-            </label>
+            {!readOnly && (
+                <label className="flex w-fit cursor-pointer items-center gap-2 px-1 pb-1 text-xs text-muted-foreground">
+                    <Checkbox
+                        checked={allSelected}
+                        indeterminate={selectedInGroup > 0 && !allSelected}
+                        onCheckedChange={(checked) => onToggleAll(group, !!checked)}
+                    />
+                    Marcar todos os dias
+                </label>
+            )}
 
             {group.days.map((day) => (
                 <div
@@ -85,11 +90,13 @@ export function EmployeeDays({
                         selectedIds.has(day.id) && "border-primary/50 bg-primary/5"
                     )}
                 >
-                    <Checkbox
-                        checked={selectedIds.has(day.id)}
-                        onCheckedChange={() => onToggle(day.id)}
-                        aria-label="Marcar dia"
-                    />
+                    {!readOnly && (
+                        <Checkbox
+                            checked={selectedIds.has(day.id)}
+                            onCheckedChange={() => onToggle(day.id)}
+                            aria-label="Marcar dia"
+                        />
+                    )}
 
                     <span className="w-24 whitespace-nowrap text-sm font-medium capitalize">
                         {day.date &&
@@ -112,28 +119,45 @@ export function EmployeeDays({
                         {formatBalance(day.balanceMinutes)}
                     </span>
 
-                    <div className="flex items-center gap-1">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 gap-1 px-2"
-                            disabled={isBusy}
-                            onClick={() => onApprove(day)}
-                        >
-                            <CheckIcon className="size-3.5 text-primary" />
-                            Aceitar
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 gap-1 px-2 text-destructive hover:text-destructive"
-                            disabled={isBusy}
-                            onClick={() => onReject(day)}
-                        >
-                            <XIcon className="size-3.5" />
-                            Rejeitar
-                        </Button>
-                    </div>
+                    {!readOnly && (
+                        <div className="flex items-center gap-1">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 gap-1 px-2"
+                                disabled={isBusy}
+                                onClick={() => onApprove(day)}
+                            >
+                                <CheckIcon className="size-3.5 text-primary" />
+                                Aceitar
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 gap-1 px-2 text-destructive hover:text-destructive"
+                                disabled={isBusy}
+                                onClick={() => onReject(day)}
+                            >
+                                <XIcon className="size-3.5" />
+                                Rejeitar
+                            </Button>
+                        </div>
+                    )}
+
+                    {day.status === "approved" && day.approval.byName && (
+                        <p className="w-full text-xs text-muted-foreground">
+                            Aprovado por {day.approval.byName}
+                            {day.approval.at &&
+                                ` em ${format(new Date(day.approval.at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`}
+                        </p>
+                    )}
+
+                    {day.status === "rejected" && (
+                        <p className="w-full text-xs text-destructive">
+                            Rejeitado{day.approval.byName && ` por ${day.approval.byName}`}
+                            {day.note ? ` — motivo: ${day.note}` : " — sem motivo informado"}
+                        </p>
+                    )}
                 </div>
             ))}
         </div>

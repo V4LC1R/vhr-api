@@ -41,7 +41,7 @@ function PunchChip({ punch, onUpdateTime, onToggleType, onDelete }: PunchChipPro
     const Icon = punch.type === "entry" ? LogInIcon : LogOutIcon
 
     return (
-        <div className="group flex items-center gap-0.5 rounded-md border bg-background pl-1">
+        <div className="group relative flex items-center gap-0.5 rounded-md border bg-background pl-1">
             <button
                 type="button"
                 onClick={onToggleType}
@@ -68,11 +68,12 @@ function PunchChip({ punch, onUpdateTime, onToggleType, onDelete }: PunchChipPro
                 aria-label={`Horário da ${PUNCH_TYPE_LABELS[punch.type].toLowerCase()}`}
                 className={timeInputClass}
             />
+            {/* Overlay absoluto: não reserva espaço no chip — aparece sobre a ponta vazia do input no hover. */}
             <button
                 type="button"
                 onClick={onDelete}
                 aria-label="Excluir marcação"
-                className="flex items-center rounded-r-md px-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive focus-visible:opacity-100 group-hover:opacity-100"
+                className="absolute inset-y-0 right-0 flex items-center rounded-r-md bg-background px-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive focus-visible:opacity-100 group-hover:opacity-100"
             >
                 <XIcon className="size-3" />
             </button>
@@ -109,7 +110,8 @@ export function PunchInline({
     }
 
     return (
-        <div className="flex flex-wrap items-center gap-1">
+        // w-fit: as duas colunas abraçam o conteúdo — pares entrada|saída alinhados sem esticar na célula.
+        <div className="grid w-fit grid-cols-2 items-center gap-1">
             {punches.map((punch) => (
                 <PunchChip
                     key={punch.id}

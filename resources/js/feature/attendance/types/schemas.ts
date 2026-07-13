@@ -7,7 +7,7 @@ export const exceptionSchema = z.object({
     note: z
         .string()
         .trim()
-        .nonempty('Informe a observação')
-        .max(255, 'A observação não pode passar de 255 caracteres'),
+        .max(255, 'A observação não pode passar de 255 caracteres')
+        .optional(),
 });
 export type ExceptionPayload = z.infer<typeof exceptionSchema>;

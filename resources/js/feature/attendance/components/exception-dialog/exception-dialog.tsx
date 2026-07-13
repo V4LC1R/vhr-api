@@ -3,8 +3,8 @@ import { Controller, useForm } from "react-hook-form"
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema"
 
 import { DAILY_ENGAGEMENT_TYPES } from "@/types/dailyEngagement/types"
-import { DAY_TYPE_LABELS } from "../lib/labels"
-import { exceptionSchema, ExceptionPayload } from "../types/schemas"
+import { DAY_TYPE_LABELS } from "../../lib/labels"
+import { exceptionSchema, ExceptionPayload } from "../../types/schemas"
 import { Button } from "@/components/ui/button"
 import { RHF } from "@/components/rhf-fields"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
@@ -98,7 +98,7 @@ export function ExceptionDialog({
 
                     <RHF.Input
                         name="note"
-                        label="Observação"
+                        label="Observação (opcional)"
                         control={form.control}
                         placeholder="Ex.: atestado entregue, feriado municipal..."
                     />

@@ -18,7 +18,7 @@ class UpsertExceptionRequest extends FormRequest
     {
         return [
             'type' => ['required', Rule::in(DailyEngagementTypeEnum::values())],
-            'note' => ['required', 'string', 'max:255'],
+            'note' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -27,7 +27,6 @@ class UpsertExceptionRequest extends FormRequest
         return [
             'type.required' => 'O tipo do dia é obrigatório.',
             'type.in'       => 'O tipo do dia é inválido.',
-            'note.required' => 'A observação é obrigatória.',
             'note.max'      => 'A observação não pode ter mais de 255 caracteres.',
         ];
     }

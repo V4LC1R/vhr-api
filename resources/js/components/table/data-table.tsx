@@ -17,6 +17,7 @@ import {
     Table,
     TableBody,
     TableCell,
+    TableFooter,
     TableHead,
     TableHeader,
     TableRow,
@@ -30,6 +31,8 @@ interface DataTableProps<TData> {
     emptyMessage?: string
     footer?: React.ReactNode
     isLoading?: boolean
+    /** Classes extras por linha (ex.: destacar fim de semana / hoje). */
+    rowClassName?: (row: Row<TData>) => string | undefined
 }
 
 export function DataTable<TData>({
@@ -40,6 +43,7 @@ export function DataTable<TData>({
     emptyMessage = "Sem resultados.",
     footer,
     isLoading,
+    rowClassName,
 }: DataTableProps<TData>) {
     const isMobile = useIsMobile()
     const [expanded, setExpanded] = React.useState<ExpandedState>({})
@@ -73,7 +77,12 @@ export function DataTable<TData>({
                             {headerGroup.headers.map((header) => (
                                 <TableHead
                                     key={header.id}
-                                    style={isMobile ? undefined : { width: header.getSize() }}
+                                    // sem `size` declarado a coluna flexiona com o conteúdo
+                                    style={
+                                        isMobile || header.column.columnDef.size === undefined
+                                            ? undefined
+                                            : { width: header.getSize() }
+                                    }
                                     className="sticky top-0 z-10 bg-background"
                                 >
                                     {header.isPlaceholder
@@ -91,6 +100,7 @@ export function DataTable<TData>({
                                 <TableRow
                                     data-state={row.getIsSelected() ? "selected" : undefined}
                                     aria-expanded={row.getIsExpanded()}
+                                    className={rowClassName?.(row)}
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
@@ -118,6 +128,28 @@ export function DataTable<TData>({
                         </TableRow>
                     )}
                 </TableBody>
+                {resolvedColumns.some((column) => column.footer) && (
+                    <TableFooter>
+                        {table.getFooterGroups().map((footerGroup) => (
+                            <TableRow key={footerGroup.id}>
+                                {footerGroup.headers.map((header) => (
+                                    // sticky por célula (como no header); bg opaco pras linhas não vazarem por baixo
+                                    <TableCell
+                                        key={header.id}
+                                        className="sticky bottom-0 z-10 border-t bg-muted"
+                                    >
+                                        {header.isPlaceholder
+                                            ? null
+                                            : flexRender(
+                                                  header.column.columnDef.footer,
+                                                  header.getContext()
+                                              )}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableFooter>
+                )}
             </Table>
             {footer && <div className="border-t bg-muted/50 p-2">{footer}</div>}
         </div>

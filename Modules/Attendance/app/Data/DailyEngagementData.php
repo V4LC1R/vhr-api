@@ -11,7 +11,7 @@ class DailyEngagementData extends Data
 {
     public function __construct(
         public string|Optional $type,
-        public string|Optional $note,
+        public string|Optional|null $note,
     ) {
     }
 }

@@ -8,6 +8,7 @@ import {
 
 export type DailyEngagementFilters = {
     employeeId?: string;
+    employeeName?: string; // busca parcial (ILIKE) pelo nome do colaborador
     status?: DailyEngagementStatus;
     type?: DailyEngagementType;
     month?: string; // YYYY-MM

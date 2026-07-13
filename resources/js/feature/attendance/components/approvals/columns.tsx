@@ -5,7 +5,10 @@ import { cn } from "@/lib/utils"
 import { ApprovalGroup } from "../../types/approvals"
 import { formatBalance, formatMinutes } from "../../lib/time"
 
-export function getApprovalColumns(isMobile: boolean): ColumnDef<ApprovalGroup>[] {
+export function getApprovalColumns(
+    isMobile: boolean,
+    daysHeader = "Pendentes"
+): ColumnDef<ApprovalGroup>[] {
     const columns: ColumnDef<ApprovalGroup>[] = [
         {
             accessorKey: "name",
@@ -25,7 +28,7 @@ export function getApprovalColumns(isMobile: boolean): ColumnDef<ApprovalGroup>[
         },
         {
             id: "days",
-            header: "Pendentes",
+            header: daysHeader,
             size: 100,
             cell: ({ row }) =>
                 `${row.original.days.length} ${row.original.days.length === 1 ? "dia" : "dias"}`,

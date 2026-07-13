@@ -106,18 +106,24 @@ class DailyEngagementTest extends DBTestCase
         ]);
     }
 
-    public function testExcecaoSemObservacaoEhRejeitada(): void
+    public function testExcecaoSemObservacaoEhAceitaEPreservaNote(): void
     {
         $company = Company::factory()->create();
         $this->autenticarComRole('humanResource', company: $company);
 
         $day = $this->diaParaNovoFuncionario($company);
+        $day->forceFill(['note' => 'Observação existente'])->save();
 
+        // Observação é opcional; ausente, a existente é preservada.
         $this->patchJson("/api/v1/daily-engagements/{$day->id}/exception", [
             'type' => 'holiday',
-        ])
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors('note');
+        ])->assertOk();
+
+        $this->assertDatabaseHas('attendance.daily_engagements', [
+            'id'   => $day->id,
+            'type' => 'holiday',
+            'note' => 'Observação existente',
+        ]);
     }
 
     // ==========================================
