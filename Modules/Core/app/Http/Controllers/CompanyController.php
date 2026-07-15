@@ -37,7 +37,11 @@ class CompanyController extends Controller
     {
         $data = $request->toDTO();
 
-        $company = $this->service->create($data);
+        $company = $this->service->create(
+            $data,
+            $request->user()->id,
+            currentCompany()?->personId
+        );
 
         return response()->json($company, Response::HTTP_CREATED);
     }

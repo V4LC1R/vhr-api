@@ -34,12 +34,11 @@ export const navItems: NavItem[] = [
     {
         icon: 'lucide:settings',
         label: 'Cadastros',
-        path: '/companies',
+        path: '/dashboard/companies',
         permission: 'core.companies.view',
         children: [
-            { icon: 'lucide:building-2', label: 'Empresas', path: '/companies', permission: 'core.companies.view' },
-            { icon: 'lucide:contact', label: 'Pessoas', path: '/persons', permission: 'core.persons.view' },
-            { icon: 'lucide:user-cog', label: 'Usuários', path: '/users', permission: 'core.users.view' },
+            { icon: 'lucide:building-2', label: 'Empresas', path: '/dashboard/companies', permission: 'core.companies.view' },
+            { icon: 'lucide:user-cog', label: 'Usuários', path: '/dashboard/users', permission: 'core.users.view' },
         ],
     },
 ];

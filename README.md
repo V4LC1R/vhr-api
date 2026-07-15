@@ -61,7 +61,7 @@ Sistema de gestão de recursos humanos multi-empresa. Digitaliza processos de RH
 ```bash
 git clone <repo-url> vhr-api
 cd vhr-api
-docker compose up -d          # PostgreSQL (5432), Redis (6379), PHP-FPM + Nginx (80)
+docker compose up -d          # PostgreSQL (15432), Redis (16379), PHP-FPM + Nginx (18080)
 ```
 
 ### 2. Instalar dependências
@@ -101,7 +101,7 @@ REDIS_HOST=redis
 
 ## Desenvolvimento local
 
-O app é servido pelo Nginx do Docker em **http://localhost** (porta 80). Para hot reload do front, rode o Vite no host:
+O app é servido pelo Nginx do Docker em **http://localhost:18080** (porta 18080). Para hot reload do front, rode o Vite no host:
 
 ```bash
 pnpm dev                      # Vite + HMR (deixe rodando em outro terminal)

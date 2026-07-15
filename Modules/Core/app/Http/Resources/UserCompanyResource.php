@@ -17,6 +17,8 @@ class UserCompanyResource extends JsonResource
         return [
             'id' => $this->id,
 
+            'role' => $this->getRoleNames()->first(),
+
             'company' => $this->whenLoaded('company', function () {
                 return [
                     'id' => $this->company->id,

@@ -21,7 +21,7 @@ services:
     container_name: vhr-api-nginx
     restart: always
     ports:
-      - "80:80"
+      - "18080:80"
     volumes:
       - ./:/var/www:cached
       - ./docker/nginx:/etc/nginx/conf.d
@@ -37,7 +37,7 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
     ports:
-      - "5432:5432"
+      - "15432:5432"
     volumes:
       - vhr-api-db:/var/lib/postgresql/data
 
@@ -46,7 +46,7 @@ services:
     container_name: vhr-api-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "16379:6379"
     volumes:
       - vhr-api-redis:/data
 

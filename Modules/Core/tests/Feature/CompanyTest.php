@@ -3,6 +3,7 @@
 namespace Modules\Core\Tests\Feature;
 
 use Modules\Core\Models\Company;
+use Modules\Core\Models\UserCompany;
 use Tests\DBTestCase;
 
 class CompanyTest extends DBTestCase
@@ -15,7 +16,7 @@ class CompanyTest extends DBTestCase
 
     public function testUsuarioComPermissaoPodeCriarEmpresa(): void
     {
-        $this->autenticarComRole('owner');
+        $user = $this->autenticarComRole('owner');
 
         $payload = [
             'name' => 'Empresa Sucesso LTDA',
@@ -26,6 +27,16 @@ class CompanyTest extends DBTestCase
 
         $response->assertStatus(201);
         $this->assertDatabaseHas('core.companies', ['cnpj' => '12345678000100']);
+
+        $novaEmpresa = Company::query()->where('cnpj', '12345678000100')->firstOrFail();
+
+        $vinculo = UserCompany::query()
+            ->where('userId', $user->id)
+            ->where('companyId', $novaEmpresa->id)
+            ->first();
+
+        $this->assertNotNull($vinculo, 'O criador deveria ficar vinculado à nova empresa.');
+        $this->assertTrue($vinculo->hasRole('owner'));
     }
 
     public function testUsuarioSemPermissaoNaoPodeCriarEmpresa(): void

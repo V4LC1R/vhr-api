@@ -9,6 +9,7 @@ use Modules\Core\Models\Person;
 use Modules\Core\Models\Company;
 use Modules\Core\Models\User;
 use Modules\Core\Data\UserData;
+use Spatie\Permission\Models\Role;
 
 class StoreUserRequest extends FormRequest
 {
@@ -25,6 +26,12 @@ class StoreUserRequest extends FormRequest
                 'nullable',
                 'uuid',
                 Rule::exists(Person::class, 'id')
+            ],
+
+            'role' => [
+                'required',
+                'string',
+                Rule::in(Role::query()->where('guard_name', 'web')->pluck('name')),
             ],
 
             'password' => [
@@ -57,6 +64,9 @@ class StoreUserRequest extends FormRequest
 
             'personId.uuid'     => 'O código da pessoa deve ser um UUID válido.',
             'personId.exists'   => 'A pessoa selecionada não foi encontrada no sistema.',
+
+            'role.required' => 'O papel do usuário é obrigatório.',
+            'role.in'       => 'Selecione um papel válido.',
 
             'email.required' => 'O e-mail é obrigatório.',
             'email.string'   => 'O e-mail deve ser um texto válido.',

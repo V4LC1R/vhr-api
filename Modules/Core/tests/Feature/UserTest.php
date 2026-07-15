@@ -2,8 +2,10 @@
 
 namespace Modules\Core\Tests\Feature;
 
+use Modules\Core\Models\Company;
 use Modules\Core\Models\Person;
 use Modules\Core\Models\User;
+use Modules\Core\Models\UserCompany;
 use Tests\DBTestCase;
 
 class UserTest extends DBTestCase
@@ -37,7 +39,8 @@ class UserTest extends DBTestCase
             ->assertUnprocessable()
             ->assertJsonValidationErrors([
                 'email',
-                'password'
+                'password',
+                'role',
             ]);
     }
 
@@ -55,6 +58,7 @@ class UserTest extends DBTestCase
             'email'     => 'bruce@waynecorp.com',
             'password'  => 'Secret123',
             'personId'  => $person->id,
+            'role'      => 'employee',
         ];
 
         $this->postJson('/api/v1/users', $payload)
@@ -70,6 +74,7 @@ class UserTest extends DBTestCase
             'personId' => $person->id,
             'email'     => 'clark@dailyplanet.com',
             'password'  => 'Super_secure_password1',
+            'role'      => 'humanResource',
         ];
 
         $response = $this->postJson('/api/v1/users', $payload)
@@ -84,6 +89,72 @@ class UserTest extends DBTestCase
             'personId' => $person->id,
             'companyId' => currentCompany()->companyId,
         ]);
+
+        $userCompany = UserCompany::query()
+            ->where('personId', $person->id)
+            ->where('companyId', currentCompany()->companyId)
+            ->first();
+
+        $this->assertTrue($userCompany->hasRole('humanResource'));
+    }
+
+    public function testDeveRetornarErroDeValidacaoQuandoRoleForInvalida()
+    {
+        $this->autenticarComPermissao('core.users.create');
+        $person = Person::factory()->create();
+
+        $payload = [
+            'personId' => $person->id,
+            'email'    => 'diana@themyscira.com',
+            'password' => 'Super_secure_password1',
+            'role'     => 'papel-inexistente',
+        ];
+
+        $this->postJson('/api/v1/users', $payload)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['role']);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | LIST (Listagem de Usuários da Empresa Ativa)
+    |--------------------------------------------------------------------------
+    */
+
+    public function testDeveRetornarForbiddenAoListarUsuariosSemPermissao()
+    {
+        $this->autenticarSemPermissao();
+
+        $this->getJson('/api/v1/users')
+            ->assertForbidden();
+    }
+
+    public function testDeveListarApenasUsuariosDaEmpresaAtiva()
+    {
+        $company = Company::factory()->create();
+        $user = $this->autenticarComPermissao('core.users.view', $company);
+        $companyId = $company->id;
+
+        $outroUser = User::factory()->create();
+        UserCompany::factory()->create([
+            'userId'    => $outroUser->id,
+            'companyId' => $companyId,
+        ]);
+
+        $usuarioDeOutraEmpresa = User::factory()->create();
+        UserCompany::factory()->create([
+            'userId' => $usuarioDeOutraEmpresa->id,
+        ]);
+
+        $response = $this->getJson('/api/v1/users')
+            ->assertOk()
+            ->json();
+
+        $ids = collect($response['data'])->pluck('id');
+
+        $this->assertTrue($ids->contains($user->id));
+        $this->assertTrue($ids->contains($outroUser->id));
+        $this->assertFalse($ids->contains($usuarioDeOutraEmpresa->id));
     }
 
     /*

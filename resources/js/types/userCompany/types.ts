@@ -19,6 +19,7 @@ export interface UserCompanyPerson {
 
 export interface UserCompany {
     id: string;
+    role?: string; // nome da role Spatie do usuário nessa empresa
     company?: UserCompanyCompany; // whenLoaded('company')
     person?: UserCompanyPerson; // whenLoaded('person')
     createdAt: string | null;

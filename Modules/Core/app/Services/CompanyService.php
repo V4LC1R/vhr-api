@@ -5,16 +5,35 @@ namespace Modules\Core\Services;
 use App\Exceptions\UniqueConstraintException;
 use App\Helpers\DatabaseExceptionResolver;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Modules\Core\Data\CompanyData;
 use Modules\Core\Models\Company;
+use Modules\Core\Models\UserCompany;
+use Spatie\Permission\PermissionRegistrar;
 
 class CompanyService
 {
-    public function create(CompanyData $data)
+    /**
+     * Cria a empresa e já vincula quem a criou como owner — sem isso a empresa
+     * nasce inacessível (o seletor de empresas só lista as `userCompanies` do usuário).
+     */
+    public function create(CompanyData $data, string $userId, ?string $personId = null)
     {
         try {
-            return Company::create($data->toArray())
-                ->toResource();
+            return DB::transaction(function () use ($data, $userId, $personId) {
+                $company = Company::create($data->toArray());
+
+                $userCompany = UserCompany::create([
+                    'companyId' => $company->id,
+                    'userId'    => $userId,
+                    'personId'  => $personId,
+                ]);
+
+                app(PermissionRegistrar::class)->setPermissionsTeamId($company->id);
+                $userCompany->syncRoles(['owner']);
+
+                return $company->toResource();
+            });
         } catch (QueryException $e) {
             if (DatabaseExceptionResolver::isUniqueViolation($e)) {
                 throw new UniqueConstraintException(

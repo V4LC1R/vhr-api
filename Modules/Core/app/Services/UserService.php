@@ -9,6 +9,7 @@ use Modules\Core\Data\UserData;
 use Modules\Core\Models\User;
 use Modules\Core\Models\UserCompany;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Spatie\Permission\PermissionRegistrar;
 
 class UserService
 {
@@ -17,7 +18,32 @@ class UserService
     ) {
     }
 
-    public function create(UserData $userData, string $companyId, ?string $personId = null)
+    public function list(string $companyId, array $filters = [], int $perPage = 15)
+    {
+        return User::query()
+            ->whereHas(
+                'userCompanies',
+                fn ($q) => $q->where('companyId', $companyId)
+            )
+            ->with([
+                'userCompanies' => fn ($q) => $q
+                    ->where('companyId', $companyId)
+                    ->with(['company', 'person']),
+            ])
+            ->when(
+                !empty($filters['email']),
+                fn ($q) => $q->where('email', 'ilike', "%{$filters['email']}%")
+            )
+            ->when(
+                !empty($filters['status']),
+                fn ($q) => $q->where('status', $filters['status'])
+            )
+            ->paginate($perPage)
+            ->withQueryString()
+            ->through(fn ($user) => $user->toResource());
+    }
+
+    public function create(UserData $userData, string $companyId, string $role, ?string $personId = null)
     {
         $usuarioExistente = $this->userRepository
             ->findByEmail($userData->email);
@@ -31,6 +57,7 @@ class UserService
         return DB::transaction(function () use (
             $userData,
             $companyId,
+            $role,
             $personId
         ) {
 
@@ -39,11 +66,14 @@ class UserService
                 'password' => $userData->password,
             ]);
 
-            UserCompany::create([
+            $userCompany = UserCompany::create([
                 'userId'    => $user->id,
                 'companyId' => $companyId,
                 'personId'  => $personId,
             ]);
+
+            app(PermissionRegistrar::class)->setPermissionsTeamId($companyId);
+            $userCompany->syncRoles([$role]);
 
             return $user
                 ->load('userCompanies.company', 'userCompanies.person')
@@ -52,7 +82,7 @@ class UserService
     }
 
 
-    public function update(string $id, UserData $userData)
+    public function update(string $id, UserData $userData, ?string $companyId = null, ?string $role = null)
     {
         $data = $userData
             ->except('id')
@@ -65,6 +95,18 @@ class UserService
         if (!$user) {
             throw (new ModelNotFoundException())
                 ->setModel(User::class, [$id]);
+        }
+
+        if ($companyId && $role) {
+            $userCompany = UserCompany::query()
+                ->where('userId', $id)
+                ->where('companyId', $companyId)
+                ->first();
+
+            if ($userCompany) {
+                app(PermissionRegistrar::class)->setPermissionsTeamId($companyId);
+                $userCompany->syncRoles([$role]);
+            }
         }
 
 

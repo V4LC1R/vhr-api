@@ -7,6 +7,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Modules\Core\Data\UserData;
 use Modules\Core\Models\User;
+use Spatie\Permission\Models\Role;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -26,6 +27,11 @@ class UpdateUserRequest extends FormRequest
                     ->mixedCase()
                     ->numbers()
                     ->symbols()
+            ],
+            'role' => [
+                'nullable',
+                'string',
+                Rule::in(Role::query()->where('guard_name', 'web')->pluck('name')),
             ],
             'status' => [
                 'nullable',
@@ -58,6 +64,8 @@ class UpdateUserRequest extends FormRequest
             'password.mixed' => 'A senha deve conter letras maiúsculas e minúsculas.',
             'password.numbers' => 'A senha deve conter pelo menos um número.',
             'password.symbols' => 'A senha deve conter pelo menos um caractere especial (!, @, #, $, etc.).',
+
+            'role.in' => 'Selecione um papel válido.',
         ];
     }
 
