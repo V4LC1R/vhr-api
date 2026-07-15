@@ -35,18 +35,20 @@ class EmployeeService
         $person   = $this->findPerson($data->personId);
         $workload = $this->findWorkload($data->workloadId);
 
-        $this->ensureWorkloadBelongsToCompany($workload, $company->id);
-        $this->ensureNoActiveEmployment($company->id, $person->id);
+        $kind = $data->kind instanceof Optional
+            ? EmploymentTypeEnum::CLT->value
+            : $data->kind;
 
-        return DB::transaction(function () use ($data, $company, $person) {
+        $this->ensureWorkloadBelongsToCompany($workload, $company->id);
+        $this->ensureNoActiveEmployment($company->id, $person->id, $kind);
+
+        return DB::transaction(function () use ($data, $company, $person, $kind) {
             $employee = $this->resolveOrCreateEmployee($company->id, $person->id);
 
             $this->employmentRepository->create([
                 'employeeId'  => $employee->id,
                 'workloadId'  => $data->workloadId,
-                'kind'        => $data->kind instanceof Optional
-                    ? EmploymentTypeEnum::CLT->value
-                    : $data->kind,
+                'kind'        => $kind,
                 'status'      => ! ($data->isProbationary instanceof Optional) && $data->isProbationary
                     ? EmploymentStatusEnum::EXPERIENCE->value
                     : EmploymentStatusEnum::HIRED->value,
@@ -202,8 +204,17 @@ class EmployeeService
         }
     }
 
-    private function ensureNoActiveEmployment(string $companyId, string $personId): void
+    /**
+     * Só bloqueia CLT duplicado (a pessoa já é CLT ativo e o novo vínculo também
+     * seria CLT). Diarista/temporário/freelancer podem ser adicionados mesmo com
+     * um CLT ativo — são vínculos concorrentes, não substituem o CLT.
+     */
+    private function ensureNoActiveEmployment(string $companyId, string $personId, string $kind): void
     {
+        if ($kind !== EmploymentTypeEnum::CLT->value) {
+            return;
+        }
+
         $hasActiveClt = $this->employeeRepository
             ->getModel()
             ->newQuery()

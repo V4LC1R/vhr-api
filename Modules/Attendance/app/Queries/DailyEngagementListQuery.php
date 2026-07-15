@@ -2,6 +2,7 @@
 
 namespace Modules\Attendance\Queries;
 
+use Modules\Attendance\Filters\DateRangeFilter;
 use Modules\Attendance\Filters\EmployeeNameFilter;
 use Modules\Attendance\Filters\EmploymentKindFilter;
 use Modules\Attendance\Filters\MonthFilter;
@@ -21,6 +22,7 @@ class DailyEngagementListQuery
                 AllowedFilter::exact('status'),
                 AllowedFilter::exact('type'),
                 AllowedFilter::custom('month', new MonthFilter()),
+                AllowedFilter::custom('dateRange', new DateRangeFilter()),
                 AllowedFilter::custom('employeeName', new EmployeeNameFilter()),
                 AllowedFilter::custom('employmentKind', new EmploymentKindFilter()),
                 AllowedFilter::exact('date'),

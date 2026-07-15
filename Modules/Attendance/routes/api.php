@@ -2,11 +2,19 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Attendance\Http\Controllers\DailyEngagementController;
+use Modules\Attendance\Http\Controllers\ReportController;
 use Modules\Attendance\Http\Controllers\TimeEntryController;
 
 Route::middleware(['auth:sanctum', 'current.company'])
     ->prefix('v1')
     ->group(function () {
+
+        Route::get('reports/hours-summary', [ReportController::class, 'hoursSummary']);
+        Route::get('reports/hours-summary/export', [ReportController::class, 'exportHoursSummary']);
+        Route::get('reports/absences', [ReportController::class, 'absences']);
+        Route::get('reports/absences/export', [ReportController::class, 'exportAbsences']);
+        Route::get('reports/dayli-workers', [ReportController::class, 'dayliWorkers']);
+        Route::get('reports/dayli-workers/export', [ReportController::class, 'exportDayliWorkers']);
 
         Route::post(
             'time-entries/batch',

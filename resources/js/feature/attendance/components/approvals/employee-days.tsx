@@ -24,7 +24,7 @@ interface EmployeeDaysProps {
     onReject: (day: DailyEngagement) => void
 }
 
-function DayPairs({ day }: { day: DailyEngagement }) {
+export function DayPairs({ day }: { day: DailyEngagement }) {
     const { pairs } = buildPunchPairs(day.timeEntries ?? [])
 
     if (pairs.length === 0) {

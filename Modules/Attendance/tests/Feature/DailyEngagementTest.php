@@ -496,4 +496,53 @@ class DailyEngagementTest extends DBTestCase
             ->assertOk()
             ->assertJsonCount(1, 'data');
     }
+
+    public function testFiltroDeIntervaloDeDatasTrazDiaComMarcacoes(): void
+    {
+        $company = Company::factory()->create();
+        $this->autenticarComRole('owner', $company);
+
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
+
+        $day = DailyEngagement::factory()->create([
+            'companyId'  => $company->id,
+            'employeeId' => $employee->id,
+            'date'       => '2026-07-10',
+        ]);
+
+        \Modules\Attendance\Models\TimeEntry::factory()->create([
+            'companyId'         => $company->id,
+            'dailyEngagementId' => $day->id,
+            'punchedAt'         => '2026-07-10 11:00:00',
+            'type'              => 'entry',
+        ]);
+
+        \Modules\Attendance\Models\TimeEntry::factory()->create([
+            'companyId'         => $company->id,
+            'dailyEngagementId' => $day->id,
+            'punchedAt'         => '2026-07-10 20:00:00',
+            'type'              => 'exit',
+        ]);
+
+        $foraDoIntervalo = DailyEngagement::factory()->create([
+            'companyId'  => $company->id,
+            'employeeId' => $employee->id,
+            'date'       => '2026-08-05',
+        ]);
+
+        $response = $this->getJson(
+            '/api/v1/daily-engagements?filter[employeeId]=' . $employee->id
+                . '&filter[dateRange]=2026-07-01,2026-07-31'
+                . '&per_page=100'
+        )
+            ->assertOk()
+            ->json('data');
+
+        $ids = collect($response)->pluck('id');
+        $this->assertTrue($ids->contains($day->id));
+        $this->assertFalse($ids->contains($foraDoIntervalo->id));
+
+        $linha = collect($response)->firstWhere('id', $day->id);
+        $this->assertCount(2, $linha['timeEntries']);
+    }
 }

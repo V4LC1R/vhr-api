@@ -18,6 +18,7 @@ class DailyEngagementResource extends JsonResource
             'type'            => $this->type,
             'status'          => $this->status,
             'workedMinutes'   => $this->workedMinutes,
+            'workedHoursDecimal' => round($this->workedMinutes / 60, 2),
             'expectedMinutes' => $this->expectedMinutes,
             'balanceMinutes'  => $this->balanceMinutes,
             'diariaValue'     => $this->diariaValue,

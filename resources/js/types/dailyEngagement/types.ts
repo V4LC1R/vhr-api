@@ -26,6 +26,7 @@ export interface DailyEngagement {
     type: DailyEngagementType;
     status: DailyEngagementStatus;
     workedMinutes: number;
+    workedHoursDecimal: number; // workedMinutes/60, arredondado (ex.: 90 -> 1.5)
     expectedMinutes: number;
     balanceMinutes: number;
     diariaValue: number | null; // cast 'double' no back

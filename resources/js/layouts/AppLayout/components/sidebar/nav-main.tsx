@@ -24,18 +24,26 @@ import { navItems, type NavItem } from '../../config/nav';
 import { useAuth } from '@/hooks/use-auth';
 
 /**
- * Filtra a navegação pelas permissões da empresa ativa.
+ * Filtra a navegação pelas permissões/papéis da empresa ativa.
  *
- * - Item de folha: aparece se não tiver `permission` ou se o usuário a possuir.
+ * - Item de folha: aparece se não tiver `permission`/`role`, ou se o usuário atender
+ *   ambos os que estiverem definidos.
  * - Grupo (com `children`): filtra os filhos e só aparece se sobrar ao menos um;
- *   a `permission` do próprio grupo é ignorada aqui (a visibilidade vem dos filhos).
+ *   a `permission`/`role` do próprio grupo é ignorada aqui (a visibilidade vem dos filhos).
  */
-function filterNav(items: NavItem[], can: (permission: string) => boolean): NavItem[] {
+function filterNav(
+    items: NavItem[],
+    can: (permission: string) => boolean,
+    hasRole: (role: string) => boolean
+): NavItem[] {
+    const isVisible = (item: NavItem) =>
+        (!item.permission || can(item.permission)) && (!item.role || hasRole(item.role));
+
     return items.reduce<NavItem[]>((acc, item) => {
         if (item.children?.length) {
-            const children = item.children.filter((child) => !child.permission || can(child.permission));
+            const children = item.children.filter(isVisible);
             if (children.length) acc.push({ ...item, children });
-        } else if (!item.permission || can(item.permission)) {
+        } else if (isVisible(item)) {
             acc.push(item);
         }
         return acc;
@@ -46,8 +54,8 @@ export function NavMain() {
     const url = usePage().url.split('?')[0];
     const isActive = (path: string) =>
         url === path || (path !== '/dashboard' && url.startsWith(`${path}/`));
-    const { can } = useAuth();
-    const items = filterNav(navItems, can);
+    const { can, hasRole } = useAuth();
+    const items = filterNav(navItems, can, hasRole);
     return (
         <SidebarGroup>
             <SidebarMenu className="gap-1">

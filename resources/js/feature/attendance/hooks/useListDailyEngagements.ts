@@ -14,6 +14,7 @@ export type DailyEngagementFilters = {
     type?: DailyEngagementType;
     month?: string; // YYYY-MM
     date?: string; // YYYY-MM-DD
+    dateRange?: string; // "YYYY-MM-DD,YYYY-MM-DD"
 };
 
 type Params = PaginateParams<DailyEngagementFilters>;

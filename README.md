@@ -221,6 +221,9 @@ daily-engagements    index/show + submit · approve · reject · exception
 - Fluxo de aprovação: draft → pending → approved/rejected
 - Exceções: faltas, folgas, feriados, atestados
 - Consolidação mensal por funcionário
+- Relatórios (owner/contador): resumo geral de horas, faltas/horas negativas por
+  funcionário e diaristas/temporários (com fator de hora decimal) — sempre sobre dias
+  aprovados, com exportação em CSV, XLSX e PDF
 
 ### 🔄 Front-end (em andamento)
 - Inertia + React sobre os módulos Core, Job e Attendance
@@ -229,6 +232,8 @@ daily-engagements    index/show + submit · approve · reject · exception
 - Lançamento de ponto: grade mensal por colaborador (busca por nome) com edição inline (sem modais), tipo do dia direto na grade, "dia completo" pela jornada, exceções folga/feriado/atestado/falta (observação opcional) e envio p/ aprovação
 - Lançamento de temporários (diarista/freelancer/temporário) na mesma tela, em aba própria (CLTs × Temporários, como em Aprovações): presença com 1 clique, coluna/total de diárias pra vínculo dayli (regra provisória — ver DiariaRule) e contratação rápida em tela (CPF busca quem já passou pela empresa ou cadastra pessoa nova)
 - Aprovações: fila agrupada por colaborador com pares entrada→saída, alerta de sequência inconsistente, aprovar/rejeitar por dia ou em lote (dias marcados), histórico de aprovados/rejeitados com motivo e busca por nome
+- Cadastros: empresas (dono vira owner automaticamente ao criar) e usuários (papel/role definido no cadastro, vínculo opcional com pessoa)
+- Relatórios: geral, faltas/horas negativas e diaristas/temporários — filtro por intervalo de datas, linha expansível com os dias do período e exportação (CSV/XLSX/PDF)
 
 ### 🔮 Futuro
 - **Módulo Contract** — admissões, demissões, período de experiência, estágios, terceiros

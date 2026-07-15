@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Modules\Attendance\Models\DailyEngagement;
 use Modules\Attendance\Models\TimeEntry;
+use Modules\Attendance\Support\AttendanceCalculator;
 use Modules\Core\Database\Seeders\RolesAndPermissionsSeeder;
 use Modules\Core\Models\Company;
 use Modules\Core\Models\Person;
@@ -142,27 +143,32 @@ class DevCompanySeeder extends Seeder
                 'registerNumber' => $registerNumber++,
             ]);
 
+            $workload = $jornadas->first();
+
             Employment::create([
                 'employeeId'  => $employee->id,
-                'workloadId'  => $jornadas->first()->id,
+                'workloadId'  => $workload->id,
                 'kind'        => $f['kind']->value,
                 'status'      => EmploymentStatusEnum::HIRED->value,
                 'registerAt' => now()->utc(),
             ]);
 
-            // Ponto apenas para os 3 primeiros, o bastante para popular relatórios.
-            if ($i < 3) {
-                $this->criarPonto($company, $employee, $ownerUc);
-            }
+            // Ponto pra todo mundo — dá massa real pros 3 relatórios (geral,
+            // faltas/horas negativas e diaristas/temporários).
+            $this->criarPonto($company, $employee, $workload, $ownerUc);
         }
     }
 
     /**
-     * 5 dias úteis recentes com entrada/saída e status variados
-     * (aprovado, pendente e um rascunho do owner).
+     * 5 dias úteis recentes com entrada/saída e status variados (aprovado,
+     * pendente e um rascunho do owner) — sempre recalculados pelo
+     * `AttendanceCalculator`, igual ao fluxo real de lançar ponto pela tela.
+     * Sem isso o dia fica com workloadId nulo e worked/expected/balance zerados.
      */
-    private function criarPonto(Company $company, Employee $employee, ?UserCompany $ownerUc): void
+    private function criarPonto(Company $company, Employee $employee, Workload $workload, ?UserCompany $ownerUc): void
     {
+        $calculator = app(AttendanceCalculator::class);
+
         for ($d = 1; $d <= 5; $d++) {
             $date = now()->subDays($d);
 
@@ -179,6 +185,7 @@ class DevCompanySeeder extends Seeder
             $day = DailyEngagement::factory()->create([
                 'companyId'  => $company->id,
                 'employeeId' => $employee->id,
+                'workloadId' => $workload->id,
                 'date'       => $date->toDateString(),
                 'status'     => $status,
                 'draftedBy'  => $draftedBy,
@@ -198,6 +205,8 @@ class DevCompanySeeder extends Seeder
                 'punchedAt'        => $date->copy()->setTime(20, 0)->utc(),
                 'type'              => 'exit',
             ]);
+
+            $calculator->recalculate($day);
         }
     }
 }
