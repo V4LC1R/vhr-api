@@ -246,6 +246,80 @@ class TimeEntryTest extends DBTestCase
     }
 
     // ==========================================
+    // CONFLITO DE HORÁRIO (CLT + diarista concorrentes no mesmo funcionário)
+    // ==========================================
+
+    public function testNaoPermiteDuasMarcacoesNoMesmoHorario(): void
+    {
+        $company = Company::factory()->create();
+        $this->autenticarComPermissao('attendance.timeEntries.create', company: $company);
+
+        $employee = $this->funcionarioComJornada($company);
+
+        $this->postJson('/api/v1/time-entries', [
+            'employeeId' => $employee->id,
+            'punchedAt' => '2026-06-25 08:00:00',
+            'type'       => 'entry',
+        ])->assertCreated();
+
+        $this->postJson('/api/v1/time-entries', [
+            'employeeId' => $employee->id,
+            'punchedAt' => '2026-06-25 08:00:00',
+            'type'       => 'entry',
+        ])->assertConflict();
+
+        $this->assertDatabaseCount('attendance.time_entries', 1);
+    }
+
+    public function testLoteRejeitaDuasMarcacoesNoMesmoHorario(): void
+    {
+        $company = Company::factory()->create();
+        $this->autenticarComPermissao('attendance.timeEntries.create', company: $company);
+
+        $employee = $this->funcionarioComJornada($company);
+
+        $this->postJson('/api/v1/time-entries/batch', [
+            'employeeId' => $employee->id,
+            'entries'    => [
+                ['punchedAt' => '2026-06-25T08:00:00-03:00', 'type' => 'entry'],
+                ['punchedAt' => '2026-06-25T08:00:00-03:00', 'type' => 'entry'],
+            ],
+        ])->assertConflict();
+
+        $this->assertDatabaseCount('attendance.time_entries', 0);
+    }
+
+    public function testAtualizarMarcacaoParaHorarioJaOcupadoEhRejeitado(): void
+    {
+        $company = Company::factory()->create();
+        $this->autenticarComRole('owner', company: $company);
+
+        $employee = $this->funcionarioComJornada($company);
+        $day = DailyEngagement::factory()->create([
+            'companyId'  => $company->id,
+            'employeeId' => $employee->id,
+        ]);
+
+        TimeEntry::factory()->create([
+            'companyId'         => $company->id,
+            'dailyEngagementId' => $day->id,
+            'punchedAt'        => '2026-06-25 08:00:00',
+            'type'              => 'entry',
+        ]);
+
+        $entry2 = TimeEntry::factory()->create([
+            'companyId'         => $company->id,
+            'dailyEngagementId' => $day->id,
+            'punchedAt'        => '2026-06-25 18:00:00',
+            'type'              => 'exit',
+        ]);
+
+        $this->putJson("/api/v1/time-entries/{$entry2->id}", [
+            'punchedAt' => '2026-06-25 08:00:00',
+        ])->assertConflict();
+    }
+
+    // ==========================================
     // DIÁRIA (implementação parcial)
     // ==========================================
 

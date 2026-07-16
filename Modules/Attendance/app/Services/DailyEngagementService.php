@@ -80,6 +80,10 @@ class DailyEngagementService
                 'approvedAt' => null,
             ])->save();
 
+            if (! $day->type->usesPunches()) {
+                $day->timeEntries()->delete();
+            }
+
             $this->calculator->recalculate($day);
 
             return $day->fresh(['timeEntries'])->toResource();

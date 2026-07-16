@@ -106,6 +106,40 @@ class DailyEngagementTest extends DBTestCase
         ]);
     }
 
+    public function testTrocarTipoParaExcecaoRemoveMarcacoesExistentes(): void
+    {
+        $company = Company::factory()->create();
+        $this->autenticarComRole('humanResource', company: $company);
+
+        $day = $this->diaParaNovoFuncionario($company);
+
+        \Modules\Attendance\Models\TimeEntry::factory()->create([
+            'companyId'         => $company->id,
+            'dailyEngagementId' => $day->id,
+            'punchedAt'        => '2026-06-25 08:00:00',
+            'type'              => 'entry',
+        ]);
+        \Modules\Attendance\Models\TimeEntry::factory()->create([
+            'companyId'         => $company->id,
+            'dailyEngagementId' => $day->id,
+            'punchedAt'        => '2026-06-25 18:00:00',
+            'type'              => 'exit',
+        ]);
+
+        $this->assertDatabaseCount('attendance.time_entries', 2);
+
+        // Falta não usa marcações — as duas entradas/saídas de trabalho somem.
+        $this->patchJson("/api/v1/daily-engagements/{$day->id}/exception", [
+            'type' => 'absence',
+        ])->assertOk();
+
+        $this->assertDatabaseHas('attendance.daily_engagements', [
+            'id'   => $day->id,
+            'type' => 'absence',
+        ]);
+        $this->assertDatabaseCount('attendance.time_entries', 0);
+    }
+
     public function testExcecaoSemObservacaoEhAceitaEPreservaNote(): void
     {
         $company = Company::factory()->create();

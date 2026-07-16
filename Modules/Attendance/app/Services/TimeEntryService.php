@@ -5,6 +5,7 @@ namespace Modules\Attendance\Services;
 use DB;
 use App\Contracts\DailyEngagementRepositoryInterface;
 use App\Contracts\TimeEntryRepositoryInterface;
+use App\Exceptions\DomainException;
 use Illuminate\Support\Carbon;
 use Modules\Attendance\Data\TimeEntryData;
 use Modules\Attendance\Enums\DailyEngagementStatusEnum;
@@ -31,6 +32,8 @@ class TimeEntryService
         $employee  = $this->dayResolver->findEmployee($data->employeeId, $company->companyId);
         $punchedAt = $this->normalizePunchedAt($data->punchedAt);
         $date      = substr($punchedAt, 0, 10);
+
+        $this->ensureNoConflictingPunch($employee->id, $punchedAt);
 
         return DB::transaction(function () use ($data, $company, $employee, $date, $punchedAt) {
             $day = $this->dayResolver->resolve($company->companyId, $employee, $date);
@@ -65,6 +68,7 @@ class TimeEntryService
         return DB::transaction(function () use ($entries, $company, $employee, $replace) {
             /** @var array<string, DailyEngagement> $days */
             $days = [];
+            $seenPunchedAt = [];
 
             foreach ($entries as $entry) {
                 $punchedAt = $this->normalizePunchedAt($entry['punchedAt']);
@@ -81,6 +85,18 @@ class TimeEntryService
                         $days[$date]->timeEntries()->delete();
                     }
                 }
+
+                // Sem `replace`, as marcações existentes do dia continuam de pé —
+                // precisa checar contra o banco. Dentro do próprio lote (com ou
+                // sem replace) duas entradas no mesmo horário também são inválidas.
+                if (! $replace) {
+                    $this->ensureNoConflictingPunch($employee->id, $punchedAt);
+                }
+
+                if (isset($seenPunchedAt[$punchedAt])) {
+                    throw new DomainException('O lote tem duas marcações no mesmo horário.');
+                }
+                $seenPunchedAt[$punchedAt] = true;
 
                 $day = $days[$date];
 
@@ -112,7 +128,15 @@ class TimeEntryService
             $payload = [];
 
             if (! ($data->punchedAt instanceof Optional)) {
-                $payload['punchedAt'] = $this->normalizePunchedAt($data->punchedAt);
+                $punchedAt = $this->normalizePunchedAt($data->punchedAt);
+
+                $this->ensureNoConflictingPunch(
+                    $timeEntry->dailyEngagement->employeeId,
+                    $punchedAt,
+                    $timeEntry->id
+                );
+
+                $payload['punchedAt'] = $punchedAt;
             }
 
             if (! ($data->type instanceof Optional)) {
@@ -174,6 +198,27 @@ class TimeEntryService
             'approvedBy' => null,
             'approvedAt' => null,
         ])->save();
+    }
+
+    /**
+     * Com CLT + diarista podendo coexistir no mesmo funcionário, o dia (por
+     * funcionário+data) pode acabar recebendo marcações dos dois contextos —
+     * bloqueia duas marcações no mesmo horário exato pro mesmo funcionário.
+     */
+    private function ensureNoConflictingPunch(
+        string $employeeId,
+        string $punchedAt,
+        ?string $ignoreTimeEntryId = null
+    ): void {
+        $exists = TimeEntry::query()
+            ->whereHas('dailyEngagement', fn ($q) => $q->where('employeeId', $employeeId))
+            ->where('punchedAt', $punchedAt)
+            ->when($ignoreTimeEntryId, fn ($q) => $q->where('id', '!=', $ignoreTimeEntryId))
+            ->exists();
+
+        if ($exists) {
+            throw new DomainException('Já existe uma marcação para este funcionário nesse horário.');
+        }
     }
 
     private function resolveCompany()

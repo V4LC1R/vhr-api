@@ -228,6 +228,42 @@ class EmployeeTest extends DBTestCase
         ])->assertCreated();
     }
 
+    public function testPermiteContratarComoDiaristaMesmoComCltAtivo(): void
+    {
+        $company  = Company::factory()->create();
+        $workload = Workload::factory()->create(['companyId' => $company->id]);
+
+        $this->autenticarComPermissao(
+            'job.employees.create',
+            company: $company,
+        );
+
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
+
+        Employment::factory()->create([
+            'employeeId' => $employee->id,
+            'workloadId' => $workload->id,
+            'kind'       => EmploymentTypeEnum::CLT->value,
+        ]);
+
+        $workload2 = Workload::factory()->create(['companyId' => $company->id]);
+
+        // CLT ativo não deve impedir um vínculo dayli/temporary/freelancer concorrente
+        // — só bloqueia CLT duplicado (ver testNaoPermiteVinculoAtivoDuplicado).
+        $this->postJson('/api/v1/employees', [
+            'companyId'      => $employee->companyId,
+            'personId'       => $employee->personId,
+            'workloadId'     => $workload2->id,
+            'kind'           => EmploymentTypeEnum::DAYLI->value,
+            'isProbationary' => false,
+        ])->assertCreated();
+
+        $this->assertDatabaseHas('job.employments', [
+            'employeeId' => $employee->id,
+            'kind'       => EmploymentTypeEnum::DAYLI->value,
+        ]);
+    }
+
     public function testPermiteRecontratacao(): void
     {
         $company  = Company::factory()->create();
