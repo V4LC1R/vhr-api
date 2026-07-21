@@ -13,39 +13,141 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+/* ============================================================
+   VHR — Valcir Human Resource · paleta aplicada
+   Esmeralda #0C2A24 · Ouro #CBB06B · Areia #FAF9F5 · Creme #F4F1EA
+   ============================================================ */
+
+@layer base {
+    :root {
+        --radius: 0.625rem;
+
+        /* superfícies */
+        --background: #FAF9F5;
+        --card: #FFFFFF;
+        --popover: #FFFFFF;
+        --muted: #F4F1EA;
+        --sidebar: #F4F1EA;
+
+        /* texto */
+        --foreground: #14201C;
+        --card-foreground: #14201C;
+        --popover-foreground: #14201C;
+        --muted-foreground: #5D635B;
+        --foreground-strong: #0C2A24;
+
+        /* marca */
+        --primary: #0C2A24;
+        --primary-foreground: #F4F1EA;
+        --accent: #CBB06B;
+        --accent-foreground: #0C2A24;
+        --ring: #CBB06B;
+
+        /* neutra (Button/Badge variant="secondary") */
+        --secondary: #F4F1EA;
+        --secondary-foreground: #14201C;
+
+        /* linhas */
+        --border: #E7E2D5;
+        --input: #D9D3C5;
+
+        /* semânticas */
+        --success: #1F6E4E;
+        --success-bg: #E4F0E9;
+        --warning: #8A6D1F;
+        --warning-bg: #FBF1D6;
+        --info: #3B6A88;
+        --info-bg: #E8EFF4;
+        --contract: #6E4A7A; /* vínculo freelancer */
+        --contract-bg: #F1EAF4;
+        --destructive: #C23B32;
+        --destructive-bg: #FBEBE9;
+        --destructive-foreground: #FFFFFF;
+
+        /* charts — reaproveitam a paleta, sem cor nova */
+        --chart-1: var(--primary);
+        --chart-2: var(--accent);
+        --chart-3: var(--success);
+        --chart-4: var(--info);
+        --chart-5: var(--contract);
+
+        /* sidebar */
+        --sidebar-foreground: var(--foreground);
+        --sidebar-primary: var(--primary);
+        --sidebar-primary-foreground: var(--primary-foreground);
+        --sidebar-accent: var(--muted);
+        --sidebar-accent-foreground: var(--foreground);
+        --sidebar-border: var(--border);
+        --sidebar-ring: var(--ring);
+    }
+
+    .dark {
+        /* inversão: ouro vira primária, fundo quase-preto esmeralda */
+        --background: #08130F;
+        --card: #12241E;
+        --popover: #12241E;
+        --muted: #16281F;
+        --sidebar: #16281F;
+
+        --foreground: #E7EAE3;
+        --card-foreground: #E7EAE3;
+        --popover-foreground: #E7EAE3;
+        --muted-foreground: #A6ADA4;
+        --foreground-strong: #F4F1EA;
+
+        --primary: #CBB06B;
+        --primary-foreground: #08130F;
+        --accent: #CBB06B;
+        --accent-foreground: #08130F;
+        --ring: #CBB06B;
+
+        --secondary: #16281F;
+        --secondary-foreground: #E7EAE3;
+
+        --border: #27372F;
+        --input: #33453B;
+
+        --success: #7FC9A3;
+        --success-bg: #12291F;
+        --warning: #D9B75A;
+        --warning-bg: #2A2413;
+        --info: #8FBBD6;
+        --info-bg: #14252E;
+        --contract: #C3A2D0;
+        --contract-bg: #241A2A;
+        --destructive: #EA918B;
+        --destructive-bg: #2E1817;
+        --destructive-foreground: #08130F;
+
+        --chart-1: var(--primary);
+        --chart-2: var(--accent);
+        --chart-3: var(--success);
+        --chart-4: var(--info);
+        --chart-5: var(--contract);
+
+        --sidebar-foreground: var(--foreground);
+        --sidebar-primary: var(--primary);
+        --sidebar-primary-foreground: var(--primary-foreground);
+        --sidebar-accent: var(--muted);
+        --sidebar-accent-foreground: var(--foreground);
+        --sidebar-border: var(--border);
+        --sidebar-ring: var(--ring);
+    }
+
+    * {
+        @apply border-border outline-ring/50;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
+    html {
+        @apply font-sans;
+    }
+}
+
 @theme inline {
     --font-heading: var(--font-sans);
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-accent: var(--accent);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-secondary: var(--secondary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-primary: var(--primary);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
-    --color-card: var(--card);
-    --color-foreground: var(--foreground);
-    --color-background: var(--background);
+
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
     --radius-lg: var(--radius);
@@ -53,124 +155,56 @@
     --radius-2xl: calc(var(--radius) * 1.8);
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
-}
 
-/* ============================================================
-   VHR — Valcir Human Resource · paleta aplicada
-   Esmeralda #0C2A24 · Ouro #CBB06B · Creme #F4F1EA
-   ============================================================ */
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-foreground-strong: var(--foreground-strong);
 
-:root {
-    --background: hsl(40 33% 98%);          /* #FAF9F5  areia clara */
-    --foreground: hsl(168 40% 12%);         /* #12281F  texto esmeralda */
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
 
-    --card: hsl(0 0% 100%);
-    --card-foreground: hsl(168 40% 12%);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
 
-    --popover: hsl(0 0% 100%);
-    --popover-foreground: hsl(168 40% 12%);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
 
-    --primary: hsl(168 56% 11%);            /* #0C2A24  esmeralda (marca) */
-    --primary-foreground: hsl(42 33% 96%);  /* #F4F1EA  creme */
+    --color-success: var(--success);
+    --color-success-bg: var(--success-bg);
+    --color-warning: var(--warning);
+    --color-warning-bg: var(--warning-bg);
+    --color-info: var(--info);
+    --color-info-bg: var(--info-bg);
+    --color-contract: var(--contract);
+    --color-contract-bg: var(--contract-bg);
+    --color-destructive: var(--destructive);
+    --color-destructive-bg: var(--destructive-bg);
+    --color-destructive-foreground: var(--destructive-foreground);
 
-    --secondary: hsl(42 28% 92%);           /* areia média */
-    --secondary-foreground: hsl(168 40% 14%);
+    /* compat: telas antigas ainda usam bg-negative/text-negative */
+    --color-negative: var(--destructive);
 
-    --muted: hsl(40 20% 94%);
-    --muted-foreground: hsl(168 8% 42%);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
 
-    --accent: hsl(43 48% 55%);              /* #CBB06B  ouro */
-    --accent-foreground: hsl(168 56% 11%);
-
-    --destructive: hsl(0 72% 45%);
-    --destructive-foreground: hsl(0 0% 98%);
-
-    --border: hsl(40 16% 88%);
-    --input: hsl(40 16% 88%);
-    --ring: hsl(43 48% 52%);                /* foco em ouro */
-
-    --chart-1: hsl(168 56% 11%);
-    --chart-2: hsl(43 48% 55%);
-    --chart-3: hsl(168 40% 30%);
-    --chart-4: hsl(43 40% 70%);
-    --chart-5: hsl(168 20% 55%);
-
-    --radius: 0.625rem;
-
-    --sidebar: hsl(42 62% 96%);                       /* creme claro */
-    --sidebar-foreground: hsl(168 40% 12%);           /* esmeralda — igual --foreground */
-    --sidebar-primary: hsl(43 48% 55%);               /* ouro — item ativo */
-    --sidebar-primary-foreground: hsl(168 56% 11%);   /* esmeralda sobre ouro */
-    --sidebar-accent: hsl(42 28% 92%);                /* areia — hover suave */
-    --sidebar-accent-foreground: hsl(168 40% 14%);    /* esmeralda no hover */
-    --sidebar-border: hsl(40 16% 88%);                /* borda clara — igual --border */
-    --sidebar-ring: hsl(43 48% 52%);                  /* foco em ouro */
-
-    /* Marca (uso livre) */
-    --brand-emerald: hsl(168 56% 11%);
-    --brand-gold: hsl(43 48% 55%);
-    --brand-gold-deep: hsl(43 48% 48%);     /* ouro p/ texto sobre claro */
-    --brand-cream: hsl(42 33% 96%);
-}
-
-.dark {
-    --background: hsl(165 26% 6%);          /* #08130F  quase-preto esmeralda */
-    --foreground: hsl(42 33% 92%);          /* #F1ECDD  creme */
-
-    --card: hsl(168 22% 9%);                /* #111F1A */
-    --card-foreground: hsl(42 33% 92%);
-
-    --popover: hsl(168 22% 9%);
-    --popover-foreground: hsl(42 33% 92%);
-
-    --primary: hsl(41, 27%, 70%);             /* ouro vira primário no dark */
-    --primary-foreground: hsl(168 56% 8%);
-
-    --secondary: hsl(168 18% 14%);
-    --secondary-foreground: hsl(42 33% 92%);
-
-    --muted: hsl(168 15% 14%);
-    --muted-foreground: hsl(42 12% 66%);
-
-    --accent: hsl(43 52% 60%);              /* ouro */
-    --accent-foreground: hsl(168 56% 8%);
-
-    --destructive: hsl(0 62% 46%);
-    --destructive-foreground: hsl(0 0% 98%);
-
-    --border: hsl(168 15% 16%);
-    --input: hsl(168 15% 18%);
-    --ring: hsl(43 52% 58%);
-
-    --chart-1: hsl(43 52% 60%);
-    --chart-2: hsl(168 40% 30%);
-    --chart-3: hsl(43 40% 45%);
-    --chart-4: hsl(168 20% 45%);
-    --chart-5: hsl(42 12% 66%);
-
-    --sidebar: hsl(165 26% 6%);
-    --sidebar-foreground: hsl(42 33% 92%);
-    --sidebar-primary: hsl(43 52% 60%);
-    --sidebar-primary-foreground: hsl(168 56% 8%);
-    --sidebar-accent: hsl(168 18% 14%);
-    --sidebar-accent-foreground: hsl(42 33% 92%);
-    --sidebar-border: hsl(168 15% 16%);
-    --sidebar-ring: hsl(43 52% 58%);
-
-    --brand-emerald: hsl(168 40% 20%);
-    --brand-gold: hsl(43 52% 60%);
-    --brand-gold-deep: hsl(43 52% 52%);
-    --brand-cream: hsl(42 33% 92%);
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-    }
-  body {
-    @apply bg-background text-foreground;
-    }
-  html {
-    @apply font-sans;
-    }
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
 }

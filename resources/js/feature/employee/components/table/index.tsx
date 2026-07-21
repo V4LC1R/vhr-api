@@ -26,6 +26,7 @@ export function EmployeeTable({ data, currentPage, lastPage, total, isLoading, n
             data={data}
             columns={columns}
             isLoading={isLoading}
+            rowClassName={(row) => row.getIsExpanded() ? "has-aria-expanded:bg-amber-50 dark:has-aria-expanded:bg-[#2A2413]" : undefined}
             renderExpandedRow={(row) => <EmployeeDetail employee={row.original} />}
             footer={
                 <TablePagination

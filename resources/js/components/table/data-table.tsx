@@ -64,13 +64,13 @@ export function DataTable<TData>({
     })
 
     return (
-        <div className="relative flex min-h-0 flex-1 flex-col rounded-md border">
+        <div className="relative flex min-h-0 flex-1 flex-col rounded-md border-border border overflow-hidden">
             {isLoading && (
                 <div className="absolute inset-0 z-20 flex items-center justify-center rounded-md bg-background/60">
                     <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
                 </div>
             )}
-            <Table containerClassName="min-h-0 flex-1 overflow-y-auto">
+            <Table containerClassName="min-h-0 flex-1 bg-white dark:bg-background overflow-y-auto">
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>
@@ -83,7 +83,7 @@ export function DataTable<TData>({
                                             ? undefined
                                             : { width: header.getSize() }
                                     }
-                                    className="sticky top-0 z-10 bg-background"
+                                    className="sticky top-0 z-10 bg-border/50"
                                 >
                                     {header.isPlaceholder
                                         ? null
@@ -103,7 +103,7 @@ export function DataTable<TData>({
                                     className={rowClassName?.(row)}
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell className="px-5 py-3" key={cell.id}>
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
@@ -159,7 +159,7 @@ export function DataTable<TData>({
 function expanderColumn<TData>(): ColumnDef<TData, any> {
     return {
         id: "expander",
-        size: 32,
+        size: 12,
         header: () => null,
         cell: ({ row }) =>
             row.getCanExpand() ? (

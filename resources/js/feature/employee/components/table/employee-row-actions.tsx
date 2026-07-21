@@ -1,19 +1,15 @@
 import * as React from "react"
 import { Link } from "@inertiajs/react"
-import { EllipsisIcon, EyeIcon, SquarePenIcon, UserXIcon } from "lucide-react"
+import { UserXIcon } from "lucide-react"
 import toast from "react-hot-toast"
 
 import { extractErrorMessage } from "@/lib/http"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { Button } from "@/components/ui/button"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+
 import { useDismissEmployee } from "../../hooks/useDismissEmployee"
 import { Employee } from "../../types/types"
+import { Icon } from "@iconify/react"
 
 interface EmployeeRowActionsProps {
     employee: Employee
@@ -24,9 +20,7 @@ export function EmployeeRowActions({ employee, onDismissed }: EmployeeRowActions
     const [dismissDialogOpen, setDismissDialogOpen] = React.useState(false)
     const { dismiss, isDismissing } = useDismissEmployee()
 
-    // `activeEmployment` só existe (relação HasOne filtrada por status hired/experience) enquanto o
-    // vínculo está ativo — depois de desligado, esse campo vem null, não com status "left".
-    const isDismissed = !employee.activeEmployment
+    const isDismissed = !employee.activeEmployment || !!employee.activeEmployment.leftAt
 
     async function confirmDismiss() {
         try {
@@ -39,34 +33,28 @@ export function EmployeeRowActions({ employee, onDismissed }: EmployeeRowActions
         }
     }
 
+
     return (
         <>
-            <DropdownMenu>
-                <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
-                    <EllipsisIcon />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                        <EyeIcon />
-                        Ver detalhes
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        render={<Link href={`/dashboard/employees/${employee.id}/edit`} />}
-                    >
-                        <SquarePenIcon />
-                        Editar
-                    </DropdownMenuItem>
-                    {!isDismissed && (
-                        <DropdownMenuItem
-                            variant="destructive"
-                            onClick={() => setDismissDialogOpen(true)}
-                        >
-                            <UserXIcon />
+            <div className="flex flex-row gap-1">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    nativeButton={false}
+                    render={<Link href={`/dashboard/employees/${employee.id}/edit`} />}
+                >
+                    <Icon icon="solar:pen-linear"/>
+                </Button>
+
+                {
+                    !isDismissed && (
+                        <Button variant="outline" size="sm" className="border-negative/20 border-spacing-1.5 text-negative/80 font-semibold hover:text-negative">
                             Demitir
-                        </DropdownMenuItem>
-                    )}
-                </DropdownMenuContent>
-            </DropdownMenu>
+                        </Button>
+                    )
+                }
+                
+            </div>
 
             <ConfirmDialog
                 open={dismissDialogOpen}
@@ -80,5 +68,48 @@ export function EmployeeRowActions({ employee, onDismissed }: EmployeeRowActions
                 onConfirm={confirmDismiss}
             />
         </>
+        
     )
+    // return (
+    //     <>
+    //         <DropdownMenu>
+    //             <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
+    //                 <EllipsisIcon />
+    //             </DropdownMenuTrigger>
+    //             <DropdownMenuContent align="end">
+    //                 <DropdownMenuItem>
+    //                     <EyeIcon />
+    //                     Ver detalhes
+    //                 </DropdownMenuItem>
+    //                 <DropdownMenuItem
+    //                     render={<Link href={`/dashboard/employees/${employee.id}/edit`} />}
+    //                 >
+    //                     <SquarePenIcon />
+    //                     Editar
+    //                 </DropdownMenuItem>
+    //                 {!isDismissed && (
+    //                     <DropdownMenuItem
+    //                         variant="destructive"
+    //                         onClick={() => setDismissDialogOpen(true)}
+    //                     >
+    //                         <UserXIcon />
+    //                         Demitir
+    //                     </DropdownMenuItem>
+    //                 )}
+    //             </DropdownMenuContent>
+    //         </DropdownMenu>
+
+    //         <ConfirmDialog
+    //             open={dismissDialogOpen}
+    //             onOpenChange={setDismissDialogOpen}
+    //             title="Desligar colaborador"
+    //             description={`Tem certeza que deseja desligar ${employee.person?.name ?? "este colaborador"}? Essa ação encerra o vínculo atual.`}
+    //             confirmLabel="Desligar"
+    //             confirmIcon={UserXIcon}
+    //             destructive
+    //             isLoading={isDismissing}
+    //             onConfirm={confirmDismiss}
+    //         />
+    //     </>
+    // )
 }

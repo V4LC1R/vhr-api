@@ -1,4 +1,3 @@
-import * as React from "react"
 import { format } from "date-fns"
 import { FilterIcon, XIcon } from "lucide-react"
 
@@ -9,13 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DatePicker } from "@/components/ui/date-picker"
 import { Field, FieldLabel } from "@/components/ui/field"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import {
     Drawer,
     DrawerClose,
@@ -28,6 +20,10 @@ import {
 } from "@/components/ui/drawer"
 import { EmployeeListFilters } from "../../types/types"
 import { EMPLOYMENT_STATUS_LABELS, EMPLOYMENT_TYPE_LABELS } from "../table/columns"
+import { cn } from "@/lib/utils"
+import { Icon } from "@iconify/react"
+import { Link } from "@inertiajs/react"
+import { useEffect, useMemo, useState } from "react"
 
 interface EmployeeFiltersProps {
     value: EmployeeListFilters
@@ -50,15 +46,15 @@ function formatFilterValue(key: DrawerFilterKey, value: string) {
 
 export function EmployeeFilters({ value, onChange }: EmployeeFiltersProps) {
     const isMobile = useIsMobile()
-    const [open, setOpen] = React.useState(false)
-    const [draft, setDraft] = React.useState<EmployeeListFilters>(value)
-    const [name, setName] = React.useState(value.name ?? "")
+    const [open, setOpen] = useState(false)
+    const [draft, setDraft] = useState<EmployeeListFilters>(value)
+    const [name, setName] = useState(value.name ?? "")
 
     const activeEntries = (["status", "kind", "registerAt"] as DrawerFilterKey[])
         .filter((key) => !!value[key])
         .map((key) => [key, value[key]] as const)
 
-    React.useEffect(() => {
+    useEffect(() => {
         const trimmed = name.trim()
         if ((value.name ?? "") === trimmed) return
 
@@ -67,7 +63,7 @@ export function EmployeeFilters({ value, onChange }: EmployeeFiltersProps) {
         }, 400)
 
         return () => clearTimeout(timeout)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+       
     }, [name])
 
     function handleOpenChange(nextOpen: boolean) {
@@ -84,40 +80,27 @@ export function EmployeeFilters({ value, onChange }: EmployeeFiltersProps) {
         onChange({ ...value, [key]: undefined })
     }
 
+    const filterInUse = useMemo(()=>{
+        let filters = 0
+
+        activeEntries.forEach(element => {
+            filters++
+        });
+
+        return filters
+    },[activeEntries])
+
     return (
         <div className="flex flex-wrap items-center justify-between gap-2">
-            <Input
-                placeholder="Buscar por nome"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="max-w-64"
-            />
-
             <div className="flex flex-wrap items-center justify-end gap-2">
-                {activeEntries.map(([key, v]) => (
-                    <Badge key={key} variant="secondary" className="gap-1 pr-1">
-                        {FILTER_LABELS[key]}: {formatFilterValue(key, v!)}
-                        <button
-                            type="button"
-                            onClick={() => removeFilter(key)}
-                            className="rounded-full p-0.5 hover:bg-foreground/10"
-                            aria-label={`Remover filtro ${FILTER_LABELS[key]}`}
-                        >
-                            <XIcon className="size-3" />
-                        </button>
-                    </Badge>
-                ))}
-
-                {activeEntries.length > 0 && (
-                    <Button variant="ghost" size="sm" onClick={() => onChange({ name: value.name })}>
-                        Limpar filtros
-                    </Button>
-                )}
-
                 <Drawer open={open} onOpenChange={handleOpenChange} swipeDirection={isMobile ? "down" : "right"}>
-                    <DrawerTrigger render={<Button variant="outline" size="sm" />}>
+                    <DrawerTrigger render={<Button variant="outline" className="px-2.5 py-1 h-8" size="sm" />}>
                         <FilterIcon />
                         {activeEntries.length > 0 ? "Editar filtros" : "Filtrar"}
+                        {
+                            filterInUse > 0 &&
+                            <span className="rounded-xl bg-accent text-background px-1">{filterInUse}</span>
+                        }
                     </DrawerTrigger>
                     <DrawerContent>
                         <DrawerHeader>
@@ -130,48 +113,35 @@ export function EmployeeFilters({ value, onChange }: EmployeeFiltersProps) {
                         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4">
                             <Field>
                                 <FieldLabel>Status</FieldLabel>
-                                <Select
-                                    items={EMPLOYMENT_STATUS_LABELS}
-                                    value={draft.status ?? null}
-                                    onValueChange={(v) =>
-                                        setDraft({ ...draft, status: v ?? undefined })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Todos" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value={null}>Todos</SelectItem>
-                                        {EMPLOYMENT_STATUSES.map((status) => (
-                                            <SelectItem key={status} value={status}>
+                                <div className="flex flex-row flex-wrap gap-2">
+                                    {EMPLOYMENT_STATUSES.map((status) => (
+                                            <Button 
+                                                size="default" 
+                                                variant="outline"
+                                                className={cn(draft.status === status ? 'bg-accent/60 text-amber-950 hover:bg-amber-300 border-amber-950 dark:text-background dark:bg-accent/80 hover:dark:bg-accent/50' :'')}
+                                                onClick={()=>setDraft({ ...draft, status: draft.status === status ? undefined : status })}
+                                            >
                                                 {EMPLOYMENT_STATUS_LABELS[status]}
-                                            </SelectItem>
+                                            </Button>
                                         ))}
-                                    </SelectContent>
-                                </Select>
+                                </div>
+                               
                             </Field>
 
                             <Field>
                                 <FieldLabel>Tipo</FieldLabel>
-                                <Select
-                                    items={EMPLOYMENT_TYPE_LABELS}
-                                    value={draft.kind ?? null}
-                                    onValueChange={(v) =>
-                                        setDraft({ ...draft, kind: v ?? undefined })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Todos" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value={null}>Todos</SelectItem>
-                                        {EMPLOYMENT_TYPES.map((kind) => (
-                                            <SelectItem key={kind} value={kind}>
+                                <div className="flex flex-row flex-wrap gap-1">
+                                    {EMPLOYMENT_TYPES.map((kind) => (
+                                            <Button 
+                                                size="default" 
+                                                variant="outline"
+                                                className={cn(draft.kind === kind ?'bg-accent/60 text-amber-950 hover:bg-amber-300 border-amber-950 dark:text-background dark:bg-accent/80 hover:dark:bg-accent/50' :'')}
+                                                onClick={()=>setDraft({ ...draft, kind: draft.kind === kind ? undefined :kind})}
+                                            >
                                                 {EMPLOYMENT_TYPE_LABELS[kind]}
-                                            </SelectItem>
+                                            </Button>
                                         ))}
-                                    </SelectContent>
-                                </Select>
+                                </div>
                             </Field>
 
                             <Field>
@@ -195,7 +165,18 @@ export function EmployeeFilters({ value, onChange }: EmployeeFiltersProps) {
                         </DrawerFooter>
                     </DrawerContent>
                 </Drawer>
+                {activeEntries.length > 0 && (
+                    <Button variant="ghost" size="sm" onClick={() => onChange({ name: value.name })}>
+                        Limpar filtros
+                    </Button>
+                )}
             </div>
+            <Button 
+                className="h-8 rounded-md"
+                render={<Link href="/dashboard/employees/create"/>}
+            >
+                <Icon  icon="fluent:add-12-filled"/>Adicionar
+            </Button>
         </div>
     )
 }

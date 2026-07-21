@@ -5,6 +5,8 @@ import { Employee } from "../../types/types"
 import { EmploymentStatus, EmploymentType } from "@/types/employment/types"
 import { Badge } from "@/components/ui/badge"
 import { EmployeeRowActions } from "./employee-row-actions"
+import { KindChip } from "./kind-chip"
+import { StatusChip } from "./status-chipt"
 
 export const EMPLOYMENT_TYPE_LABELS: Record<EmploymentType, string> = {
     clt: "CLT",
@@ -31,61 +33,84 @@ export const EMPLOYMENT_STATUS_VARIANTS: Record<
 export function getEmployeeColumns(isMobile: boolean, onDismissed?: () => void): ColumnDef<Employee>[] {
     const columns: ColumnDef<Employee>[] = [
         {
-            accessorKey: "registerNumber",
-            header: "Registro",
-            size: 90,
-        },
-        {
             accessorKey: "person.name",
-            header: "Nome",
+            header: "Colaborador",
             size: 240,
+            cell({row}) {
+                const name = row.original.person?.name ?? ''
+                const splitName = name.split(" ");
+    
+                const hasName = !!splitName?.length
+
+                const firtLetter = hasName && splitName[0] ? splitName[0][0].toUpperCase(): 'S'
+                const secondLetter = hasName && splitName[1] ? splitName[1][0].toUpperCase() : ''
+
+                const number = Number(row.original.registerNumber)  > 9
+                    ? `#0${row.original.registerNumber}`
+                    : `#00${row.original.registerNumber}`
+
+                return (
+                    <div className="flex flex-row gap-3">
+                        <div className="text-[12px] font-light bg-primary dark:font-bold dark:bg-brand-gold text-secondary p-2 h-8.75 w-8.75 text-center rounded-md">
+                            <span>{`${firtLetter}${secondLetter}`}</span>
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="font-bold">{name}</span>
+                            <span className="font-light text-xs text-[#9A9587]">{number}</span>
+                        </div>
+                    </div>
+                )
+            },
         },
     ]
 
     if (!isMobile) {
         columns.push({
             accessorKey: "activeEmployment.kind",
-            header: "Tipo",
-            size: 100,
+            header: "Vinculo",
+            size: 50,
             cell: ({ row }) => {
                 const kind = row.original.activeEmployment?.kind
                 if (!kind) return null
-                return <Badge variant="outline">{EMPLOYMENT_TYPE_LABELS[kind]}</Badge>
+                return <KindChip kind={kind}/>
             },
         })
     }
 
-    columns.push({
-        accessorKey: "activeEmployment.status",
-        header: "Status",
-        size: 110,
-        cell: ({ row }) => {
-            const status = row.original.activeEmployment?.status
-            if (!status) return null
-            return (
-                <Badge variant={EMPLOYMENT_STATUS_VARIANTS[status]}>
-                    {EMPLOYMENT_STATUS_LABELS[status]}
-                </Badge>
-            )
-        },
-    })
-
     if (!isMobile) {
         columns.push({
-            accessorKey: "activeEmployment.registerAt",
-            header: "Data Registro",
-            size: 120,
+            accessorKey: "activeEmployment.kind.workload",
+            header: "Jornada",
+            size: 50,
             cell: ({ row }) => {
-                const registerAt = row.original.activeEmployment?.registerAt
-                if (!registerAt) return null
-                return format(new Date(registerAt), "dd/MM/yyyy", { locale: ptBR })
+                
+                const workload = row.original.activeEmployment?.workload
+                if (!workload) return null
+                return (
+                    <span>
+                        {workload.description}
+                    </span>
+                )
             },
         })
+           
+        columns.push({
+            accessorKey: "activeEmployment.status",
+            header: "Status",
+            size: 20,
+            cell: ({ row }) => {
+                
+                const workload = row.original.activeEmployment?.status
+                if (!workload) return null
+                return <StatusChip status={workload}/>
+            },
+        })
+    
     }
 
     columns.push({
         id: "actions",
-        size: 56,
+        size: 26,
         cell: ({ row }) => <EmployeeRowActions employee={row.original} onDismissed={onDismissed} />,
     })
 

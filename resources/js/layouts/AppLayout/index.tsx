@@ -10,10 +10,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
             <SidebarProvider className="h-full overflow-hidden">
                 <AppSidebar/>
                 <div className='flex h-full min-h-0 flex-1 flex-col overflow-hidden'>
-                    <HeaderApp/>
-                    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-                        {children}
-                    </div>
+                    {children}
                 </div>
             </SidebarProvider>
         </div>
