@@ -22,6 +22,7 @@ class PersonTest extends DBTestCase
             'name' => 'Bruce Wayne',
             'email' => 'bruce@waynecorp.com',
             'cellphone' => '11988888888',
+            'birhtdate' => now()
         ];
         $this->postJson('/api/v1/persons', $payload)
             ->assertUnauthorized();
@@ -36,6 +37,7 @@ class PersonTest extends DBTestCase
             'name' => 'Bruce Wayne',
             'email' => 'bruce@waynecorp.com',
             'cellphone' => '11988888888',
+            'birhtdate' => now()
         ];
 
         $this->postJson('/api/v1/persons', $payload)
@@ -53,6 +55,7 @@ class PersonTest extends DBTestCase
                 'name',
                 'email',
                 'cellphone',
+                'birthdate'
             ]);
     }
 
@@ -65,6 +68,7 @@ class PersonTest extends DBTestCase
             'name' => 'Bruce Wayne',
             'email' => 'email-invalido',
             'cellphone' => '11988888888',
+            'birhtdate' => now()
         ];
 
         $this->postJson('/api/v1/persons', $payload)
@@ -83,6 +87,7 @@ class PersonTest extends DBTestCase
             'name' => 'Bruce Wayne',
             'email' => 'bruce@waynecorp.com',
             'cellphone' => '11988888888',
+            'birhtdate' => now()
         ];
 
         $this->postJson('/api/v1/persons', $payload)
@@ -105,6 +110,7 @@ class PersonTest extends DBTestCase
             'name' => 'Bruce Wayne',
             'email' => 'bruce@waynecorp.com',
             'cellphone' => '11988888888',
+            'birthdate' => now()->timezone('Europe/Stockholm')->format('Y-m-d\TH:i:sP')
         ];
 
         $this->postJson('/api/v1/persons', $payload)
@@ -124,6 +130,7 @@ class PersonTest extends DBTestCase
             'name' => 'Bruce Wayne',
             'email' => 'bruce@waynecorp.com',
             'cellphone' => '11988888888',
+            'birthdate' => now()->timezone('Europe/Stockholm')->format('Y-m-d\TH:i:sP')
         ];
 
         $this->postJson('/api/v1/persons', $payload)
@@ -140,6 +147,7 @@ class PersonTest extends DBTestCase
             'email' => 'bruce@waynecorp.com',
             'cellphone' => '11988888888',
             'pixKey' => 'bruce@waynecorp.com',
+            'birthdate' => now()->timezone('Europe/Stockholm')->format('Y-m-d\TH:i:sP')
         ];
 
         $response = $this->postJson('/api/v1/persons', $payload)
@@ -163,6 +171,7 @@ class PersonTest extends DBTestCase
             'name' => 'Bruce Wayne',
             'email' => 'bruce@waynecorp.com',
             'cellphone' => '11988888888',
+            'birthdate' => now()->timezone('Europe/Stockholm')->format('Y-m-d\TH:i:sP')
         ];
 
         $response = $this->postJson('/api/v1/persons', $payload)
@@ -213,11 +222,11 @@ class PersonTest extends DBTestCase
             ->assertOk();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LOOKUP (busca por CPF)
-    |--------------------------------------------------------------------------
-    */
+    // /*
+    // |--------------------------------------------------------------------------
+    // | LOOKUP (busca por CPF)
+    // |--------------------------------------------------------------------------
+    // */
 
     public function testDeveRetornarUnauthorizedAoConsultarPessoaPorCpfSemAutenticacao()
     {
@@ -279,11 +288,11 @@ class PersonTest extends DBTestCase
             ->assertJsonPath('id', $person->id);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LIST
-    |--------------------------------------------------------------------------
-    */
+    // /*
+    // |--------------------------------------------------------------------------
+    // | LIST
+    // |--------------------------------------------------------------------------
+    // */
 
     public function testDeveRetornarUnauthorizedAoListarPessoasSemAutenticacao()
     {
@@ -392,6 +401,7 @@ class PersonTest extends DBTestCase
             'name' => $personB->name,
             'email' => $personA->email,
             'cellphone' => $personB->cellphone,
+            'birthdate' => now()->timezone('Europe/Stockholm')->format('Y-m-d\TH:i:sP')
         ])->assertStatus(409);
     }
 
@@ -412,6 +422,7 @@ class PersonTest extends DBTestCase
             'name' => $personB->name,
             'email' => $personB->email,
             'cellphone' => $personB->cellphone,
+            'birthdate' => now()->timezone('Europe/Stockholm')->format('Y-m-d\TH:i:sP')
         ])->assertStatus(409);
     }
 
@@ -426,6 +437,7 @@ class PersonTest extends DBTestCase
             'name' => 'Batman',
             'email' => $person->email,
             'cellphone' => $person->cellphone,
+            'birthdate' =>  now()->timezone('Europe/Stockholm')->format('Y-m-d\TH:i:sP')
         ])->assertOk();
 
         $this->assertDatabaseHas('core.persons', [

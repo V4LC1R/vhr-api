@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('cellphone');
+            $table->date('birthdate')->nullable(false);
             $table->softDeletes();
             $table->timestamps();
         });

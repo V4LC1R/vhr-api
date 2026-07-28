@@ -1,6 +1,7 @@
 import { useHttp } from "@inertiajs/react";
 import { PaginatedResponse } from "@/types/paginate-requests";
 import { Workload } from "../types/types";
+import { useEffect } from "react";
 
 type WorkloadListParams = {
     page?: number;

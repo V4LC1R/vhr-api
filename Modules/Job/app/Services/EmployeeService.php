@@ -7,6 +7,7 @@ use App\Contracts\CompanyRepositoryInterface;
 use App\Contracts\EmployeeRepositoryInterface;
 use App\Contracts\EmploymentRepositoryInterface;
 use App\Contracts\PersonRepositoryInterface;
+use App\Contracts\PersonServiceInterface;
 use App\Contracts\WorkloadRepositoryInterface;
 use App\Exceptions\UniqueConstraintException;
 use App\Helpers\DatabaseExceptionResolver;
@@ -25,6 +26,7 @@ class EmployeeService
         protected EmploymentRepositoryInterface $employmentRepository,
         protected CompanyRepositoryInterface $companyRepository,
         protected PersonRepositoryInterface $personRepository,
+        protected PersonServiceInterface $personService,
         protected WorkloadRepositoryInterface $workloadRepository,
     ) {
     }
@@ -32,7 +34,9 @@ class EmployeeService
     public function create(EmployeeData $data)
     {
         $company  = $this->findCompany($data->companyId);
-        $person   = $this->findPerson($data->personId);
+        $person   = $data->personId instanceof Optional
+            ? $this->personService->create($data->person)
+            : $this->findPerson($data->personId);
         $workload = $this->findWorkload($data->workloadId);
 
         $kind = $data->kind instanceof Optional

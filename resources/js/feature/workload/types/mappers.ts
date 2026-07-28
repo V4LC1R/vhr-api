@@ -8,15 +8,15 @@ import type { WorkloadPayload } from './schemas';
  * Resource e request agora são camelCase; o mapeamento só achata o objeto
  * `interval` do resource em `intervalStartAt`/`intervalEndAt`.
  */
-export function mapToForm(resource: Workload): WorkloadPayload {
+export function mapToForm(resource: Partial<Workload>): WorkloadPayload {
     return {
-        description: resource.description,
-        monthlyHours: resource.monthlyHours,
-        weeklyHours: resource.weeklyHours,
-        entryTime: resource.entryTime,
-        leftTime: resource.leftTime,
-        intervalStartAt: resource.interval.startAt ?? "",
-        intervalEndAt: resource.interval.endAt ?? "",
+        description: resource.description ?? '',
+        monthlyHours: resource.monthlyHours ?? 0,
+        weeklyHours: resource.weeklyHours ?? 0,
+        entryTime: resource.entryTime ?? '',
+        leftTime: resource.leftTime ?? '',
+        intervalStartAt: resource.interval?.startAt ?? "",
+        intervalEndAt: resource.interval?.endAt ?? "",
     };
 }
 

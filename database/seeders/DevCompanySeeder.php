@@ -77,6 +77,7 @@ class DevCompanySeeder extends Seeder
                 [
                     'name'      => $u['name'],
                     'cpf'       => $u['cpf'],
+                    'birthdate' => now(),
                     'cellphone' => '(11) 99999-00' . str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT),
                 ],
             );
@@ -134,6 +135,7 @@ class DevCompanySeeder extends Seeder
                 'name'      => $f['nome'],
                 'cpf'       => $f['cpf'],
                 'email'     => 'func' . ($i + 1) . '@demo.test',
+                'birthdate' => now(),
                 'cellphone' => '(11) 98888-00' . str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT),
             ]);
 

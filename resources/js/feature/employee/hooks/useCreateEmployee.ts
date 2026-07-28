@@ -1,18 +1,12 @@
 import { useHttp } from "@inertiajs/react";
 import { Employee } from "../types/types";
+import { EmployeePayload } from "../types";
 
-export type CreateEmployeePayload = {
-    companyId: string;
-    personId: string;
-    workloadId: string;
-    kind: string;
-    isProbationary: boolean;
-};
 
 export function useCreateEmployee() {
-    const { post, setData, processing } = useHttp<CreateEmployeePayload, Employee>();
+    const { post, setData, processing } = useHttp<EmployeePayload, Employee>();
 
-    async function create(payload: CreateEmployeePayload) {
+    async function create(payload: EmployeePayload) {
         setData(payload);
         return await post("/api/v1/employees");
     }

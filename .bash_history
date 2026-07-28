@@ -92,3 +92,7 @@ php artisan test --filter PersonTest
 exit
 php artisan test --filter PersonTest
 exit
+clear
+php artisan test --filter=EmployeeTest
+clear
+exit

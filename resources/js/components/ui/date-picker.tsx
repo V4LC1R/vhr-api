@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Matcher } from "react-day-picker"
 
 interface DatePickerProps {
     value: Date | null
@@ -15,6 +16,7 @@ interface DatePickerProps {
     disabled?: boolean
     id?: string
     className?: string
+    limits?:Matcher[]
 }
 
 export function DatePicker({
@@ -24,6 +26,7 @@ export function DatePicker({
     disabled,
     id,
     className,
+    limits = []
 }: DatePickerProps) {
     const [open, setOpen] = React.useState(false)
 
@@ -50,6 +53,7 @@ export function DatePicker({
                 <Calendar
                     mode="single"
                     selected={value ?? undefined}
+                    disabled={limits}
                     onSelect={(date) => {
                         onChange(date ?? null)
                         setOpen(false)

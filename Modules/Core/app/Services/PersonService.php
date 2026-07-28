@@ -2,16 +2,19 @@
 
 namespace Modules\Core\Services;
 
+use App\Contracts\PersonServiceInterface;
 use App\Exceptions\UniqueConstraintException;
 use App\Helpers\DatabaseExceptionResolver;
 use Illuminate\Database\QueryException;
 use Modules\Core\Data\PersonData;
 use Modules\Core\Models\Person;
 
-class PersonService
+class PersonService implements PersonServiceInterface
 {
-    public function create(PersonData $data)
+    public function create(array|PersonData $data)
     {
+        $data = PersonData::from($data);
+
         try {
             return Person::create($data->toArray())
                 ->toResource();

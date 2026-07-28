@@ -39,10 +39,10 @@ class StorePersonRequest extends FormRequest
                 'string',
                 'size:11',
                 new ValidCpf(),
-                // Sem Rule::unique('core.persons', 'cpf'): a unicidade é garantida
-                // pela constraint do banco e tratada de forma genérica pelo
-                // PersonService (QueryException -> UniqueConstraintException),
-                // no mesmo padrão já usado pelo campo 'email'.
+            ],
+            'birthdate' => [
+                'required',
+                'date'
             ],
             'name' => [
                 'required',

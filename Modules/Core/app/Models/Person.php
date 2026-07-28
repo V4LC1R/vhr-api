@@ -19,6 +19,7 @@ use Modules\Core\Http\Resources\PersonResource;
     'email',
     'cellphone',
     'pixKey',
+    'birthdate'
 ])]
 #[UseFactory(PersonFactory::class)]
 #[UseResource(PersonResource::class)]
@@ -33,6 +34,7 @@ class Person extends Model
     public $incrementing = false;
 
     protected $keyType = 'string';
+
 
     public function employees(): HasMany
     {

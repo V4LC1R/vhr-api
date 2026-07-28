@@ -1,4 +1,4 @@
-import * as React from "react"
+
 import { CheckCircle2Icon, Loader2Icon } from "lucide-react"
 
 import { Person } from "@/feature/person/types/types"
@@ -6,6 +6,7 @@ import { usePersonLookup } from "@/feature/person/hooks/usePersonLookup"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { useEffect } from "react"
 
 interface PersonSectionProps {
     cpf: string
@@ -47,7 +48,7 @@ export function PersonSection({
 }: PersonSectionProps) {
     const { lookup, isLookingUp } = usePersonLookup()
 
-    React.useEffect(() => {
+    useEffect(() => {
         const digits = cpf.replace(/\D/g, "")
         if (digits.length !== 11) {
             onMatch(null)

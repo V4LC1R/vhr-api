@@ -11,7 +11,7 @@ export default function AuthLayout({ children }: PropsWithChildren) {
                 <ThemeToggleButton className="absolute bottom-5 right-5 z-50" />
             </div>
 
-            <div className="hidden w-full bg-primary md:block rounded-md overflow-hidden"/>
+            <div className="hidden w-full bg-primary md:block rounded-md "/>
 
         </div>
     );

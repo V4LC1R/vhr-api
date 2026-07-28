@@ -1,4 +1,3 @@
-import * as React from "react"
 import { Controller, useForm } from "react-hook-form"
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema"
 import { MinusIcon, PlusIcon } from "lucide-react"
@@ -17,6 +16,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
+import { useEffect } from "react";
 
 const DEFAULT_WEEKLY_HOURS = 40
 const WEEKLY_HOURS_PRESETS = [20, 30, 36, 40, 44]
@@ -106,11 +106,9 @@ export function WorkloadFormDialog({
         defaultValues: defaultValues ?? emptyWorkloadForm,
     })
 
-    // Reseta só na abertura — resetar em qualquer re-render do pai perderia o
-    // que o usuário já digitou.
-    React.useEffect(() => {
+    useEffect(() => {
         if (open) form.reset(defaultValues ?? emptyWorkloadForm)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+       
     }, [open])
 
     return (

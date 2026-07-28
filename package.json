@@ -26,6 +26,7 @@
         "@iconify/react": "^6.0.2",
         "@inertiajs/core": "3.5.0",
         "@inertiajs/react": "^3.5.0",
+        "@react-input/mask": "^2.0.4",
         "@tanstack/react-table": "^8.21.3",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
