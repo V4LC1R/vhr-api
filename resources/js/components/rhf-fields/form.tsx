@@ -10,17 +10,25 @@ type Props<T extends FieldValues> = {
     form: UseFormReturn<T>;
     onSubmit: SubmitHandler<T>;
     children: ReactNode;
+    stopPropagation?: boolean;
 } & Omit<React.ComponentProps<"form">, "onSubmit">;
 
 export function RHFForm<T extends FieldValues>({
     form,
     onSubmit,
     children,
+    stopPropagation,
     ...props
 }: Props<T>) {
     return (
         <FormProvider {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} {...props}>
+            <form
+                onSubmit={(e) => {
+                    if (stopPropagation) e.stopPropagation()
+                    return form.handleSubmit(onSubmit)(e)
+                }}
+                {...props}
+            >
                 {children}
             </form>
         </FormProvider>

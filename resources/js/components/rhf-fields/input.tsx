@@ -20,6 +20,7 @@ export function RHFInput<T extends FieldValues = FieldValues>({
     containerClassName,
     labelClassName,
     errorClassName,
+    type,
     ...props
 }: Props<T>) {
     return (
@@ -36,8 +37,18 @@ export function RHFInput<T extends FieldValues = FieldValues>({
 
                     <Input
                         id={name}
+                        type={type}
                         aria-invalid={fieldState.invalid}
                         {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                            if (type === "number") {
+                                const raw = e.target.value
+                                return field.onChange(raw === "" ? null : Number(raw))
+                            }
+
+                            field.onChange(e)
+                        }}
                         {...props}
                     />
 

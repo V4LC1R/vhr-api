@@ -47,7 +47,11 @@ export function RHFSelect<T extends FieldValues = FieldValues, TOption = unknown
                         onValueChange={field.onChange}
                         {...props}
                     >
-                        <SelectTrigger id={name} aria-invalid={fieldState.invalid} className={cn("w-full",triggerClassName)}>
+                        <SelectTrigger 
+                            id={name} 
+                            aria-invalid={fieldState.invalid} 
+                            className={cn("w-full",triggerClassName)}
+                        >
                             <SelectValue>
                                 {(value: string | number) => {
                                     const selected = options.find((option) => getOptionValue(option) === value)

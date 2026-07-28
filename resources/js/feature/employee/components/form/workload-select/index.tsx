@@ -20,6 +20,10 @@ export function WorkloadSelect({name}:Props) {
     const {value,toggle,setTrue} = useBoolean()
     const { list,data: workloads } = useListWorkload({ per_page: 50 })
 
+    useEffect(()=>{
+        list()
+    },[])
+
     return (
         <>
             <WorkloadMutateDialog

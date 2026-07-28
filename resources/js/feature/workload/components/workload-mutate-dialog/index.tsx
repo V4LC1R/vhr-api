@@ -22,24 +22,29 @@ export function WorkloadMutateDialog({
     current,
     onSaved
 }:Props) {
-    
+
     const {isCreate,isLoading,form,onSubmit} = useWorkloadMutateForm({current,onSaved})
 
-    const title = isCreate 
+    const title = isCreate
         ? 'Nova jornada'
         : 'Editar Jornada'
 
-    const subTitle = isCreate 
+    const subTitle = isCreate
         ? 'Reutilizável no cadastro de colaboradores'
         : current?.description
-    
+
     return (
         <Dialog
             open={open}
             onOpenChange={toggle}
         >
             <DialogContent className="sm:max-w-lg">
-                <RHF.Form form={form} onSubmit={onSubmit} className="contents">
+                <RHF.Form
+                    form={form}
+                    onSubmit={onSubmit}
+                    className="contents"
+                    stopPropagation
+                >
                     <DialogHeader>
                         <DialogTitle className="font-semibold">{title}</DialogTitle>
                         <DialogDescription>{subTitle}</DialogDescription>
@@ -62,7 +67,7 @@ export function WorkloadMutateDialog({
                                         value={field.value}
                                     />
                                     <FieldError
-                                       
+
                                         errors={fieldState.error ? [fieldState.error] : undefined}
                                     />
                                 </Field>
@@ -77,7 +82,7 @@ export function WorkloadMutateDialog({
                         />
 
                         <div className="grid grid-cols-2 gap-2">
-                            <RHF.TimePicker 
+                            <RHF.TimePicker
                                 control={form.control}
                                 name="entryTime"
                                 label="Entrada"
@@ -106,7 +111,7 @@ export function WorkloadMutateDialog({
                         <Button onClick={toggle} variant="outline" className="p-4 font-light">
                             Cancelar
                         </Button>
-                        <Button disabled={isLoading} className="p-4">
+                        <Button disabled={isLoading} type="submit" className="p-4">
                             {
                                 isLoading
                                     ?<Spinner />

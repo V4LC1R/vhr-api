@@ -18,7 +18,7 @@ export function ContainerPage({children}:Props) {
 export function HeaderPage({children}:Props) {
     return (
         <div className="bg-white dark:bg-background p-6 flex flex-row items-center justify-between gap-4 border-b">
-            <div className="w-full flex flex-row 2xl:max-w-362 mx-auto">
+            <div className="w-full flex flex-row 2xl:max-w-375 mx-auto">
                 {children}
             </div>
         </div>
@@ -73,8 +73,10 @@ export function ActionsPage({children}:Props) {
 // intermediarios do conteudo e o header
 export function ContentPage({children}:Props) {
     return (
-        <div className="flex h-full overflow-y-scroll min-h-0 mx-auto w-full 2xl:max-w-375 flex-1 flex-col p-6">
-            {children}
+        <div className="themed-scrollbar flex h-full overflow-y-scroll min-h-0 w-full flex-1 bg-transparent p-6">
+            <div className="mx-auto w-full 2xl:max-w-375 flex flex-1 flex-col">
+                {children}
+            </div>
         </div>
     )
 }

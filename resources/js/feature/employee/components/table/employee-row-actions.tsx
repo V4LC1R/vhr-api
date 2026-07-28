@@ -70,46 +70,4 @@ export function EmployeeRowActions({ employee, onDismissed }: EmployeeRowActions
         </>
         
     )
-    // return (
-    //     <>
-    //         <DropdownMenu>
-    //             <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
-    //                 <EllipsisIcon />
-    //             </DropdownMenuTrigger>
-    //             <DropdownMenuContent align="end">
-    //                 <DropdownMenuItem>
-    //                     <EyeIcon />
-    //                     Ver detalhes
-    //                 </DropdownMenuItem>
-    //                 <DropdownMenuItem
-    //                     render={<Link href={`/dashboard/employees/${employee.id}/edit`} />}
-    //                 >
-    //                     <SquarePenIcon />
-    //                     Editar
-    //                 </DropdownMenuItem>
-    //                 {!isDismissed && (
-    //                     <DropdownMenuItem
-    //                         variant="destructive"
-    //                         onClick={() => setDismissDialogOpen(true)}
-    //                     >
-    //                         <UserXIcon />
-    //                         Demitir
-    //                     </DropdownMenuItem>
-    //                 )}
-    //             </DropdownMenuContent>
-    //         </DropdownMenu>
-
-    //         <ConfirmDialog
-    //             open={dismissDialogOpen}
-    //             onOpenChange={setDismissDialogOpen}
-    //             title="Desligar colaborador"
-    //             description={`Tem certeza que deseja desligar ${employee.person?.name ?? "este colaborador"}? Essa ação encerra o vínculo atual.`}
-    //             confirmLabel="Desligar"
-    //             confirmIcon={UserXIcon}
-    //             destructive
-    //             isLoading={isDismissing}
-    //             onConfirm={confirmDismiss}
-    //         />
-    //     </>
-    // )
 }

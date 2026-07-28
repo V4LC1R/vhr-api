@@ -2,8 +2,8 @@ import { useCreateWorkload } from "@/feature/workload/hooks/useCreateWorkload";
 import { useUpdateWorkload } from "@/feature/workload/hooks/useUpdateWorkload";
 import { mapToApi, mapToForm, Workload, WorkloadPayload, workloadSchema } from "@/feature/workload/types";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema"
-import { useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useMemo } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "react-hot-toast";
 
 type Props = {
@@ -17,6 +17,8 @@ export function useWorkloadMutateForm({current,onSaved}:Props) {
 
     const {create,isCreatingWorkload,response} = useCreateWorkload()
     const {update,isUpdatingWorkload} = useUpdateWorkload()
+
+    const weeklyHours = useWatch({name:'weeklyHours'})
 
     const currentValue = useMemo(()=>{
         return current 
