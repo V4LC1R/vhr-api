@@ -7,17 +7,13 @@ import { personSchema } from "@/feature/person/types/schemas"
 import { useUpdatePerson } from "@/feature/person/hooks/useUpdatePerson"
 import { Workload } from "@/feature/workload/types/types"
 import { EmploymentType } from "@/types/employment/types"
-import { Employee } from "../types/types"
-import { useGetEmployee } from "./useGetEmployee"
+import { useEmployee } from "./useEmployee"
 import { useUpdateEmployee } from "./useUpdateEmployee"
 import { useDismissEmployee } from "./useDismissEmployee"
 
 type PersonErrors = { name?: string; email?: string; cellphone?: string; pixKey?: string }
 
 export function useEmployeeEditForm(employeeId: string) {
-    const [employee, setEmployee] = useState<Employee | null>(null)
-    const [isLoading, setIsLoading] = useState(true)
-
     const [cpf, setCpf] = useState("")
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
@@ -35,41 +31,29 @@ export function useEmployeeEditForm(employeeId: string) {
 
     const [dismissDialogOpen, setDismissDialogOpen] = useState(false)
 
-    const { fetchEmployee, isLoadingEmployee } = useGetEmployee()
+    const { employee, isLoadingEmployee, error: employeeError } = useEmployee(employeeId)
     const { update: updatePerson, isUpdatingPerson } = useUpdatePerson()
     const { update: updateEmployee, isUpdatingEmployee } = useUpdateEmployee()
     const { dismiss: dismissEmployee, isDismissing } = useDismissEmployee()
 
     useEffect(() => {
-        let cancelled = false
+        if (!employee) return
 
-        async function load() {
-            try {
-                const data = await fetchEmployee(employeeId)
-                if (cancelled) return
+        setCpf(employee.person?.cpf ?? "")
+        setName(employee.person?.name ?? "")
+        setEmail(employee.person?.email ?? "")
+        setCellphone(employee.person?.cellphone ?? "")
+        setPixKey(employee.person?.pixKey ?? "")
+        setSelectedWorkload(employee.activeEmployment?.workload ?? null)
+        setIsProbationary(employee.activeEmployment?.status === "experience")
+        setKind(employee.activeEmployment?.kind ?? null)
+    }, [employee])
 
-                setEmployee(data)
-                setCpf(data.person?.cpf ?? "")
-                setName(data.person?.name ?? "")
-                setEmail(data.person?.email ?? "")
-                setCellphone(data.person?.cellphone ?? "")
-                setPixKey(data.person?.pixKey ?? "")
-                setSelectedWorkload(data.activeEmployment?.workload ?? null)
-                setIsProbationary(data.activeEmployment?.status === "experience")
-                setKind(data.activeEmployment?.kind ?? null)
-            } catch (error) {
-                toast.error(extractErrorMessage(error, "Não foi possível carregar o colaborador."))
-            } finally {
-                if (!cancelled) setIsLoading(false)
-            }
+    useEffect(() => {
+        if (employeeError) {
+            toast.error(extractErrorMessage(employeeError, "Não foi possível carregar o colaborador."))
         }
-
-        load()
-        return () => {
-            cancelled = true
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [employeeId])
+    }, [employeeError])
 
     function selectWorkload(workload: Workload) {
         setSelectedWorkload(workload)
@@ -141,8 +125,8 @@ export function useEmployeeEditForm(employeeId: string) {
     }
 
     return {
-        employee,
-        isLoading: isLoading || isLoadingEmployee,
+        employee: employee ?? null,
+        isLoading: isLoadingEmployee,
         isDismissed,
 
         cpf,

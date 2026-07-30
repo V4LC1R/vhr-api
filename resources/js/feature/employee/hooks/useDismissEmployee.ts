@@ -1,12 +1,17 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useHttp } from "@inertiajs/react";
 import { Employee } from "../types/types";
 
 export function useDismissEmployee() {
-    const { patch, processing } = useHttp<Record<string, never>, Employee>();
+    const { patch } = useHttp<Record<string, never>, Employee>();
+    const queryClient = useQueryClient();
 
-    async function dismiss(id: string) {
-        return await patch(`/api/v1/employees/${id}/dismiss`);
-    }
+    const mutation = useMutation({
+        mutationFn: (id: string) => patch(`/api/v1/employees/${id}/dismiss`),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["employees"] });
+        },
+    });
 
-    return { dismiss, isDismissing: processing };
+    return { dismiss: mutation.mutateAsync, isDismissing: mutation.isPending };
 }

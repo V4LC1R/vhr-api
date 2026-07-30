@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { useHttp } from "@inertiajs/react";
 
 type NextRegisterNumberResponse = {
@@ -5,11 +6,12 @@ type NextRegisterNumberResponse = {
 };
 
 export function useNextRegisterNumber() {
-    const { get, processing, response } = useHttp<Record<string, never>, NextRegisterNumberResponse>();
+    const { get } = useHttp<Record<string, never>, NextRegisterNumberResponse>();
 
-    async function fetchNextRegisterNumber() {
-        return await get("/api/v1/employees/next-register-number");
-    }
+    const { data, isLoading: isLoadingRegisterNumber } = useQuery({
+        queryKey: ["employees", "next-register-number"],
+        queryFn: () => get("/api/v1/employees/next-register-number"),
+    });
 
-    return { fetchNextRegisterNumber, isLoadingRegisterNumber: processing, registerNumber: response?.registerNumber };
+    return { isLoadingRegisterNumber, registerNumber: data?.registerNumber };
 }

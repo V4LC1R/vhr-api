@@ -6,7 +6,7 @@ function formatTime(time: string) {
     return time.slice(0, 5)
 }
 
-export function getWorkloadColumns(isMobile: boolean, onChanged?: () => void): ColumnDef<Workload>[] {
+export function getWorkloadColumns(isMobile: boolean): ColumnDef<Workload>[] {
     const columns: ColumnDef<Workload>[] = [
         {
             accessorKey: "description",
@@ -45,7 +45,7 @@ export function getWorkloadColumns(isMobile: boolean, onChanged?: () => void): C
     columns.push({
         id: "actions",
         size: 56,
-        cell: ({ row }) => <WorkloadRowActions workload={row.original} onChanged={onChanged} />,
+        cell: ({ row }) => <WorkloadRowActions workload={row.original} />,
     })
 
     return columns

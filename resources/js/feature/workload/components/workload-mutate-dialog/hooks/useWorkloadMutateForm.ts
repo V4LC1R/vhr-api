@@ -18,18 +18,27 @@ export function useWorkloadMutateForm({current,onSaved}:Props) {
     const {create,isCreatingWorkload,response} = useCreateWorkload()
     const {update,isUpdatingWorkload} = useUpdateWorkload()
 
-    const weeklyHours = useWatch({name:'weeklyHours'})
+   
 
     const currentValue = useMemo(()=>{
         return current 
             ? mapToForm(current)
-            : {}
+            : {
+                weeklyHours:40
+            }
     },[current])
 
     const form = useForm<WorkloadPayload>({
         defaultValues:currentValue,
         resolver:standardSchemaResolver(workloadSchema)
     })
+
+     const weeklyHours = useWatch<WorkloadPayload>({name:'weeklyHours',control:form.control})
+
+     useEffect(()=>{
+        form.setValue('monthlyHours', Number(weeklyHours) * 5,{shouldDirty:true,shouldTouch:true,shouldValidate:true})
+    },[weeklyHours])
+
 
     const onSubmit = async(data:WorkloadPayload) =>{
        

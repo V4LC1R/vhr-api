@@ -7,7 +7,7 @@ import { useWorkloadMutateForm } from "./hooks/useWorkloadMutateForm";
 import { Field, FieldError, FieldGroup } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { WeeklyHours } from "./weekly-hours";
-import { Controller } from "react-hook-form";
+import { UnityInput } from "./unity-input";
 
 type Props = {
     current?:Workload
@@ -16,6 +16,9 @@ type Props = {
     toggle:()=>void
 }
 
+const formatTime = (value?: string | null) => (value ? value.slice(0, 5) : null)
+const parseTime = (time: string | null) => (time ? `${time}:00` : '')
+
 export function WorkloadMutateDialog({
     open,
     toggle,
@@ -23,7 +26,18 @@ export function WorkloadMutateDialog({
     onSaved
 }:Props) {
 
-    const {isCreate,isLoading,form,onSubmit} = useWorkloadMutateForm({current,onSaved})
+    const {
+        isCreate,
+        isLoading,
+        form,
+        onSubmit
+    } = useWorkloadMutateForm({
+        current,
+        onSaved:(w)=>{
+            toggle()
+            onSaved?.(w)
+        }
+    })
 
     const title = isCreate
         ? 'Nova jornada'
@@ -57,28 +71,19 @@ export function WorkloadMutateDialog({
                             name="description"
                         />
 
-                        <Controller
-                            control={form.control}
-                            name="weeklyHours"
-                            render={({ field, fieldState }) => (
-                                 <Field data-invalid={fieldState.invalid}>
-                                    <WeeklyHours
-                                        onChange={(w)=>field.onChange(w.value)}
-                                        value={field.value}
-                                    />
-                                    <FieldError
+                        <Field data-invalid={!!form.formState.errors.weeklyHours}>
+                            <WeeklyHours name="weeklyHours" />
+                            <FieldError
+                                errors={form.formState.errors.weeklyHours ? [form.formState.errors.weeklyHours] : undefined}
+                            />
+                        </Field>
 
-                                        errors={fieldState.error ? [fieldState.error] : undefined}
-                                    />
-                                </Field>
-                            )}
-                        />
-
-                        <RHF.Input
-                            control={form.control}
+                        <UnityInput
+                            
+                            
                             label="Horas Mensais"
                             name="monthlyHours"
-                            type="number"
+                            
                         />
 
                         <div className="grid grid-cols-2 gap-2">
@@ -86,21 +91,29 @@ export function WorkloadMutateDialog({
                                 control={form.control}
                                 name="entryTime"
                                 label="Entrada"
+                                format={formatTime}
+                                parse={parseTime}
                             />
                             <RHF.TimePicker
                                 control={form.control}
                                 name="leftTime"
                                 label="Saida"
+                                format={formatTime}
+                                parse={parseTime}
                             />
                             <RHF.TimePicker
                                 control={form.control}
                                 name="intervalStartAt"
                                 label="Início Intervalo"
+                                format={formatTime}
+                                parse={parseTime}
                             />
                             <RHF.TimePicker
                                 control={form.control}
                                 name="intervalEndAt"
                                 label="Fim Intervalo"
+                                format={formatTime}
+                                parse={parseTime}
                             />
                         </div>
 

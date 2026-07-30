@@ -2,8 +2,10 @@ import { createInertiaApp } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
 import type { ComponentType } from 'react';
 import { Toaster } from 'react-hot-toast';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import { registerHttpInterceptors } from '@/lib/http';
+import { queryClient } from '@/lib/query-client';
 
 registerHttpInterceptors();
 
@@ -17,10 +19,12 @@ createInertiaApp({
     },
     setup({ el, App, props }) {
         createRoot(el).render(
-            <ThemeProvider>
-                <App {...props} />
-                <Toaster position="top-right" />
-            </ThemeProvider>,
+            <QueryClientProvider client={queryClient}>
+                <ThemeProvider>
+                    <App {...props} />
+                    <Toaster position="top-right" />
+                </ThemeProvider>
+            </QueryClientProvider>,
         );
     },
     progress: { color: '#0f766e' },

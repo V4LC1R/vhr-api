@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useState } from "react"
 import toast from "react-hot-toast"
 
 import { extractErrorMessage } from "@/lib/http"
@@ -14,10 +14,9 @@ interface WorkloadListViewProps {
 }
 
 export function WorkloadListView({ createOpen, onCreateOpenChange }: WorkloadListViewProps) {
+    const [page, setPage] = useState(1)
+
     const {
-        list,
-        nextPage,
-        prevPage,
         isLoadingWorkloads,
         data,
         current_page,
@@ -25,17 +24,17 @@ export function WorkloadListView({ createOpen, onCreateOpenChange }: WorkloadLis
         total,
     } = useListWorkload({
         per_page: 15,
-        page: 1,
+        page,
     })
 
     const { create, isCreatingWorkload } = useCreateWorkload()
 
-    useEffect(() => {
-        list()
-    }, [])
+    function nextPage() {
+        if (current_page && last_page && current_page < last_page) setPage(current_page + 1)
+    }
 
-    function handleChanged() {
-        list({ page: current_page ?? 1 })
+    function prevPage() {
+        if (current_page && current_page > 1) setPage(current_page - 1)
     }
 
     async function handleCreate(values: WorkloadPayload) {
@@ -43,7 +42,7 @@ export function WorkloadListView({ createOpen, onCreateOpenChange }: WorkloadLis
             await create(values)
             toast.success("Jornada cadastrada com sucesso!")
             onCreateOpenChange(false)
-            await list({ page: 1 })
+            setPage(1)
         } catch (error) {
             toast.error(extractErrorMessage(error, "Não foi possível cadastrar a jornada."))
         }
@@ -59,7 +58,6 @@ export function WorkloadListView({ createOpen, onCreateOpenChange }: WorkloadLis
                 isLoading={isLoadingWorkloads}
                 next={nextPage}
                 prev={prevPage}
-                onChanged={handleChanged}
             />
 
             <WorkloadFormDialog

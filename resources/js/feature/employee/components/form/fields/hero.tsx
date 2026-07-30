@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 import { useWatch } from "react-hook-form"
 
 export function EmployeeHero() {
-    const name = useWatch({name:'name'})
+    const name = useWatch({name:'person.name'})
 
     return (
         <div className="flex flex-col gap-4 rounded-xl border bg-card p-6 sm:flex-row sm:items-center sm:justify-between">

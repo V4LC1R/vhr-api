@@ -22,6 +22,10 @@ class EmployeeResource extends JsonResource
                 'activeEmployment',
                 fn () => new EmploymentResource($this->activeEmployment)
             ),
+            'employments' => $this->whenLoaded(
+                'employments',
+                fn () => EmploymentResource::collection($this->employments)
+            ),
         ];
     }
 }

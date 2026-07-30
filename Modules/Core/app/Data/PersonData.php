@@ -21,7 +21,15 @@ class PersonData extends Data
         public string|Optional $email,
         public string|Optional $cellphone,
         public string|null|Optional $pixKey,
-        #[WithCast(DateTimeInterfaceCast::class, format: ['Y-m-d\TH:i:sP', 'Y-m-dH:i:sP']),]
+        #[WithCast(
+            DateTimeInterfaceCast::class,
+            format: [
+                'Y-m-d\TH:i:sP',
+                'Y-m-dH:i:sP',
+                'Y-m-d\TH:i:s.v\Z',
+            ]
+        ),
+        ]
         public Carbon $birthdate
     ) {
     }

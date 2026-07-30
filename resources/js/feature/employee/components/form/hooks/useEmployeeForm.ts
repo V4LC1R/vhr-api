@@ -31,7 +31,7 @@ export function useEmployeeForm({currentEmployee,id}:Props) {
     })
 
     const onSubmit = async(data:EmployeePayload) =>{
-       
+       console.log('meu ovo')
         try {
             const payload = mapToApi(data)
 
@@ -48,6 +48,7 @@ export function useEmployeeForm({currentEmployee,id}:Props) {
     }
 
     return{
+        isCreating,
         form,
         isLoading:isCreatingEmployee || isUpdatingEmployee,
         submit:onSubmit

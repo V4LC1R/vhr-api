@@ -15,7 +15,7 @@ export function mapToForm(resource: Partial<Workload>): WorkloadPayload {
         weeklyHours: resource.weeklyHours ?? 0,
         entryTime: resource.entryTime ?? '',
         leftTime: resource.leftTime ?? '',
-        intervalStartAt: resource.interval?.startAt ?? "",
+        intervalStartAt: resource?.interval?.startAt ?? "",
         intervalEndAt: resource.interval?.endAt ?? "",
     };
 }

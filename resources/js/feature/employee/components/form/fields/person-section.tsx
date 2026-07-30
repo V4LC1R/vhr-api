@@ -1,27 +1,39 @@
+import { Loader2Icon } from "lucide-react"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 import { RHF } from "@/components/rhf-fields"
-import { useFormContext, useWatch } from "react-hook-form"
+import { useFormContext } from "react-hook-form"
 import { EmployeePayload } from "@/feature/employee/types"
+import { useCpfField } from "../hooks/useCpfField";
 
 
 export function PersonSection() {
     const {control} = useFormContext<EmployeePayload>()
 
-    const cpf:string = useWatch({name:'cpf'})
 
-    const hasCpf = cpf != undefined && !!cpf && cpf.length >=  14
+    const {isLookingUp,hasCpf} = useCpfField('person.cpf')
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Pessoa</CardTitle>
+                <CardTitle className="flex flex-row gap-2">
+                    Pessoa
+                     {isLookingUp && (
+                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <Loader2Icon className="size-4 animate-spin" />
+                            Consultando CPF...
+                        </div>
+                    )}
+                </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
+               
+
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                     <RHF.InputMask
                         control={control}
-                        name="cpf"
+                        name="person.cpf"
                         label="CPF"
                         mask="###.###.###-##"
                     />
@@ -29,7 +41,7 @@ export function PersonSection() {
                      <RHF.Input
                         control={control}
                         label="Nome"
-                        name="name"
+                        name="person.name"
                         disabled={!hasCpf}
                         containerClassName="col-span-2"
                     />
@@ -37,7 +49,7 @@ export function PersonSection() {
                     <RHF.DatePicker
                         control={control}
                         label="Data de Nascimento"
-                        name="birthdate"
+                        name="person.birthdate"
                         disabled={!hasCpf}
                         limits={[{
                             after:new Date()
@@ -47,7 +59,7 @@ export function PersonSection() {
                     <RHF.Input
                         control={control}
                         label="E-mail"
-                        name="email"
+                        name="person.email"
                         type="email"
                         disabled={!hasCpf}
                     />
@@ -55,7 +67,7 @@ export function PersonSection() {
                     <RHF.InputMask
                         control={control}
                         label="Telefone celular"
-                        name="cellphone"
+                        name="person.cellphone"
                         mask="(##) # ####-####"
                         disabled={!hasCpf}
                     />
@@ -63,7 +75,7 @@ export function PersonSection() {
                     <RHF.Input
                         control={control}
                         label="Chave PIX"
-                        name="pixKey"
+                        name="person.pixKey"
                         disabled={!hasCpf}
                         containerClassName="col-span-2"
                     />

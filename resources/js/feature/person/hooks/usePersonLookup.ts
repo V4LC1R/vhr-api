@@ -2,7 +2,7 @@ import { useHttp } from "@inertiajs/react";
 import { Person } from "../types/types";
 
 export function usePersonLookup() {
-    const { get, processing } = useHttp<Record<string, never>, Person>();
+    const { get, processing,response } = useHttp<Record<string, never>, Person>();
 
     async function lookup(cpf: string): Promise<Person | null> {
         try {
@@ -14,5 +14,5 @@ export function usePersonLookup() {
         }
     }
 
-    return { lookup, isLookingUp: processing };
+    return { lookup, isLookingUp: processing,response };
 }

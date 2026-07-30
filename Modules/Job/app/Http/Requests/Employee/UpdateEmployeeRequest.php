@@ -39,6 +39,39 @@ class UpdateEmployeeRequest extends FormRequest
                 'string',
                 Rule::in(EmploymentTypeEnum::values()),
             ],
+
+            'person' => [
+                'sometimes',
+                'array',
+            ],
+
+            'person.birthdate' => [
+                'sometimes',
+                'date'
+            ],
+
+            'person.cpf' => [
+                'string',
+                'size:11',
+            ],
+            'person.name' => [
+                'string',
+                'max:255'
+            ],
+            'person.email' => [
+                'string',
+                'email',
+                'max:255',
+                //Rule::unique('core.persons', 'email') // Valida o único apontando para o seu schema 'core'
+            ],
+            'person.cellphone' => [
+                'string',
+                'max:20' // Espaço seguro caso usem máscaras como (XX) 9XXXX-XXXX
+            ],
+            'person.pixKey' => [
+                'string',
+                'max:255',
+            ]
         ];
     }
 

@@ -20,10 +20,9 @@ import { Workload } from "../../types/types"
 
 interface WorkloadRowActionsProps {
     workload: Workload
-    onChanged?: () => void
 }
 
-export function WorkloadRowActions({ workload, onChanged }: WorkloadRowActionsProps) {
+export function WorkloadRowActions({ workload }: WorkloadRowActionsProps) {
     const [editOpen, setEditOpen] = React.useState(false)
     const [deleteOpen, setDeleteOpen] = React.useState(false)
     const { update, isUpdatingWorkload } = useUpdateWorkload()
@@ -34,7 +33,6 @@ export function WorkloadRowActions({ workload, onChanged }: WorkloadRowActionsPr
             await update(workload.id, values)
             toast.success("Jornada atualizada com sucesso!")
             setEditOpen(false)
-            onChanged?.()
         } catch (error) {
             toast.error(extractErrorMessage(error, "Não foi possível atualizar a jornada."))
         }
@@ -45,7 +43,6 @@ export function WorkloadRowActions({ workload, onChanged }: WorkloadRowActionsPr
             await remove(workload.id)
             toast.success("Jornada excluída com sucesso!")
             setDeleteOpen(false)
-            onChanged?.()
         } catch (error) {
             // Ex.: 409 do back quando a jornada está vinculada a colaboradores.
             toast.error(extractErrorMessage(error, "Não foi possível excluir a jornada."))

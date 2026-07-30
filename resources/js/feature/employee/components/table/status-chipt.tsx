@@ -1,3 +1,4 @@
+import { Dot } from "@/components/dot";
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { EmploymentStatus } from "@/types/employment/types"
@@ -25,7 +26,7 @@ export function StatusChip({status}:Props){
             className={cn("rounded-2xl p-2.5",EMPLOYMENT_STATUS_STYLE[status])} 
             variant="outline"
         >
-            <span className="text-[6px]">&#9679;</span> {EMPLOYMENT_STATUS_LABELS[status]}
+            <Dot/> {EMPLOYMENT_STATUS_LABELS[status]}
         </Badge>
     )
 }

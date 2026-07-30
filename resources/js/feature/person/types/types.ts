@@ -1,3 +1,5 @@
+import { Employment } from "@/feature/employee/types";
+
 /**
  * Resource (resposta da API) — PersonResource.
  */
@@ -7,7 +9,9 @@ export interface Person {
     name: string;
     email: string;
     cellphone: string;
+    birthdate: string | null;
     pixKey: string | null;
     createdAt: string | null;
     updatedAt: string | null;
+    employments?:Employment[]
 }

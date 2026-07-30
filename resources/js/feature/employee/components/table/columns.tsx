@@ -30,7 +30,7 @@ export const EMPLOYMENT_STATUS_VARIANTS: Record<
     left: "outline",
 }
 
-export function getEmployeeColumns(isMobile: boolean, onDismissed?: () => void): ColumnDef<Employee>[] {
+export function getEmployeeColumns(isMobile: boolean): ColumnDef<Employee>[] {
     const columns: ColumnDef<Employee>[] = [
         {
             accessorKey: "person.name",
@@ -111,7 +111,7 @@ export function getEmployeeColumns(isMobile: boolean, onDismissed?: () => void):
     columns.push({
         id: "actions",
         size: 26,
-        cell: ({ row }) => <EmployeeRowActions employee={row.original} onDismissed={onDismissed} />,
+        cell: ({ row }) => <EmployeeRowActions employee={row.original} />,
     })
 
     return columns

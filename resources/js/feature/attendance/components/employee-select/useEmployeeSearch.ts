@@ -11,27 +11,23 @@ type UseEmployeeSearchParams = {
 /** Busca de colaboradores server-side (filtro `name` da API) com debounce. */
 export function useEmployeeSearch({ kinds }: UseEmployeeSearchParams = {}) {
     const [query, setQuery] = useState("")
+    const [debouncedQuery, setDebouncedQuery] = useState("")
 
-    const { list, data, isLoadingEmployees } = useListEmployee({
-        per_page: 200,
-        sort: "registerNumber",
-    })
+    useEffect(() => {
+        const handle = setTimeout(() => setDebouncedQuery(query), 300)
+        return () => clearTimeout(handle)
+    }, [query])
 
     const kindFilter = kinds?.length ? kinds.join(",") : undefined
 
-    useEffect(() => {
-        const handle = setTimeout(() => {
-            list({
-                filter: {
-                    ...(kindFilter ? { kind: kindFilter } : {}),
-                    ...(query ? { name: query } : {}),
-                },
-            })
-        }, 300)
-
-        return () => clearTimeout(handle)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [query, kindFilter])
+    const { data, isLoadingEmployees } = useListEmployee({
+        per_page: 200,
+        sort: "registerNumber",
+        filter: {
+            ...(kindFilter ? { kind: kindFilter } : {}),
+            ...(debouncedQuery ? { name: debouncedQuery } : {}),
+        },
+    })
 
     return {
         employees: data ?? [],

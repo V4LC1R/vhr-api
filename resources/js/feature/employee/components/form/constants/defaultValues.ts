@@ -1,13 +1,16 @@
 import { EmployeePayload } from "@/feature/employee/types";
 
 export const defaultEmployeeValues:EmployeePayload = {
-    companyId:'',
+    isProbationary:true,
     kind:"clt",
     workloadId:'',
     status:"experience",
-    name:'',
-    email:'',
-    cellphone:'',
-    pixKey:'',
-    cpf:'',
+    person:{
+        name:'',
+        email:'',
+        cellphone:'',
+        pixKey:'',
+        cpf:'',
+        birthdate:undefined,
+    },
 }

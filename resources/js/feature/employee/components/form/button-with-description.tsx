@@ -6,6 +6,7 @@ import { unknown } from "zod";
 type Props<T> = {
     onChange?:(value:T)=>void
     isSelected?:boolean
+    disabled?:boolean
     value?:T
     label?:string,
     description?:string
@@ -17,11 +18,13 @@ export function ButtonWithDescription<T>({
     label,
     description,
     icon,
-    isSelected=false
+    isSelected=false,
+    disabled=false
 }:Props<T>){
     return(
          <button
             type="button"
+            disabled={disabled}
             onClick={() => onChange?.(value?? unknown as T)}
             aria-pressed={isSelected}
             className={cn(
@@ -29,6 +32,7 @@ export function ButtonWithDescription<T>({
                 "hover:-translate-y-1 hover:border-accent/60 hover:shadow-primary/20",
                 "dark:hover:border-accent dark:hover:shadow-accent/20",
                 "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-accent/50 dark:focus-visible:ring-accent/50",
+                "disabled:pointer-events-none disabled:opacity-50",
                 isSelected
                     ? "border-primary bg-accent/10  dark:border-primary dark:bg-accent/10 dark:shadow-primary/10"
                     : "border-border bg-card"
@@ -45,7 +49,7 @@ export function ButtonWithDescription<T>({
             <div className="flex flex-row w-full items-center gap-2">
                 <div
                     className={cn(
-                        "relative z-10 flex size-10 items-center justify-center rounded-full transition-colors duration-300",
+                        "z-10 flex size-10 items-center justify-center rounded-full transition-colors duration-300",
                         isSelected
                             ? " bg-[#9A7B33] text-background dark:bg-accent dark:text-accent-foreground"
                             : "bg-muted text-muted-foreground group-hover:text-[#9A7B33] dark:group-hover:bg-accent dark:group-hover:text-accent-foreground"

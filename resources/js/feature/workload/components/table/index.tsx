@@ -13,12 +13,11 @@ type Props = {
     isLoading?: boolean
     next: () => void
     prev: () => void
-    onChanged?: () => void
 }
 
-export function WorkloadTable({ data, currentPage, lastPage, total, isLoading, next, prev, onChanged }: Props) {
+export function WorkloadTable({ data, currentPage, lastPage, total, isLoading, next, prev }: Props) {
     const isMobile = useIsMobile()
-    const columns = useMemo(() => getWorkloadColumns(isMobile, onChanged), [isMobile, onChanged])
+    const columns = useMemo(() => getWorkloadColumns(isMobile), [isMobile])
 
     return (
         <DataTable

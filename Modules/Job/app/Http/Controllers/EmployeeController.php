@@ -33,9 +33,11 @@ class EmployeeController extends Controller
 
     public function store(StoreEmployeeRequest $request)
     {
-        $employee = $this->service->create(
-            $request->toDTO()
-        );
+        $dto =  $request->toDTO();
+
+        $dto->companyId = currentCompany()->companyId;
+
+        $employee = $this->service->create($dto);
 
         return response()->json(
             $employee,
@@ -45,7 +47,11 @@ class EmployeeController extends Controller
 
     public function show(Employee $employee)
     {
-        $employee->load(['person', 'activeEmployment.workload']);
+        $employee->load([
+            'person',
+            'activeEmployment.workload',
+            'employments' => fn ($query) => $query->latest('registerAt')->with('workload'),
+        ]);
 
         return response()->json(
             $employee->toResource()
@@ -56,9 +62,13 @@ class EmployeeController extends Controller
         UpdateEmployeeRequest $request,
         Employee $employee
     ) {
+        $dto =  $request->toDTO();
+
+        $dto->companyId = currentCompany()->companyId;
+
         $employee = $this->service->update(
             $employee,
-            $request->toDTO()
+            $dto
         );
 
         return response()->json($employee);

@@ -18,15 +18,6 @@ class StoreEmployeeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'companyId' => [
-                'required',
-                'uuid',
-                Rule::exists(
-                    companyRepo()->getModelClass(),
-                    'id'
-                ),
-            ],
-
             'workloadId' => [
                 'required',
                 'uuid',
@@ -35,7 +26,7 @@ class StoreEmployeeRequest extends FormRequest
                     'id'
                 )->where(
                     'companyId',
-                    $this->input('companyId')
+                    currentCompany()->companyId
                 )->withoutTrashed(),
             ],
 
@@ -104,8 +95,6 @@ class StoreEmployeeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'companyId.required' => 'A empresa é obrigatória.',
-            'companyId.uuid' => 'A empresa informada é inválida.',
 
             'workloadId.required' => 'A jornada é obrigatória.',
             'workloadId.uuid' => 'A jornada informada é inválida.',

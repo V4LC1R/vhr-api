@@ -33,6 +33,9 @@ class PersonService implements PersonServiceInterface
     {
         $person = Person::query()
             ->where('cpf', $cpf)
+            ->with([
+                'employees.employments' => fn ($query) => $query->latest('registerAt')->with('workload'),
+            ])
             ->first();
 
         return $person?->toResource();

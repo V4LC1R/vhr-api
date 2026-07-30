@@ -9,6 +9,7 @@ import { EmployeePayload } from "@/feature/employee/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RHF } from "@/components/rhf-fields";
 import { WorkloadSelect } from "../workload-select";
+import { useEmployeeContext } from "../hooks/useEmployeeContext";
 
 interface ContractTypeSectionProps {
     kinds?: EmploymentType[]
@@ -21,6 +22,7 @@ export function ContractTypeSection({
     showProbationary = true,
 }: ContractTypeSectionProps) {
     const {control} = useFormContext<EmployeePayload>()
+    const {contracts} = useEmployeeContext()
     const contractTypes = kinds
         ? CONTRACT_TYPES.filter((type) => kinds.includes(type.value))
         : CONTRACT_TYPES
@@ -46,14 +48,15 @@ export function ContractTypeSection({
                             >
                                 {contractTypes.map((type) => {
                                     const Icon = type.icon
-
+                                    const disabled = contracts.some(c=>(c.kind ===type.value) && ['hired', 'experience',].includes(c.status)) 
                                     return (
                                         <ButtonWithDescription
                                             key={type.value}
+                                            disabled={disabled}
                                             value={type.value}
                                             label={type.label}
                                             description={type.description}
-                                            isSelected={field.value === type.value}
+                                            isSelected={field.value === type.value && !disabled}
                                             onChange={field.onChange}
                                             icon={<Icon/>}
                                         />
@@ -68,12 +71,12 @@ export function ContractTypeSection({
                 {showProbationary && (
                     <RHF.Checkbox
                         control={control}
-                        name="status"
+                        name="isProbationary"
                         label="Contrato de experiência"
                     />
                 )}
 
-                <WorkloadSelect name="workloadId"/>
+                <WorkloadSelect/>
             </CardContent>
         </Card>
     )

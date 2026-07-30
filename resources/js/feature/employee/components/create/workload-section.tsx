@@ -34,19 +34,14 @@ function formatTime(time: string) {
 
 export function WorkloadSection({ selectedWorkloadId, onSelectWorkload, workloadIdError }: WorkloadSectionProps) {
     const [open, setOpen] = React.useState(false)
-    const { list, data: workloads, isLoadingWorkloads } = useListWorkload({ per_page: 50 })
+    const { data: workloads, isLoadingWorkloads } = useListWorkload({ per_page: 50 })
     const { create: createWorkload, isCreatingWorkload } = useCreateWorkload()
-
-    React.useEffect(() => {
-        list()
-    }, [])
 
     const selectedWorkload = workloads?.find((w) => w.id === selectedWorkloadId)
 
     async function handleCreate(values: WorkloadPayload) {
         try {
             const workload = await createWorkload(values)
-            await list()
             onSelectWorkload(workload)
             setOpen(false)
         } catch (error) {

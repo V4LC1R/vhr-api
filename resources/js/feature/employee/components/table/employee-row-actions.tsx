@@ -13,10 +13,9 @@ import { Icon } from "@iconify/react"
 
 interface EmployeeRowActionsProps {
     employee: Employee
-    onDismissed?: () => void
 }
 
-export function EmployeeRowActions({ employee, onDismissed }: EmployeeRowActionsProps) {
+export function EmployeeRowActions({ employee }: EmployeeRowActionsProps) {
     const [dismissDialogOpen, setDismissDialogOpen] = React.useState(false)
     const { dismiss, isDismissing } = useDismissEmployee()
 
@@ -27,7 +26,6 @@ export function EmployeeRowActions({ employee, onDismissed }: EmployeeRowActions
             await dismiss(employee.id)
             toast.success("Colaborador desligado com sucesso!")
             setDismissDialogOpen(false)
-            onDismissed?.()
         } catch (error) {
             toast.error(extractErrorMessage(error, "Não foi possível desligar o colaborador."))
         }

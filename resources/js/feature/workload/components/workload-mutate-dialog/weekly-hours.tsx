@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
 import { UnityInput } from "./unity-input";
+import { useFormContext, useWatch } from "react-hook-form";
 
 const weeklyHours = [
     {
@@ -33,22 +34,22 @@ const weeklyHours = [
 type WeeklyHoursOption = typeof weeklyHours[0]
 
 type Props = {
-    value:number
-    onChange:(value:WeeklyHoursOption)=>void
+    name:string
 }
 
-export function WeeklyHours({value,onChange}:Props) {
+export function WeeklyHours({name}:Props) {
+    const { control, setValue } = useFormContext()
+    const value = useWatch({ control, name })
 
-    const handle = (value:WeeklyHoursOption)=>{
-        onChange(value)
+    const handle = (option:WeeklyHoursOption)=>{
+        setValue(name, option.value, { shouldValidate: true, shouldDirty: true })
     }
 
     return (
         <div className="grid gap-3 grid-cols-5">
-            <h4 className="col-span-5 font-semibold">Horas Semanais</h4>
 
             <div className="col-span-5">
-                <UnityInput name="weeklyHours"/>
+                <UnityInput label="Horas Semanais" name={name}/>
             </div>
 
             <span className="col-span-5 text-center text-xs text-muted-foreground">

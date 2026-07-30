@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { router } from "@inertiajs/react"
 import toast from "react-hot-toast"
 
@@ -22,7 +22,7 @@ type UseEmployeeFormOptions = {
 
 export function useEmployeeForm({ onSuccess }: UseEmployeeFormOptions = {}) {
     const { current } = useAuth()
-    const { fetchNextRegisterNumber, isLoadingRegisterNumber, registerNumber } = useNextRegisterNumber()
+    const { isLoadingRegisterNumber, registerNumber } = useNextRegisterNumber()
 
     const [cpf, setCpf] = useState("")
     const [name, setName] = useState("")
@@ -42,10 +42,6 @@ export function useEmployeeForm({ onSuccess }: UseEmployeeFormOptions = {}) {
 
     const { create: createPerson, isCreatingPerson } = useCreatePerson()
     const { create: createEmployee, isCreatingEmployee } = useCreateEmployee()
-
-    useEffect(() => {
-        fetchNextRegisterNumber()
-    }, [])
 
     function handleMatch(person: Person | null) {
         setMatchedPerson(person)
