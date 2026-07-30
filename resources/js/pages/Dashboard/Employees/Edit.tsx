@@ -32,7 +32,7 @@ export default function EmployeeEditPage({ id }: Props){
                 }
             ]}
         >
-            <EmployeeEditView employeeId={id} />
+            <EmployeeEditView id={id} />
         </Page.Dashboard>
     )
 }

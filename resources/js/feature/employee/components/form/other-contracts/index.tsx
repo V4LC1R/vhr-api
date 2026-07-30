@@ -1,9 +1,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ContractsRow } from "./contracts-row";
 import { useEmployeeContext } from "../hooks/useEmployeeContext";
+import { Employment } from "@/feature/employee/types";
 
-export function OtherContracts() {
-    const {contracts} = useEmployeeContext()
+type Props ={
+    contracts:Employment[]
+}
+
+export function OtherContracts({contracts}:Props) {
 
     if(contracts.length <=0) return null
 
@@ -18,7 +22,7 @@ export function OtherContracts() {
                 </CardDescription>
             </CardHeader>
             
-            <CardContent>
+            <CardContent className="flex flex-col gap-2">
                 {
                     contracts.map((v,i)=>(
                         <ContractsRow key={i} contract={v}/>

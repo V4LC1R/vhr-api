@@ -16,7 +16,6 @@ interface ContractTypeSectionProps {
     showProbationary?: boolean
 }
 
-
 export function ContractTypeSection({
     kinds,
     showProbationary = true,
@@ -62,8 +61,9 @@ export function ContractTypeSection({
                                         />
                                     )
                                 })}
+                                <FieldError errors={[fieldState.error]} />
                             </Field>
-                            <FieldError errors={[fieldState.error]} />
+                          
                         </>
                     )}
                 />

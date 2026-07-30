@@ -26,6 +26,7 @@ export type Employee = {
     registerNumber: string;
     person?: Person;
     activeEmployment?: Employment;
+    employments?:Employment[]
 }
 
 export type EmployeeListFilters = {

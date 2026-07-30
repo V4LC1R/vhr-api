@@ -2,8 +2,8 @@ import { z } from 'zod';
 import { EMPLOYMENT_STATUSES, EMPLOYMENT_TYPES } from '@/types/employment/types';
 
 export const employeeBaseSchema = z.object({
-  workloadId: z.uuid(),
-  kind: z.enum(EMPLOYMENT_TYPES),
+  workloadId: z.uuid({error:'Por favor selecione uma jornada'}).optional(),
+  kind: z.enum(EMPLOYMENT_TYPES,{error:'Por favor selecione um Modelo de contratação'}).optional(),
   status: z.enum(EMPLOYMENT_STATUSES),
   personId: z.uuid(),
   isProbationary:z.boolean()
@@ -23,24 +23,32 @@ export const employeeSchema = employeeBaseSchema
     })
   })
   .superRefine((data, ctx) => {
+    if (!data.workloadId) {
+      ctx.addIssue({ code: 'custom', message: 'Por favor selecione uma jornada', path: ['workloadId'] });
+    }
+
+    if (!data.kind) {
+      ctx.addIssue({ code: 'custom', message: 'Por favor selecione um Modelo de contratação', path: ['kind'] });
+    }
+
     if (data.personId) return;
 
     if(!data.person.birthdate){
-      ctx.addIssue({ code: 'custom', message: 'Data de nascimento é obrigatório', path: ['birthdate'] });
+      ctx.addIssue({ code: 'custom', message: 'Data de nascimento é obrigatório', path: ['person', 'birthdate'] });
     }
 
     if(!data.person.cpf){
-      ctx.addIssue({ code: 'custom', message: 'CPF é obrigatório', path: ['cpf'] });
+      ctx.addIssue({ code: 'custom', message: 'CPF é obrigatório', path: ['person', 'cpf'] });
     }
 
     if (!data.person.name) {
-      ctx.addIssue({ code: 'custom', message: 'Nome é obrigatório', path: ['name'] });
+      ctx.addIssue({ code: 'custom', message: 'Nome é obrigatório', path: ['person', 'name'] });
     }
     if (!data.person.email) {
-      ctx.addIssue({ code: 'custom', message: 'E-mail é obrigatório', path: ['email'] });
+      ctx.addIssue({ code: 'custom', message: 'E-mail é obrigatório', path: ['person', 'email'] });
     }
     if (!data.person.cellphone) {
-      ctx.addIssue({ code: 'custom', message: 'Celular é obrigatório', path: ['cellphone'] });
+      ctx.addIssue({ code: 'custom', message: 'Celular é obrigatório', path: ['person', 'cellphone'] });
     }
   });
 

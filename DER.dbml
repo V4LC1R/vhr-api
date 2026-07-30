@@ -166,6 +166,7 @@ Ref: core.userCompanies.personId > core.persons.id
 Ref: job.employees.personId > core.persons.id
 Ref: job.employees.companyId > core.companies.id
 Ref: job.employment.workloadId > job.workload.id
+Ref: job.employment.employeeId > job.employees.id
 Ref: job.workload.companyId > core.companies.id
 
 // Attendance

@@ -4,6 +4,7 @@ import { Dot } from "@/components/dot";
 import { StatusChip } from "@/feature/employee/components/table/status-chipt";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useController } from "react-hook-form";
 
 type Props ={
     contract:Employment
@@ -17,6 +18,8 @@ export function ContractsRow({contract}:Props) {
     const registerAt = contract.registerAt
         ? format(new Date(contract.registerAt), "dd/MM/yyyy", { locale: ptBR })
         : null
+
+
 
     return (
         <div className="bg-transparent border border-border rounded-xl px-4 py-4 flex flex-row gap-2 items-center justify-between">

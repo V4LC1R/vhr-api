@@ -1,31 +1,18 @@
-import { EmployeePayload } from "@/feature/employee/types";
+import { EmployeePayload, formatCellphone } from "@/feature/employee/types";
+import { parseBirthdate } from "@/feature/employee/types/mappers";
 import { usePersonLookup } from "@/feature/person/hooks/usePersonLookup";
 import { useDebouceValue } from "@/hooks/use-debounce";
-import { format } from "@react-input/mask";
-import { isValid, parse } from "date-fns";
 import { useEffect, useState } from "react";
 import { FieldPathByValue, useFormContext, useWatch } from "react-hook-form";
 import { useEmployeeContext } from "./useEmployeeContext";
 
-const CELLPHONE_MASK = { mask: "(##) # ####-####", replacement: { '#': /\d/ } };
 
 
-function formatCellphone(value: string | undefined): string {
-    if (!value) return ''
-
-    return format(value, CELLPHONE_MASK)
-}
-
-
-function parseBirthdate(value: string | null | undefined): Date | undefined {
-    if (!value) return undefined
-
-    const date = parse(value.slice(0, 10), 'yyyy-MM-dd', new Date())
-
-    return isValid(date) ? date : undefined
-}
-
-export function useCpfField(fieldName:FieldPathByValue<EmployeePayload, string | undefined>) {
+export function useCpfField(
+    fieldName:FieldPathByValue<EmployeePayload, string | undefined>,
+    dispatch:boolean = true
+) {
+    console.log('m::',dispatch)
     const {control,setValue} = useFormContext<EmployeePayload>()
     const {setContracts} = useEmployeeContext()
     const cpf:string | undefined = useWatch({name:fieldName,control})
@@ -39,11 +26,15 @@ export function useCpfField(fieldName:FieldPathByValue<EmployeePayload, string |
 
     const [hasOne,setHasOne] = useState(false)
 
+    
+
     useEffect(()=>{
+        if(!dispatch) return
         if(!cpfDebounced || cpfDebounced.length < 14) {
             setHasOne(false)
             return
         }
+
 
         let cancelled = false
 
@@ -55,6 +46,8 @@ export function useCpfField(fieldName:FieldPathByValue<EmployeePayload, string |
             setContracts(person?.employments ?? [])
 
             setValue('personId', person?.id, { shouldDirty:true })
+            setValue('kind', undefined, { shouldDirty:true })
+            setValue('workloadId',undefined,{ shouldDirty:true})
             setValue('person',{
                 cpf: cpfDebounced,
                 name: person?.name ?? '',
@@ -65,7 +58,6 @@ export function useCpfField(fieldName:FieldPathByValue<EmployeePayload, string |
             },
             {
                 shouldDirty:true,
-                shouldValidate:true
             })
         })
 

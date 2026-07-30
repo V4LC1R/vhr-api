@@ -7,22 +7,23 @@ import { OtherContracts } from "./other-contracts";
 import { Button } from "@/components/ui/button";
 import { useEmployeeContext } from "./hooks/useEmployeeContext";
 import { Spinner } from "@/components/ui/spinner";
+import { Employee } from "../../types";
 
+type Props ={
+    current?:Employee
+}
 
-
-export function EmployeeFormFields() {
-    const {form,submit,isCreating,isLoading} = useEmployeeForm({})
+export function EmployeeFormFields({current}:Props) {
+    const {form,submit,isCreating,isLoading} = useEmployeeForm({currentEmployee:current})
     const {contracts} = useEmployeeContext()
-
-    console.log(form.formState.errors)
-
     const alreadyAnotherContract = contracts.length > 0
     return (
         <RHF.Form form={form} onSubmit={submit} className="gap-4 flex flex-col">
             <EmployeeHero/>
-            <PersonSection/>
+            <PersonSection autoComplete={!current}/>
             <ContractTypeSection/>
-            <OtherContracts/>
+
+            <OtherContracts contracts={current?.employments ?? contracts}/>
 
             <div className="w-full flex flex-row justify-end">
                 <Button disabled={isLoading} type="submit" className="p-4">

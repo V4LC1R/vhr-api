@@ -12,9 +12,6 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        // A exclusão de jornada via API é soft delete — vínculos encerrados
-        // continuam referenciando a jornada (histórico). O restrict substitui o
-        // cascade pra nenhum hard delete direto no banco apagar vínculos junto.
         Schema::table('job.employments', function (Blueprint $table) {
             $table->dropForeign(['workloadId']);
             $table->foreign('workloadId')

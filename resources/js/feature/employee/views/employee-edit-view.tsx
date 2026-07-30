@@ -9,12 +9,10 @@ type Props ={
 export function EmployeeEditView({ id }: Props) {
     const {employee} = useEmployee(id)
 
-    
-
     return (
         <div className="flex flex-col gap-4 pb-6">
             <EmployeeContextProvider>
-                <EmployeeFormFields/>
+                <EmployeeFormFields current={employee}/>
             </EmployeeContextProvider>
         </div>
     )

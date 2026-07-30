@@ -7,12 +7,15 @@ import { useFormContext } from "react-hook-form"
 import { EmployeePayload } from "@/feature/employee/types"
 import { useCpfField } from "../hooks/useCpfField";
 
+type Props ={
+    autoComplete?:boolean
+}
 
-export function PersonSection() {
+export function PersonSection({autoComplete=true}:Props) {
     const {control} = useFormContext<EmployeePayload>()
 
 
-    const {isLookingUp,hasCpf} = useCpfField('person.cpf')
+    const {isLookingUp,hasCpf} = useCpfField('person.cpf',autoComplete)
 
     return (
         <Card>
