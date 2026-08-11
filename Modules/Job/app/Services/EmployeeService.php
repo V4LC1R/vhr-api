@@ -3,119 +3,38 @@
 namespace Modules\Job\Services;
 
 use DB;
-use App\Contracts\CompanyRepositoryInterface;
-use App\Contracts\EmployeeRepositoryInterface;
-use App\Contracts\EmploymentRepositoryInterface;
-use App\Contracts\PersonRepositoryInterface;
-use App\Contracts\PersonServiceInterface;
-use App\Contracts\WorkloadRepositoryInterface;
-use App\Exceptions\UniqueConstraintException;
-use App\Helpers\DatabaseExceptionResolver;
-use Illuminate\Database\QueryException;
 use Modules\Job\Data\EmployeeData;
-use Modules\Job\Enums\EmploymentStatusEnum;
-use Modules\Job\Enums\EmploymentTypeEnum;
+use Modules\Job\Data\UpdateEmployeeData;
 use Modules\Job\Models\Employee;
 use Modules\Job\Queries\EmployeeListQuery;
-use Spatie\LaravelData\Optional;
+use Modules\Job\UseCases\Employee\CreateEmployeeUseCase;
+use Modules\Job\UseCases\Employee\DismissEmployeeUseCase;
+use Modules\Job\UseCases\Employee\ResolveNextRegisterNumberUseCase;
+use Modules\Job\UseCases\Employee\UpdateEmployeeUseCase;
 
 class EmployeeService
 {
     public function __construct(
-        protected EmployeeRepositoryInterface $employeeRepository,
-        protected EmploymentRepositoryInterface $employmentRepository,
-        protected CompanyRepositoryInterface $companyRepository,
-        protected PersonRepositoryInterface $personRepository,
-        protected PersonServiceInterface $personService,
-        protected WorkloadRepositoryInterface $workloadRepository,
+        protected CreateEmployeeUseCase $createEmployeeUseCase,
+        protected DismissEmployeeUseCase $dismissEmployeeUseCase,
+        protected UpdateEmployeeUseCase $updateEmployeeUseCase,
+        protected ResolveNextRegisterNumberUseCase $resolveNextRegisterNumberUseCase,
     ) {
     }
 
     public function create(EmployeeData $data)
     {
-        $company  = $this->findCompany($data->companyId);
-        $person   = $data->personId instanceof Optional
-            ? $this->personService->create($data->person)
-            : $this->findPerson($data->personId);
-        $workload = $this->findWorkload($data->workloadId);
-
-        $kind = $data->kind instanceof Optional
-            ? EmploymentTypeEnum::CLT->value
-            : $data->kind;
-
-        $this->ensureWorkloadBelongsToCompany($workload, $company->id);
-        $this->ensureNoActiveEmployment($company->id, $person->id, $kind);
-
-        return DB::transaction(function () use ($data, $company, $person, $kind) {
-            $employee = $this->resolveOrCreateEmployee($company->id, $person->id);
-
-            $this->employmentRepository->create([
-                'employeeId'  => $employee->id,
-                'workloadId'  => $data->workloadId,
-                'kind'        => $kind,
-                'status'      => ! ($data->isProbationary instanceof Optional) && $data->isProbationary
-                    ? EmploymentStatusEnum::EXPERIENCE->value
-                    : EmploymentStatusEnum::HIRED->value,
-                'registerAt' => now()->utc(),
-            ]);
-
-            return $employee
-                ->fresh(['activeEmployment.workload', 'person'])
-                ->toResource();
-        });
+        return $this->createEmployeeUseCase->execute($data);
     }
 
-    public function update(Employee $employee, EmployeeData $data)
+    public function update(Employee $employee, UpdateEmployeeData $data)
     {
-        $workload = $this->findWorkload($data->workloadId);
-
-        $this->ensureWorkloadBelongsToCompany(
-            $workload,
-            $employee->companyId,
-            'A jornada não pertence à empresa do funcionário.'
-        );
-
-        $employee->loadMissing('activeEmployment');
-        $activeEmployment = $employee->activeEmployment;
-
-        if (! $activeEmployment) {
-            throw new \RuntimeException('O funcionário não possui vínculo ativo.');
-        }
-
-        $activeEmployment->update([
-            'status'     => $data->status instanceof Optional
-                ? $activeEmployment->status->value
-                : $data->status,
-            'workloadId' => $data->workloadId,
-            'kind'       => $data->kind instanceof Optional
-                ? $activeEmployment->kind->value
-                : $data->kind,
-        ]);
-
-        return $employee
-            ->fresh(['activeEmployment.workload', 'person'])
-            ->toResource();
+        $this->updateEmployeeUseCase->execute($employee, $data);
     }
 
     public function dismiss(Employee $employee)
     {
-        $employee->loadMissing('activeEmployment');
-        $activeEmployment = $employee->activeEmployment;
-
-        if (! $activeEmployment) {
-            throw new \RuntimeException('O funcionário já foi desligado.');
-        }
-
-        return DB::transaction(function () use ($activeEmployment, $employee) {
-            $activeEmployment->update([
-                'status'  => EmploymentStatusEnum::LEFT->value,
-                'leftAt' => now()->utc(),
-            ]);
-
-            return $employee
-                ->fresh(['activeEmployment.workload', 'person'])
-                ->toResource();
-        });
+        return $this->dismissEmployeeUseCase->execute($employee);
     }
 
     public function delete(Employee $employee): void
@@ -130,127 +49,6 @@ class EmployeeService
             ->through(fn (Employee $employee) => $employee->toResource());
     }
 
-    private function resolveOrCreateEmployee(string $companyId, string $personId): Employee
-    {
-        $employee = Employee::query()
-            ->where('companyId', $companyId)
-            ->where('personId', $personId)
-            ->first();
-
-        if ($employee) {
-            return $employee;
-        }
-
-        $maxAttempts = 3;
-
-        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
-            try {
-                return $this->employeeRepository->create([
-                    'companyId'      => $companyId,
-                    'personId'       => $personId,
-                    'registerNumber' => $this->getNextRegisterNumber($companyId),
-                ]);
-            } catch (QueryException $e) {
-                if (! DatabaseExceptionResolver::isUniqueViolation($e)) {
-                    throw $e;
-                }
-
-                if ($attempt === $maxAttempts) {
-                    throw new UniqueConstraintException(
-                        'Já existe um funcionário cadastrado com os dados informados.',
-                        previous: $e
-                    );
-                }
-            }
-        }
-    }
-
-    private function findCompany(string $companyId)
-    {
-        $company = $this->companyRepository->findById($companyId);
-
-        if (! $company) {
-            throw new \RuntimeException('Empresa não encontrada.');
-        }
-
-        return $company;
-    }
-
-    private function findPerson(string $personId)
-    {
-        $person = $this->personRepository->findById($personId);
-
-        if (! $person) {
-            throw new \RuntimeException('Pessoa não encontrada.');
-        }
-
-        return $person;
-    }
-
-    private function findWorkload(string $workloadId)
-    {
-        $workload = $this->workloadRepository->findById($workloadId);
-
-        if (! $workload) {
-            throw new \RuntimeException('Jornada não encontrada.');
-        }
-
-        return $workload;
-    }
-
-    private function ensureWorkloadBelongsToCompany(
-        $workload,
-        string $companyId,
-        string $message = 'A jornada não pertence à empresa informada.'
-    ): void {
-        if ($workload->companyId !== $companyId) {
-            throw new \RuntimeException($message);
-        }
-    }
-
-    /**
-     * Só bloqueia CLT duplicado (a pessoa já é CLT ativo e o novo vínculo também
-     * seria CLT). Diarista/temporário/freelancer podem ser adicionados mesmo com
-     * um CLT ativo — são vínculos concorrentes, não substituem o CLT.
-     */
-    private function ensureNoActiveEmployment(string $companyId, string $personId, string $kind): void
-    {
-        if ($kind !== EmploymentTypeEnum::CLT->value) {
-            return;
-        }
-
-        $hasActiveClt = $this->employeeRepository
-            ->getModel()
-            ->newQuery()
-            ->where('companyId', $companyId)
-            ->where('personId', $personId)
-            ->whereHas('employments', fn ($q) => $q
-                ->where('kind', EmploymentTypeEnum::CLT->value)
-                ->whereIn('status', [
-                    EmploymentStatusEnum::HIRED->value,
-                    EmploymentStatusEnum::EXPERIENCE->value,
-                ]))
-            ->exists();
-
-        if ($hasActiveClt) {
-            throw new UniqueConstraintException(
-                'Esta pessoa já possui vínculo CLT ativo com a empresa.'
-            );
-        }
-    }
-
-    private function getNextRegisterNumber(string $companyId): int
-    {
-        return (
-            $this->employeeRepository
-                ->getModel()
-                ->newQuery()
-                ->where('companyId', $companyId)
-                ->max('registerNumber')
-            ?? 0
-        ) + 1;
-    }
-
     public function previewNextRegisterNumber(): int
     {
         $company = currentCompany();
@@ -259,6 +57,6 @@ class EmployeeService
             throw new \RuntimeException('Empresa não encontrada.');
         }
 
-        return $this->getNextRegisterNumber($company->companyId);
+        return $this->resolveNextRegisterNumberUseCase->execute($company->companyId);
     }
 }

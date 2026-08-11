@@ -20,6 +20,7 @@ interface EmployeeRepositoryInterface
 
     public function delete(string $id): bool;
 
+
     public function findByPersonId(
         string $personId,
         array $relations = []

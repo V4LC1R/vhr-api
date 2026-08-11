@@ -1,10 +1,47 @@
+// ==========================================
+// DER — VHR API
+// Gerado a partir das migrations reais (2026-08-01). Ver ARCHITECTURE.md para
+// as decisões de padrão de projeto e AVALIACAO.md para achados de auditoria.
+// ==========================================
+
 // Enums
 Enum UserStatus {
   active
   inactive
 }
 
+Enum PasswordResetTokenStatus {
+  pending
+  used
+}
 
+Enum EmploymentKind {
+  clt
+  dayli
+  temporary
+  freelancer
+}
+
+Enum EmploymentStatus {
+  hired
+  experience
+  left
+}
+
+Enum DailyEngagementType {
+  work
+  day_off
+  holiday
+  medical
+  absence
+}
+
+Enum DailyEngagementStatus {
+  draft
+  pending
+  approved
+  rejected
+}
 
 Enum TimeEntryType {
   entry
@@ -16,101 +53,134 @@ Enum TimeEntrySource {
   device
 }
 
-Enum DailyEngagementStatus {
-  draft
-  pending
-  approved
-  rejected
-}
-
-Enum DailyEngagementType {
-  work
-  day_off
-  holiday
-  medical
-  absence
-}
-
 // ==========================================
 // SCHEMA: CORE (Azul)
+// Pessoas, empresas, usuários — deliberadamente FORA do escopo de empresa
+// (uma pessoa/usuário pode se relacionar com várias empresas). Ver AVALIACAO.md
+// seção 1.1: hoje isso não tem uma checagem de posse equivalente ao global
+// scope usado por Job/Attendance — tratar como achado de segurança, não como
+// modelo de dados "errado" (o desenho de não-escopar é intencional).
 // ==========================================
 
 Table core.persons [headercolor: #2B6CB0] {
   id uuid [primary key]
+  cpf varchar(11) [unique, note: 'Nullable — obrigatório é imposto na validação, não no banco']
   name string [not null]
-  email string [not null]
+  email string [not null, unique]
   cellphone string [not null]
+  pixKey string [note: 'Dado financeiro; hoje sem cifragem em repouso']
+  birthdate date [not null]
+  deleted_at datetime
+  created_at datetime
+  updated_at datetime
 }
 
 Table core.companies [headercolor: #2B6CB0] {
   id uuid [primary key]
   name string [not null]
-  cnpj string [not null]
+  cnpj string [not null, unique]
+  deleted_at datetime
+  created_at datetime
+  updated_at datetime
 }
-
 
 Table core.users [headercolor: #2B6CB0] {
   id uuid [primary key]
-  email string [not null]
+  email string [not null, unique]
   password string [not null]
-  status UserStatus
+  status UserStatus [not null, default: 'active']
+  deleted_at datetime
+  created_at datetime
+  updated_at datetime
 }
 
-Table core.userCompanies [headercolor: #2B6CB0] {
+Table core.user_companies [headercolor: #2B6CB0] {
   id uuid [primary key]
   companyId uuid [not null]
   userId uuid [not null]
-  personId uuid
+  personId uuid [note: 'Nullable — vínculo pode existir antes de a pessoa ser cadastrada']
+  deleted_at datetime
   created_at datetime
   updated_at datetime
+
+  indexes {
+    (companyId, userId) [unique]
+  }
+
+  Note: 'Sujeito autorizável (Spatie Permission "teams"), não o User. currentCompany() é resolvido a partir daqui pelo middleware SetActiveCompany.'
+}
+
+Table core.password_reset_tokens [headercolor: #2B6CB0] {
+  id uuid [primary key]
+  token text [not null, unique, note: 'Hash SHA-256 do token; o valor em claro só existe na URL do e-mail']
+  status PasswordResetTokenStatus [not null, default: 'pending']
+  userId uuid [not null]
+  ipAddress varchar(45)
+  userAgent string
+  expiresAt datetime [not null]
+  requestedAt datetime [not null]
+  usedAt datetime
+  created_at datetime
+  updated_at datetime
+
+  indexes {
+    (token, userId)
+  }
 }
 
 // ==========================================
 // SCHEMA: JOB (Laranja)
 // ==========================================
 
-Enum EmploymentStatus {
-  hired
-  experience
-  left
-}
-
-Enum EmploymentType {
-  frelancer
-  dayli
-  temporary
-  completed
+Table job.workloads [headercolor: #D69E2E] {
+  id uuid [primary key]
+  companyId uuid [not null]
+  description string [not null]
+  monthlyHours integer [not null]
+  weeklyHours integer [not null]
+  entryTime time [not null]
+  leftTime time [not null]
+  intervalStartAt time [not null]
+  intervalEndAt time [not null]
+  deleted_at datetime
+  created_at datetime
+  updated_at datetime
 }
 
 Table job.employees [headercolor: #D69E2E] {
   id uuid [primary key]
   companyId uuid [not null]
   personId uuid [not null]
-  registerNumber number [not null]
+  registerNumber integer [not null, note: 'Sequencial por empresa, não global']
+  created_at datetime
+  updated_at datetime
+
+  indexes {
+    (companyId, personId) [unique, note: '1 pessoa só pode ter 1 employee por empresa']
+    (companyId, registerNumber) [unique]
+    companyId
+    personId
+  }
 }
 
-Table job.employment [headercolor: #D69E2E] {
+Table job.employments [headercolor: #D69E2E] {
   id uuid [primary key]
-  workloadId uuid [not null]
   employeeId uuid [not null]
-  status EmploymentStatus [not null]
-  kind EmploymentType [not null]
-  register_at datetime [not null]
-  left_at datetime
-}
+  workloadId uuid [not null]
+  kind EmploymentKind [not null, default: 'clt']
+  status EmploymentStatus [not null, default: 'experience']
+  registerAt datetime [not null]
+  leftAt datetime
+  created_at datetime
+  updated_at datetime
 
-Table job.workload [headercolor: #D69E2E] {
-  id uuid [primary key]
-  companyId uuid [not null]
-  description string [not null]
-  monthly_hours integer [not null]
-  weekly_hours integer [not null]
-  entry_time time [not null]
-  left_time time [not null]
-  interval_start_at time [not null]
-  interval_end_at time [not null]
-}
+  indexes {
+    employeeId
+    status
+  }
 
+  Note: 'Sem constraint no banco para "só 1 CLT ativo por pessoa" — a regra vive só na aplicação (EmploymentEligibilityGuard). Ver AVALIACAO.md.'
+}
 
 // ==========================================
 // SCHEMA: ATTENDANCE (Verde)
@@ -120,15 +190,15 @@ Table attendance.daily_engagements [headercolor: #38A169] {
   id uuid [primary key]
   companyId uuid [not null]
   employeeId uuid [not null]
-  workloadId uuid
+  workloadId uuid [note: 'Snapshot da jornada vigente no dia; SET NULL se a jornada for removida']
   date date [not null]
-  type DailyEngagementType [not null]
-  status DailyEngagementStatus [not null]
-  worked_minutes integer
-  expected_minutes integer
-  balance_minutes integer
-  diaria_value decimal
-  note string
+  type DailyEngagementType [not null, default: 'work']
+  status DailyEngagementStatus [not null, default: 'draft']
+  workedMinutes integer
+  expectedMinutes integer
+  balanceMinutes integer
+  diariaValue decimal(3,1) [note: 'Só para kind=dayli; teto 99.9 — frágil se virar valor monetário de verdade']
+  note string [note: 'Texto livre — risco de dado sensível (saúde) por transbordamento em dias type=medical']
   draftedBy uuid
   approvedBy uuid
   approvedAt datetime
@@ -137,6 +207,10 @@ Table attendance.daily_engagements [headercolor: #38A169] {
 
   indexes {
     (companyId, employeeId, date) [unique]
+    companyId
+    employeeId
+    status
+    date
   }
 }
 
@@ -144,36 +218,41 @@ Table attendance.time_entries [headercolor: #38A169] {
   id uuid [primary key]
   companyId uuid [not null]
   dailyEngagementId uuid [not null]
-  punched_at datetime [not null]
+  punchedAt datetime [not null, note: 'Gravado em UTC; front converte para o fuso na exibição']
   type TimeEntryType [not null]
-  source TimeEntrySource [not null]
+  source TimeEntrySource [not null, default: 'manual']
   note string
   created_at datetime
   updated_at datetime
-}
 
+  indexes {
+    dailyEngagementId
+    companyId
+  }
+}
 
 // ==========================================
 // RELATIONSHIPS / REFS
 // ==========================================
 
 // Core
-Ref: core.userCompanies.companyId > core.companies.id
-Ref: core.userCompanies.userId > core.users.id
-Ref: core.userCompanies.personId > core.persons.id
+Ref: core.user_companies.companyId > core.companies.id [delete: cascade]
+Ref: core.user_companies.userId > core.users.id [delete: cascade]
+Ref: core.user_companies.personId > core.persons.id [delete: set null]
+Ref: core.password_reset_tokens.userId > core.users.id [delete: cascade]
 
 // Job
-Ref: job.employees.personId > core.persons.id
-Ref: job.employees.companyId > core.companies.id
-Ref: job.employment.workloadId > job.workload.id
-Ref: job.employment.employeeId > job.employees.id
-Ref: job.workload.companyId > core.companies.id
+Ref: job.workloads.companyId > core.companies.id [delete: cascade]
+Ref: job.employees.companyId > core.companies.id [delete: cascade]
+Ref: job.employees.personId > core.persons.id [delete: cascade]
+Ref: job.employments.employeeId > job.employees.id [delete: cascade]
+Ref: job.employments.workloadId > job.workloads.id [delete: restrict]
 
 // Attendance
-Ref: attendance.daily_engagements.companyId > core.companies.id
-Ref: attendance.daily_engagements.employeeId > job.employees.id
-Ref: attendance.daily_engagements.workloadId > job.workload.id
-Ref: attendance.daily_engagements.draftedBy > core.userCompanies.id
-Ref: attendance.daily_engagements.approvedBy > core.userCompanies.id
-Ref: attendance.time_entries.companyId > core.companies.id
-Ref: attendance.time_entries.dailyEngagementId > attendance.daily_engagements.id
+Ref: attendance.daily_engagements.companyId > core.companies.id [delete: cascade]
+Ref: attendance.daily_engagements.employeeId > job.employees.id [delete: cascade]
+Ref: attendance.daily_engagements.workloadId > job.workloads.id [delete: set null]
+Ref: attendance.daily_engagements.draftedBy > core.user_companies.id [delete: set null]
+Ref: attendance.daily_engagements.approvedBy > core.user_companies.id [delete: set null]
+Ref: attendance.time_entries.companyId > core.companies.id [delete: cascade]
+Ref: attendance.time_entries.dailyEngagementId > attendance.daily_engagements.id [delete: cascade]

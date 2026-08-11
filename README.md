@@ -9,6 +9,7 @@ Sistema de gestão de recursos humanos multi-empresa. Digitaliza processos de RH
 | Documento | Conteúdo |
 |---|---|
 | [FLUXO.md](FLUXO.md) | Visão de ponta a ponta: módulos, ciclo de requisição, multi-empresa/autorização, modelo de dados e fluxos |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Padrões de projeto adotados, critério para introduzir novos, e o que foi conscientemente adiado |
 | [FRONTEND.md](FRONTEND.md) | Stack, arquitetura e workflow do front-end |
 | [DER.dbml](DER.dbml) | Modelo de dados (DBML) |
 | [Modules/Attendance/FLOW.md](Modules/Attendance/FLOW.md) | Detalhe do fluxo de ponto |

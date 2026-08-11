@@ -37,7 +37,7 @@ class StoreEmployeeRequest extends FormRequest
             ],
 
             'isProbationary' => [
-                'required',
+                'required_if:kind,clt',
                 'boolean',
             ],
 

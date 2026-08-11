@@ -5,9 +5,11 @@ namespace Modules\Job\Http\Requests\Employee;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Modules\Job\Data\EmployeeData;
+use Modules\Job\Data\UpdateEmployeeData;
 use Modules\Job\Enums\EmploymentStatusEnum;
 use Modules\Job\Enums\EmploymentTypeEnum;
 use Modules\Job\Models\Employee;
+use Modules\Job\Models\Employment;
 use Modules\Job\Models\Workload;
 
 class UpdateEmployeeRequest extends FormRequest
@@ -22,81 +24,75 @@ class UpdateEmployeeRequest extends FormRequest
         /** @var Employee $employee */
         $employee = $this->route('employee');
 
+        $workloadRule = [
+            'required',
+            'uuid',
+            Rule::exists(Workload::class, 'id')
+                ->where('companyId', $employee->companyId)
+                ->withoutTrashed(),
+        ];
+
+        $kindRule = [
+            'required',
+            'string',
+            Rule::in(EmploymentTypeEnum::values()),
+        ];
+
+        $employmentExists = fn () => Rule::exists(Employment::class, 'id')
+            ->where('employeeId', $employee->id);
+
         return [
-            'status' => [
-                'required',
-                Rule::in(EmploymentStatusEnum::values()),
-            ],
-            'workloadId' => [
-                'required',
-                'uuid',
-                Rule::exists(Workload::class, 'id')
-                    ->where('companyId', $employee->companyId)
-                    ->withoutTrashed(),
-            ],
-            'kind' => [
-                'required',
-                'string',
-                Rule::in(EmploymentTypeEnum::values()),
-            ],
+            'employment' => ['sometimes', 'array'],
 
-            'person' => [
-                'sometimes',
-                'array',
-            ],
+            'employment.add' => ['sometimes', 'array'],
+            'employment.add.*.workloadId' => $workloadRule,
+            'employment.add.*.kind' => $kindRule,
+            'employment.add.*.isProbationary' => ['sometimes', 'boolean'],
 
-            'person.birthdate' => [
-                'sometimes',
-                'date'
-            ],
+            'employment.update' => ['sometimes', 'array'],
+            'employment.update.*.id' => ['required', 'uuid', $employmentExists()],
+            'employment.update.*.status' => ['required', Rule::in(EmploymentStatusEnum::values())],
+            'employment.update.*.workloadId' => $workloadRule,
+            'employment.update.*.kind' => $kindRule,
 
-            'person.cpf' => [
-                'string',
-                'size:11',
-            ],
-            'person.name' => [
-                'string',
-                'max:255'
-            ],
-            'person.email' => [
-                'string',
-                'email',
-                'max:255',
-                //Rule::unique('core.persons', 'email') // Valida o único apontando para o seu schema 'core'
-            ],
-            'person.cellphone' => [
-                'string',
-                'max:20' // Espaço seguro caso usem máscaras como (XX) 9XXXX-XXXX
-            ],
-            'person.pixKey' => [
-                'string',
-                'max:255',
-            ]
+            // demissao
+            'employment.remove' => ['sometimes', 'array'],
+            'employment.remove.*' => ['uuid', $employmentExists()],
+
+            'person' => ['sometimes', 'array'],
+            'person.birthdate' => ['sometimes', 'date'],
+            'person.cpf' => ['string', 'size:11'],
+            'person.name' => ['string', 'max:255'],
+            'person.email' => ['string', 'email', 'max:255'],
+            'person.cellphone' => ['string', 'max:20'],
+            'person.pixKey' => ['string', 'max:255'],
         ];
     }
 
     public function messages(): array
     {
+        $employmentMessages = fn (string $prefix) => [
+            "{$prefix}.workloadId.required" => 'A jornada é obrigatória.',
+            "{$prefix}.workloadId.exists" => 'A jornada informada não pertence à empresa do funcionário.',
+            "{$prefix}.kind.required" => 'O tipo de contratação é obrigatório.',
+            "{$prefix}.kind.in" => 'O tipo de contratação informado é inválido.',
+        ];
+
         return [
-            'status.required' =>
-                'O status é obrigatório.',
-            'status.in' =>
-                'O status informado é inválido.',
-            'workloadId.required' =>
-                'A jornada é obrigatória.',
-            'workloadId.uuid' =>
-                'A jornada informada é inválida.',
-            'workloadId.exists' =>
-                'A jornada informada não pertence à empresa do funcionário.',
-            'kind.required' =>
-                'O tipo de contratação é obrigatório.',
-            'kind.in' =>
-                'O tipo de contratação informado é inválido.',
+            ...$employmentMessages('employment.add.*'),
+            ...$employmentMessages('employment.update.*'),
+
+            'employment.update.*.id.required' => 'O vínculo a ser atualizado é obrigatório.',
+            'employment.update.*.id.exists' => 'O vínculo informado não pertence a este funcionário.',
+            'employment.update.*.status.required' => 'O status é obrigatório.',
+            'employment.update.*.status.in' => 'O status informado é inválido.',
+
+            'employment.remove.*.exists' => 'O vínculo informado não pertence a este funcionário.',
         ];
     }
 
-    public function toDTO(): EmployeeData
+    public function toDTO(): UpdateEmployeeData
     {
-        return EmployeeData::from($this->validated());
+        return UpdateEmployeeData::from($this->validated());
     }
 }

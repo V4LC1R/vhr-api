@@ -16,7 +16,11 @@ interface EmploymentRepositoryInterface
 
     public function create(array $data): Model;
 
+    public function bulkCreate(array $data): void;
+
     public function update(string $id, array $data): ?Model;
 
     public function delete(string $id): bool;
+
+    public function findByCompanyAndPerson(string $companyId, string $personId): ?Model;
 }
