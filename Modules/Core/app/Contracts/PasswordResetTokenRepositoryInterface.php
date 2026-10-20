@@ -2,23 +2,19 @@
 
 declare(strict_types=1);
 
-namespace App\Contracts;
+namespace Modules\Core\Contracts;
 
+use App\Contracts\RepositoryInterface;
 use Modules\Core\Models\PasswordResetToken;
 
-interface PasswordResetTokenRepositoryInterface
+/**
+ * @extends RepositoryInterface<PasswordResetToken>
+ */
+interface PasswordResetTokenRepositoryInterface extends RepositoryInterface
 {
-    public function getModel();
-
-    public function findById(string $id, array $relations = []);
-
-    public function create(array $data);
-
     public function findValidByToken(string $token);
 
     public function markUsed(PasswordResetToken $token);
 
     public function invalidatePendingForUser(string $userId): void;
-
-    public function getModelClass(): string;
 }

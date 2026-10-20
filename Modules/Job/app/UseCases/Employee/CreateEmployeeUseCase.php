@@ -3,14 +3,14 @@
 namespace Modules\Job\UseCases\Employee;
 
 use DB;
-use App\Contracts\CompanyRepositoryInterface;
 use App\Contracts\EmployeeRepositoryInterface;
 use App\Contracts\EmploymentRepositoryInterface;
-use App\Contracts\PersonRepositoryInterface;
-use App\Contracts\PersonServiceInterface;
 use App\Exceptions\UniqueConstraintException;
 use App\Helpers\DatabaseExceptionResolver;
 use Illuminate\Database\QueryException;
+use Modules\Core\Contracts\CompanyRepositoryInterface;
+use Modules\Core\Contracts\PersonRepositoryInterface;
+use Modules\Core\Contracts\PersonServiceInterface;
 use Modules\Job\Data\EmployeeData;
 use Modules\Job\Data\EmploymentData;
 use Modules\Job\Domain\Employment\EmploymentCreator;
@@ -39,6 +39,8 @@ class CreateEmployeeUseCase
             : $this->findPerson($data->personId);
 
         return DB::transaction(function () use ($data, $company, $person) {
+            //buscar pelo cpf e substituir os dados pelos novos
+            //tem q fazer o treo da lgpd
             $employee = $this->resolveOrCreateEmployee($company->id, $person->id);
 
             $this->employementCreator->execute($employee, EmploymentData::from([

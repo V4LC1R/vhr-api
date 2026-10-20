@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Auth\Services;
 
-use App\Contracts\PasswordResetTokenRepositoryInterface;
-use App\Contracts\UserRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -13,6 +11,8 @@ use Modules\Auth\Data\ForgotPasswordData;
 use Modules\Auth\Data\ResetPasswordData;
 use Modules\Auth\Mail\PasswordResetMail;
 use Modules\Communication\Contracts\MailerInterface;
+use Modules\Core\Contracts\PasswordResetTokenRepositoryInterface;
+use Modules\Core\Contracts\UserRepositoryInterface;
 use Modules\Core\Enums\TokenPasswordStatusEnum;
 
 class PasswordResetService

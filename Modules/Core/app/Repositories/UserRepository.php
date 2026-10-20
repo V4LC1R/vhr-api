@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Core\Repositories;
 
-use App\Contracts\UserRepositoryInterface;
 use App\Supports\Abstracts\BaseRepository;
 use Modules\Core\Models\User;
-use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Contracts\UserRepositoryInterface;
 
 /**
  * @extends BaseRepository<User>

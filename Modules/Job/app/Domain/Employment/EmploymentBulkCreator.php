@@ -40,7 +40,7 @@ final class EmploymentBulkCreator
                 'workloadId'  => $employmentData->workloadId,
                 'kind'        => $kind,
                 'status'      => $status,
-                'registerAt' => now()->utc(),
+                'registerAt'  => now()->utc(),
             ];
         });
 

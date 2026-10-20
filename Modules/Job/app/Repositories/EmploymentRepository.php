@@ -31,7 +31,7 @@ class EmploymentRepository extends BaseRepository implements EmploymentRepositor
     }
 
     #[Override]
-    public function bulkCreate(array $data)
+    public function bulkCreate(array $data): void
     {
         $this->model
             ->newQuery()

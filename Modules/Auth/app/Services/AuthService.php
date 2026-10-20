@@ -2,11 +2,11 @@
 
 namespace Modules\Auth\Services;
 
-use App\Contracts\UserRepositoryInterface;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Modules\Auth\Data\AuthUserData;
+use Modules\Core\Contracts\UserRepositoryInterface;
 use Modules\Core\Http\Resources\UserResource;
 
 class AuthService

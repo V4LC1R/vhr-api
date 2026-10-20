@@ -6,6 +6,7 @@ use App\Exceptions\UniqueConstraintException;
 use App\Helpers\DatabaseExceptionResolver;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Contracts\CompanyRepositoryInterface;
 use Modules\Core\Data\CompanyData;
 use Modules\Core\Models\Company;
 use Modules\Core\Models\UserCompany;
@@ -13,6 +14,10 @@ use Spatie\Permission\PermissionRegistrar;
 
 class CompanyService
 {
+    public function __construct(
+        protected readonly CompanyRepositoryInterface $companyRepository
+    ) {
+    }
     /**
      * Cria a empresa e já vincula quem a criou como owner — sem isso a empresa
      * nasce inacessível (o seletor de empresas só lista as `userCompanies` do usuário).
@@ -21,7 +26,7 @@ class CompanyService
     {
         try {
             return DB::transaction(function () use ($data, $userId, $personId) {
-                $company = Company::create($data->toArray());
+                $company = $this->companyRepository->create($data->toArray());
 
                 $userCompany = UserCompany::create([
                     'companyId' => $company->id,
@@ -64,7 +69,7 @@ class CompanyService
     public function update(Company $company, CompanyData $data): mixed
     {
         try {
-            $company->update($data->toArray());
+            $this->companyRepository->update($company->id, $data->toArray());
 
             return $company->fresh()->toResource();
         } catch (QueryException $e) {
@@ -80,6 +85,6 @@ class CompanyService
 
     public function delete(Company $company): void
     {
-        $company->delete();
+        $this->companyRepository->delete($company->id);
     }
 }

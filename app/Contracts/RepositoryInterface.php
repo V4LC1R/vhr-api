@@ -6,22 +6,19 @@ namespace App\Contracts;
 
 use Illuminate\Database\Eloquent\Model;
 
-interface PersonCompanyRepositoryInterface
+/**
+ * @template TModel of Model
+ */
+interface RepositoryInterface
 {
-    public function getModel(): Model;
-
-    public function getModelClass(): string;
-
+    /** @return TModel|null */
     public function findById(string $id, array $relations = []): ?Model;
 
+    /** @return TModel */
     public function create(array $data): Model;
 
+    /** @return TModel|null */
     public function update(string $id, array $data): ?Model;
 
     public function delete(string $id): bool;
-
-    public function findByCompanyAndPerson(
-        string $companyId,
-        string $personId
-    ): ?Model;
 }

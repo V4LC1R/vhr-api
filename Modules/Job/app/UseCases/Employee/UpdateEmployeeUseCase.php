@@ -2,13 +2,12 @@
 
 namespace Modules\Job\UseCases\Employee;
 
-use App\Contracts\PersonRepositoryInterface;
 use Modules\Job\Data\UpdateEmployeeData;
 use Modules\Job\Models\Employee;
 use DB;
+use Modules\Core\Contracts\PersonRepositoryInterface;
 use Modules\Job\Domain\Employment\EmploymentBulkCreator;
 use Modules\Job\Domain\Employment\EmploymentBulkUpdater;
-use Spatie\LaravelData\Optional;
 
 class UpdateEmployeeUseCase
 {
@@ -20,20 +19,12 @@ class UpdateEmployeeUseCase
     }
     public function execute(Employee $employee, UpdateEmployeeData $data)
     {
-        DB::tranaction(function () use ($employee, $data) {
-            $employment = $data->employment;
 
-            $this->personRepository->update($employee->personId, $data->person);
+        DB::transaction(function () use ($employee, $data) {
 
-            if (!($employment->add instanceof Optional)) {
-                $this->bulkCreator->execute($employment->add, $employee);
-            }
+            $newEmployeeData = $employee->person()->fill($data->person);
 
-            if (!($employment->update instanceof Optional)) {
-                $this->bulkUpdater->execute($employment->add, $employee);
-            }
-
-
+            $this->personRepository->update($employee->personId, $newEmployeeData);
 
             return $employee
                 ->fresh([

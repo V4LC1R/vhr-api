@@ -10,7 +10,6 @@ use Spatie\LaravelData\Optional;
 class UpdateEmployeeData extends Data
 {
     public function __construct(
-        public EmploymentChangesData|Optional $employment,
         public array|Optional $person,
     ) {
     }

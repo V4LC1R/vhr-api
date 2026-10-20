@@ -2,10 +2,10 @@
 
 namespace Modules\Core\Services;
 
-use App\Contracts\PersonServiceInterface;
 use App\Exceptions\UniqueConstraintException;
 use App\Helpers\DatabaseExceptionResolver;
 use Illuminate\Database\QueryException;
+use Modules\Core\Contracts\PersonServiceInterface;
 use Modules\Core\Data\PersonData;
 use Modules\Core\Models\Person;
 

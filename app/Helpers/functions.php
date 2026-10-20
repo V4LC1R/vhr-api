@@ -1,14 +1,14 @@
 <?php
 
-use App\Contracts\CompanyRepositoryInterface;
 use App\Contracts\DailyEngagementRepositoryInterface;
 use App\Contracts\EmployeeRepositoryInterface;
 use App\Contracts\EmploymentRepositoryInterface;
-use App\Contracts\PasswordResetTokenRepositoryInterface;
-use App\Contracts\PersonRepositoryInterface;
 use App\Contracts\TimeEntryRepositoryInterface;
-use App\Contracts\UserRepositoryInterface;
 use App\Contracts\WorkloadRepositoryInterface;
+use Modules\Core\Contracts\CompanyRepositoryInterface;
+use Modules\Core\Contracts\PasswordResetTokenRepositoryInterface;
+use Modules\Core\Contracts\PersonRepositoryInterface;
+use Modules\Core\Contracts\UserRepositoryInterface;
 use Modules\Core\Models\UserCompany;
 
 if (! function_exists('companyRepo')) {

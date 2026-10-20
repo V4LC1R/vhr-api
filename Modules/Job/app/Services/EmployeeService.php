@@ -5,11 +5,11 @@ namespace Modules\Job\Services;
 use DB;
 use Modules\Job\Data\EmployeeData;
 use Modules\Job\Data\UpdateEmployeeData;
+use Modules\Job\Domain\Employment\ResolveNextRegisterNumber;
 use Modules\Job\Models\Employee;
 use Modules\Job\Queries\EmployeeListQuery;
 use Modules\Job\UseCases\Employee\CreateEmployeeUseCase;
 use Modules\Job\UseCases\Employee\DismissEmployeeUseCase;
-use Modules\Job\UseCases\Employee\ResolveNextRegisterNumberUseCase;
 use Modules\Job\UseCases\Employee\UpdateEmployeeUseCase;
 
 class EmployeeService
@@ -18,7 +18,7 @@ class EmployeeService
         protected CreateEmployeeUseCase $createEmployeeUseCase,
         protected DismissEmployeeUseCase $dismissEmployeeUseCase,
         protected UpdateEmployeeUseCase $updateEmployeeUseCase,
-        protected ResolveNextRegisterNumberUseCase $resolveNextRegisterNumberUseCase,
+        protected ResolveNextRegisterNumber $resolveNextRegisterNumber,
     ) {
     }
 
@@ -57,6 +57,6 @@ class EmployeeService
             throw new \RuntimeException('Empresa não encontrada.');
         }
 
-        return $this->resolveNextRegisterNumberUseCase->execute($company->companyId);
+        return $this->resolveNextRegisterNumber->execute($company->companyId);
     }
 }

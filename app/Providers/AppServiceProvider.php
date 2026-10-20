@@ -2,19 +2,20 @@
 
 namespace App\Providers;
 
-use App\Contracts\CompanyRepositoryInterface;
 use App\Contracts\DailyEngagementRepositoryInterface;
 use App\Contracts\EmployeeRepositoryInterface;
 use App\Contracts\EmploymentRepositoryInterface;
-use App\Contracts\PasswordResetTokenRepositoryInterface;
-use App\Contracts\PersonRepositoryInterface;
-use App\Contracts\PersonServiceInterface;
 use App\Contracts\TimeEntryRepositoryInterface;
-use App\Contracts\UserRepositoryInterface;
 use App\Contracts\WorkloadRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
 use Modules\Attendance\Repositories\DailyEngagementRepository;
 use Modules\Attendance\Repositories\TimeEntryRepository;
+//
+use Modules\Core\Contracts\CompanyRepositoryInterface;
+use Modules\Core\Contracts\PasswordResetTokenRepositoryInterface;
+use Modules\Core\Contracts\PersonRepositoryInterface;
+use Modules\Core\Contracts\PersonServiceInterface;
+use Modules\Core\Contracts\UserRepositoryInterface;
 use Modules\Core\Repositories\CompanyRepository;
 use Modules\Core\Repositories\PasswordResetTokenRepository;
 use Modules\Core\Repositories\PersonRepository;

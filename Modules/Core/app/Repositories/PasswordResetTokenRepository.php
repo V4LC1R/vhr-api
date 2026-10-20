@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Core\Repositories;
 
-use App\Contracts\PasswordResetTokenRepositoryInterface;
 use App\Supports\Abstracts\BaseRepository;
+use Modules\Core\Contracts\PasswordResetTokenRepositoryInterface;
 use Modules\Core\Enums\TokenPasswordStatusEnum;
 use Modules\Core\Models\PasswordResetToken;
 

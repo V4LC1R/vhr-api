@@ -2,13 +2,13 @@
 
 namespace Modules\Core\Services;
 
-use App\Contracts\UserRepositoryInterface;
 use App\Exceptions\UniqueConstraintException;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Data\UserData;
 use Modules\Core\Models\User;
 use Modules\Core\Models\UserCompany;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Modules\Core\Contracts\UserRepositoryInterface;
 use Spatie\Permission\PermissionRegistrar;
 
 class UserService
