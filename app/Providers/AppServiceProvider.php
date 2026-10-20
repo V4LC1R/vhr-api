@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Contracts\WorkloadRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
 use Modules\Attendance\Contracts\DailyEngagementRepositoryInterface;
 use Modules\Attendance\Contracts\TimeEntryRepositoryInterface;
@@ -21,6 +20,7 @@ use Modules\Core\Repositories\UserRepository;
 use Modules\Core\Services\PersonService;
 use Modules\Job\Contract\EmployeeRepositoryInterface;
 use Modules\Job\Contract\EmploymentRepositoryInterface;
+use Modules\Job\Contract\WorkloadRepositoryInterface;
 use Modules\Job\Repositories\EmployeeRepository;
 use Modules\Job\Repositories\EmploymentRepository;
 use Modules\Job\Repositories\WorkloadRepository;

@@ -3,8 +3,8 @@
 namespace Modules\Job\Services;
 
 use DB;
-use App\Contracts\WorkloadRepositoryInterface;
 use App\Exceptions\DomainException;
+use Modules\Job\Contract\WorkloadRepositoryInterface;
 use Modules\Job\Data\WorkloadData;
 use Modules\Job\Enums\EmploymentStatusEnum;
 use Modules\Job\Models\Workload;

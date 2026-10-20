@@ -1,6 +1,5 @@
 <?php
 
-use App\Contracts\WorkloadRepositoryInterface;
 use Modules\Attendance\Contracts\DailyEngagementRepositoryInterface;
 use Modules\Attendance\Contracts\TimeEntryRepositoryInterface;
 use Modules\Core\Contracts\CompanyRepositoryInterface;
@@ -10,6 +9,7 @@ use Modules\Core\Contracts\UserRepositoryInterface;
 use Modules\Core\Models\UserCompany;
 use Modules\Job\Contract\EmployeeRepositoryInterface;
 use Modules\Job\Contract\EmploymentRepositoryInterface;
+use Modules\Job\Contract\WorkloadRepositoryInterface;
 
 if (! function_exists('companyRepo')) {
     function companyRepo(): CompanyRepositoryInterface
