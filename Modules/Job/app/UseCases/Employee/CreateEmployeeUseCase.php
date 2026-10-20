@@ -3,14 +3,14 @@
 namespace Modules\Job\UseCases\Employee;
 
 use DB;
-use App\Contracts\EmployeeRepositoryInterface;
-use App\Contracts\EmploymentRepositoryInterface;
 use App\Exceptions\UniqueConstraintException;
 use App\Helpers\DatabaseExceptionResolver;
 use Illuminate\Database\QueryException;
 use Modules\Core\Contracts\CompanyRepositoryInterface;
 use Modules\Core\Contracts\PersonRepositoryInterface;
 use Modules\Core\Contracts\PersonServiceInterface;
+use Modules\Job\Contract\EmployeeRepositoryInterface;
+use Modules\Job\Contract\EmploymentRepositoryInterface;
 use Modules\Job\Data\EmployeeData;
 use Modules\Job\Data\EmploymentData;
 use Modules\Job\Domain\Employment\EmploymentCreator;

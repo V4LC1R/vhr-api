@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Job\Repositories;
 
-use App\Contracts\EmploymentRepositoryInterface;
 use App\Supports\Abstracts\BaseRepository;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Job\Contract\EmploymentRepositoryInterface;
 use Modules\Job\Models\Employment;
 use Override;
 

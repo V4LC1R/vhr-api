@@ -2,7 +2,7 @@
 
 namespace Modules\Job\Domain\Employment;
 
-use App\Contracts\EmployeeRepositoryInterface;
+use Modules\Job\Contract\EmployeeRepositoryInterface;
 
 class ResolveNextRegisterNumber
 {

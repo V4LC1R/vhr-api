@@ -3,8 +3,8 @@
 namespace Modules\Attendance\Services;
 
 use DB;
-use App\Contracts\DailyEngagementRepositoryInterface;
 use App\Exceptions\DomainException;
+use Modules\Attendance\Contracts\DailyEngagementRepositoryInterface;
 use Modules\Attendance\Data\DailyEngagementData;
 use Modules\Attendance\Enums\DailyEngagementStatusEnum;
 use Modules\Attendance\Models\DailyEngagement;

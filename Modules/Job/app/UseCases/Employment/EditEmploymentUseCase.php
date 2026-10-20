@@ -3,8 +3,8 @@
 namespace Modules\Job\UseCases\Employment;
 
 use DB;
+use Modules\Job\Contract\EmploymentRepositoryInterface;
 use Modules\Job\Data\EmploymentData;
-use App\Contracts\EmploymentRepositoryInterface;
 use Modules\Job\Domain\Employment\EmploymentEligibilityGuard;
 use Modules\Job\Models\Employment;
 

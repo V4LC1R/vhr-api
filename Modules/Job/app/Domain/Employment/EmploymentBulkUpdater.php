@@ -2,7 +2,7 @@
 
 namespace Modules\Job\Domain\Employment;
 
-use App\Contracts\EmploymentRepositoryInterface;
+use Modules\Job\Contract\EmploymentRepositoryInterface;
 use Modules\Job\Models\Employee;
 use Modules\Job\Data\EmploymentData;
 

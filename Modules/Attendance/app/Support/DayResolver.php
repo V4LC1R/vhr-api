@@ -2,7 +2,7 @@
 
 namespace Modules\Attendance\Support;
 
-use App\Contracts\DailyEngagementRepositoryInterface;
+use Modules\Attendance\Contracts\DailyEngagementRepositoryInterface;
 use Modules\Attendance\Enums\DailyEngagementStatusEnum;
 use Modules\Attendance\Enums\DailyEngagementTypeEnum;
 use Modules\Attendance\Models\DailyEngagement;

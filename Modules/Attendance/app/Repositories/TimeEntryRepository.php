@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Attendance\Repositories;
 
-use App\Contracts\TimeEntryRepositoryInterface;
 use App\Supports\Abstracts\BaseRepository;
+use Modules\Attendance\Contracts\TimeEntryRepositoryInterface;
 use Modules\Attendance\Models\TimeEntry;
 
 /**

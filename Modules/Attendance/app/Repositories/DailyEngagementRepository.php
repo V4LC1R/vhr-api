@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Attendance\Repositories;
 
-use App\Contracts\DailyEngagementRepositoryInterface;
 use App\Supports\Abstracts\BaseRepository;
+use Modules\Attendance\Contracts\DailyEngagementRepositoryInterface;
 use Modules\Attendance\Models\DailyEngagement;
 
 /**

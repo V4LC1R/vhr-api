@@ -2,7 +2,7 @@
 
 namespace Modules\Job\Domain\Employment;
 
-use App\Contracts\EmploymentRepositoryInterface;
+use Modules\Job\Contract\EmploymentRepositoryInterface;
 use Modules\Job\Data\EmploymentData;
 use Modules\Job\Enums\EmploymentStatusEnum;
 use Modules\Job\Enums\EmploymentTypeEnum;

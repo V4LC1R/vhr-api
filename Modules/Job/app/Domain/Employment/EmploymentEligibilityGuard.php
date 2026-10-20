@@ -2,9 +2,9 @@
 
 namespace Modules\Job\Domain\Employment;
 
-use App\Contracts\EmployeeRepositoryInterface;
 use App\Contracts\WorkloadRepositoryInterface;
 use App\Exceptions\UniqueConstraintException;
+use Modules\Job\Contract\EmployeeRepositoryInterface;
 use Modules\Job\Enums\EmploymentStatusEnum;
 use Modules\Job\Enums\EmploymentTypeEnum;
 
