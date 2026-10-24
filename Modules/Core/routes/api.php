@@ -9,8 +9,8 @@ Route::middleware(['auth:sanctum','current.company'])->prefix('v1')->group(funct
 
     // Precisa vir antes do apiResource('persons', ...): caso contrário
     // 'persons/lookup' seria capturado pela rota 'show' (persons/{person}).
-    Route::get('persons/lookup', [PersonController::class, 'lookup'])
-        ->name('core.persons.lookup');
+    // Route::get('persons/lookup', [PersonController::class, 'lookup'])
+    //     ->name('core.persons.lookup');
 
     Route::apiResource('persons', PersonController::class)->names([
         'index'   => 'core.persons.index',

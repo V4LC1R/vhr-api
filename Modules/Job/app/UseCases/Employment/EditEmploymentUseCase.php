@@ -6,9 +6,11 @@ use DB;
 use Modules\Job\Contract\EmploymentRepositoryInterface;
 use Modules\Job\Data\EmploymentData;
 use Modules\Job\Domain\Employment\EmploymentEligibilityGuard;
+use Modules\Job\Enums\EmploymentStatusEnum;
 use Modules\Job\Models\Employment;
+use Spatie\LaravelData\Optional;
 
-class BulkEditEmploymentUseCase
+class EditEmploymentUseCase
 {
     public function __construct(
         protected EmploymentRepositoryInterface $employmentRepository,
@@ -20,14 +22,18 @@ class BulkEditEmploymentUseCase
      * Summary of fill
      * @param array<EmploymentData> $data
      */
-    public function execute(Employment $employment, EmploymentData $data)
+    public function execute(Employment $employment, EmploymentData $data): Employment
     {
-        DB::transaction(function () use ($data) {
-             return $this->employementCreator->execute($employee, EmploymentData::from([
-                'workloadId'     => $data->workloadId,
-                'kind'           => $data->kind,
-                'isProbationary' => $data->isProbationary,
-             ]));
+        return DB::transaction(function () use ($data, $employment) {
+
+
+            return $this->employmentRepository->update($employment->id, [
+                'workloadId'  => $data->workloadId,
+                'kind'        => $kind,
+                'status'      => ! ($data->isProbationary instanceof Optional) && $data->isProbationary
+                    ? EmploymentStatusEnum::EXPERIENCE->value
+                    : EmploymentStatusEnum::HIRED->value,
+            ]);
         });
     }
 }

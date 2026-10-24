@@ -31,24 +31,24 @@ class PersonController extends Controller
 
     public function lookup(Request $request)
     {
-        $this->authorize('viewAny', Person::class);
+        // $this->authorize('viewAny', Person::class);
 
-        $cpf = preg_replace('/\D/', '', (string) $request->query('cpf'));
+        // $cpf = preg_replace('/\D/', '', (string) $request->query('cpf'));
 
-        Validator::make(
-            ['cpf' => $cpf],
-            ['cpf' => ['required', 'string', 'size:11']],
-        )->validate();
+        // Validator::make(
+        //     ['cpf' => $cpf],
+        //     ['cpf' => ['required', 'string', 'size:11']],
+        // )->validate();
 
-        $person = $this->service->findByCpf($cpf);
+        // $person = $this->service->findByCpf($cpf);
 
-        if (!$person) {
-            return response()->json([
-                'message' => 'Nenhuma pessoa encontrada para o CPF informado.',
-            ], Response::HTTP_NOT_FOUND);
-        }
+        // if (!$person) {
+        //     return response()->json([
+        //         'message' => 'Nenhuma pessoa encontrada para o CPF informado.',
+        //     ], Response::HTTP_NOT_FOUND);
+        // }
 
-        return response()->json($person);
+        return response()->json([]);
     }
 
     public function store(StorePersonRequest $request)
@@ -57,13 +57,13 @@ class PersonController extends Controller
 
         $person = $this->service->create($data);
 
-        return response()->json($person, Response::HTTP_CREATED);
+        return response()->json($person->toResource(), Response::HTTP_CREATED);
     }
 
-    public function show(Person $person)
-    {
-        return response()->json($person->toResource());
-    }
+    // public function show(Person $person)
+    // {
+    //     return response()->json($person->toResource());
+    // }
 
     public function update(UpdatePersonRequest $request, Person $person)
     {

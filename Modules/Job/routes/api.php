@@ -21,7 +21,8 @@ Route::middleware(['auth:sanctum','current.company'])
         Route::apiResource(
             'employees',
             EmployeeController::class
-        )->names('employees');
+        )->except(['update'])
+         ->names('employees');
 
         Route::apiResource(
             'workloads',

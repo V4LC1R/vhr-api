@@ -4,20 +4,17 @@ namespace Modules\Job\Services;
 
 use DB;
 use Modules\Job\Data\EmployeeData;
-use Modules\Job\Data\UpdateEmployeeData;
 use Modules\Job\Domain\Employment\ResolveNextRegisterNumber;
 use Modules\Job\Models\Employee;
 use Modules\Job\Queries\EmployeeListQuery;
 use Modules\Job\UseCases\Employee\CreateEmployeeUseCase;
 use Modules\Job\UseCases\Employee\DismissEmployeeUseCase;
-use Modules\Job\UseCases\Employee\UpdateEmployeeUseCase;
 
 class EmployeeService
 {
     public function __construct(
         protected CreateEmployeeUseCase $createEmployeeUseCase,
         protected DismissEmployeeUseCase $dismissEmployeeUseCase,
-        protected UpdateEmployeeUseCase $updateEmployeeUseCase,
         protected ResolveNextRegisterNumber $resolveNextRegisterNumber,
     ) {
     }
@@ -25,11 +22,6 @@ class EmployeeService
     public function create(EmployeeData $data)
     {
         return $this->createEmployeeUseCase->execute($data);
-    }
-
-    public function update(Employee $employee, UpdateEmployeeData $data)
-    {
-        $this->updateEmployeeUseCase->execute($employee, $data);
     }
 
     public function dismiss(Employee $employee)

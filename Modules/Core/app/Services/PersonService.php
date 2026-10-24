@@ -7,17 +7,15 @@ use App\Helpers\DatabaseExceptionResolver;
 use Illuminate\Database\QueryException;
 use Modules\Core\Contracts\PersonServiceInterface;
 use Modules\Core\Data\PersonData;
+use Modules\Core\Exceptions\PersonUpdateException;
 use Modules\Core\Models\Person;
 
 class PersonService implements PersonServiceInterface
 {
-    public function create(array|PersonData $data)
+    public function create(PersonData $data): Person
     {
-        $data = PersonData::from($data);
-
         try {
-            return Person::create($data->toArray())
-                ->toResource();
+            return Person::create($data->toArray());
         } catch (QueryException $e) {
             if (DatabaseExceptionResolver::isUniqueViolation($e)) {
                 throw new UniqueConstraintException(
@@ -61,12 +59,14 @@ class PersonService implements PersonServiceInterface
             ->through(fn ($person) => $person->toResource());
     }
 
-    public function update(Person $person, PersonData $data): mixed
+    public function update(Person $person, PersonData $data): Person
     {
         try {
             $person->update($data->toArray());
 
-            return $person->fresh()->toResource();
+            $person->fresh();
+
+            return $person;
         } catch (QueryException $e) {
             if (DatabaseExceptionResolver::isUniqueViolation($e)) {
                 throw new UniqueConstraintException(
@@ -74,7 +74,7 @@ class PersonService implements PersonServiceInterface
                     previous: $e
                 );
             }
-            throw $e;
+            throw new PersonUpdateException();
         }
     }
 

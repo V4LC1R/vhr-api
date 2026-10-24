@@ -5,6 +5,8 @@ namespace Modules\Core\Http\Requests\Persons;
 use App\Rules\ValidCpf;
 use Illuminate\Foundation\Http\FormRequest;
 use Modules\Core\Data\PersonData;
+use Illuminate\Validation\Rule;
+use Modules\Core\Models\Person;
 
 class UpdatePersonRequest extends FormRequest
 {
@@ -12,8 +14,6 @@ class UpdatePersonRequest extends FormRequest
     {
         return true;
     }
-
-
 
     /**
      * Normaliza o CPF removendo qualquer máscara antes da validação.
@@ -30,12 +30,23 @@ class UpdatePersonRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Sem Rule::unique('core.persons', 'cpf'): mesmo padrão do campo
-            // 'email' — a unicidade é tratada pelo PersonService via constraint
-            // do banco (QueryException -> UniqueConstraintException).
-            'cpf'       => ['required', 'string', 'size:11', new ValidCpf()],
-            'name'      => ['required', 'string', 'max:255'],
-            'email'     => ['required', 'string', 'email', 'max:255'],
+            'cpf'   => [
+                'required',
+                'string',
+                'size:11',
+                new ValidCpf(),
+                Rule::unique(Person::class, 'cpf')
+                    ->ignore($this->route('person'))
+            ],
+            'name'  => ['required', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique(Person::class, 'email')
+                    ->ignore($this->route('person'))
+            ],
             'cellphone' => ['required', 'string', 'max:20'],
             'pixKey'    => ['nullable', 'string', 'max:255'],
             'birthdate' => [

@@ -3,9 +3,9 @@
 namespace Modules\Attendance\Services;
 
 use DB;
-use App\Contracts\DailyEngagementRepositoryInterface;
 use App\Exceptions\DomainException;
 use Illuminate\Support\Carbon;
+use Modules\Attendance\Contracts\DailyEngagementRepositoryInterface;
 use Modules\Attendance\Contracts\TimeEntryRepositoryInterface;
 use Modules\Attendance\Data\TimeEntryData;
 use Modules\Attendance\Enums\DailyEngagementStatusEnum;

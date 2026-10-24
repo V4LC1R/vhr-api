@@ -8,7 +8,6 @@ use Modules\Job\Models\Employee;
 use App\Http\Controllers\Controller;
 use Modules\Job\Services\EmployeeService;
 use Modules\Job\Http\Requests\Employee\StoreEmployeeRequest;
-use Modules\Job\Http\Requests\Employee\UpdateEmployeeRequest;
 
 class EmployeeController extends Controller
 {
@@ -56,22 +55,6 @@ class EmployeeController extends Controller
         return response()->json(
             $employee->toResource()
         );
-    }
-
-    public function update(
-        UpdateEmployeeRequest $request,
-        Employee $employee
-    ) {
-        $dto =  $request->toDTO();
-
-        $dto->companyId = currentCompany()->companyId;
-
-        $employee = $this->service->update(
-            $employee,
-            $dto
-        );
-
-        return response()->json($employee);
     }
 
     public function dismiss(Employee $employee)

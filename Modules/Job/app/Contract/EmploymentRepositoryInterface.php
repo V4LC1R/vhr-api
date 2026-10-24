@@ -10,7 +10,6 @@ use Modules\Job\Models\Employment;
 /**
  * @extends RepositoryInterface<Employment>
  */
-
 interface EmploymentRepositoryInterface extends RepositoryInterface
 {
     public function findByCompanyAndPerson(string $companyId, string $personId): ?Employment;

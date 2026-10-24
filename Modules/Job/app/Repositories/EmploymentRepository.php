@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\Job\Repositories;
 
 use App\Supports\Abstracts\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
 use Modules\Job\Contract\EmploymentRepositoryInterface;
 use Modules\Job\Models\Employment;
 use Override;
@@ -21,7 +20,7 @@ class EmploymentRepository extends BaseRepository implements EmploymentRepositor
     }
 
     #[Override]
-    public function findByCompanyAndPerson(string $companyId, string $personId): ?Model
+    public function findByCompanyAndPerson(string $companyId, string $personId): ?Employment
     {
          return $this->model
             ->newQuery()
@@ -30,8 +29,7 @@ class EmploymentRepository extends BaseRepository implements EmploymentRepositor
             ->first();
     }
 
-    #[Override]
-    public function bulkCreate(array $data): void
+    public function bulkCreate(array $data)
     {
         $this->model
             ->newQuery()

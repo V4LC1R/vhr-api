@@ -5,6 +5,8 @@ namespace Modules\Core\Http\Requests\Persons;
 use App\Rules\ValidCpf;
 use Illuminate\Foundation\Http\FormRequest;
 use Modules\Core\Data\PersonData;
+use Illuminate\Validation\Rule;
+use Modules\Core\Models\Person;
 
 class StorePersonRequest extends FormRequest
 {
@@ -54,7 +56,7 @@ class StorePersonRequest extends FormRequest
                 'string',
                 'email',
                 'max:255',
-                //Rule::unique('core.persons', 'email') // Valida o único apontando para o seu schema 'core'
+                Rule::unique(Person::class, 'email')
             ],
             'cellphone' => [
                 'required',
@@ -88,6 +90,7 @@ class StorePersonRequest extends FormRequest
 
     public function toDTO(): PersonData
     {
+
         return PersonData::from($this->validated());
     }
 }

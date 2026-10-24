@@ -14,13 +14,7 @@ class PersonPolicy
     public function viewAny(
         User $user
     ): bool {
-        if (!currentCompany()) {
-            return false;
-        }
-
-        return currentCompany()?->can(
-            'core.persons.view'
-        );
+        return false;
     }
 
 
@@ -32,9 +26,7 @@ class PersonPolicy
             return false;
         }
 
-        return currentCompany()?->can(
-            'core.persons.view'
-        );
+        return currentCompany()?->can('core.persons.view') && $person->hasCompanyLink();
     }
 
 
@@ -59,9 +51,15 @@ class PersonPolicy
             return false;
         }
 
-        return currentCompany()?->can(
-            'core.persons.update'
-        );
+        if (
+            ! currentCompany()?->can(
+                'core.persons.update'
+            )
+        ) {
+            return false;
+        }
+
+        return $person->hasCompanyLink();
     }
 
 
@@ -69,18 +67,6 @@ class PersonPolicy
         User $user,
         Person $person
     ): bool {
-        if (!currentCompany()) {
-            return false;
-        }
-
-        if (
-            ! currentCompany()?->can(
-                'core.persons.delete'
-            )
-        ) {
-            return false;
-        }
-
-        return ! $person->hasCompanyLink();
+        return false;
     }
 }
