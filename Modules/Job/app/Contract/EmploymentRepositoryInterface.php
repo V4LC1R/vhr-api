@@ -12,5 +12,5 @@ use Modules\Job\Models\Employment;
  */
 interface EmploymentRepositoryInterface extends RepositoryInterface
 {
-    public function findByCompanyAndPerson(string $companyId, string $personId): ?Employment;
+    public function findByEmployeeId(string $employeeId): ?Employment;
 }

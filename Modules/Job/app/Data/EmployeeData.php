@@ -14,8 +14,7 @@ class EmployeeData extends Data
         #[Uuid]
         public string|Optional $companyId,
         #[Uuid]
-        public string|Optional $personId,
-        public array|Optional $person,
+        public array $person,
         #[Uuid]
         public string|Optional $workloadId,
         public string|Optional $kind,

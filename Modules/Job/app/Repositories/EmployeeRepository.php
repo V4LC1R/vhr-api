@@ -30,4 +30,17 @@ class EmployeeRepository extends BaseRepository implements EmployeeRepositoryInt
             ->where('personId', $personId)
             ->first();
     }
+
+    public function findByPersonIdAndCompany(
+        string $personId,
+        string $companyId,
+        array $relations = []
+    ): ?Model {
+        return $this->model
+            ->newQuery()
+            ->with($relations)
+            ->where('personId', $personId)
+            ->where('companyId', $companyId)
+            ->first();
+    }
 }

@@ -16,7 +16,6 @@ use Modules\Job\Data\EmploymentData;
 use Modules\Job\Domain\Employment\EmploymentCreator;
 use Modules\Job\Domain\Employment\ResolveNextRegisterNumber;
 use Modules\Job\Models\Employee;
-use Spatie\LaravelData\Optional;
 
 class CreateEmployeeUseCase
 {
@@ -33,15 +32,12 @@ class CreateEmployeeUseCase
 
     public function execute(EmployeeData $data)
     {
-        $company = $this->findCompany($data->companyId);
-        $person  = $data->personId instanceof Optional
-            ? $this->personService->create($data->person)
-            : $this->findPerson($data->personId);
+        return DB::transaction(function () use ($data) {
 
-        return DB::transaction(function () use ($data, $company, $person) {
-            //buscar pelo cpf e substituir os dados pelos novos
-            //tem q fazer o treo da lgpd
-            $employee = $this->resolveOrCreateEmployee($company->id, $person->id);
+            $company = $this->findCompany($data->companyId);
+            $person  = $this->resolvePerson($data->person);
+
+            $employee = $this->resolveOrCreateEmployee($person->id, $company->id,);
 
             $this->employementCreator->execute($employee, EmploymentData::from([
                 'workloadId'     => $data->workloadId,
@@ -55,11 +51,11 @@ class CreateEmployeeUseCase
         });
     }
 
-    private function resolveOrCreateEmployee(string $companyId, string $personId): Employee
+    private function resolveOrCreateEmployee(string $personId, string $companyId): Employee
     {
         $employee = $this
-            ->employmentRepository
-            ->findByCompanyAndPerson($companyId, $personId);
+            ->employeeRepository
+            ->findByPersonIdAndCompany($personId, $companyId);
 
         if ($employee) {
             return $employee;
@@ -100,13 +96,17 @@ class CreateEmployeeUseCase
         return $company;
     }
 
-    private function findPerson(string $personId)
+    private function resolvePerson(array $data)
     {
-        $person = $this->personRepository->findById($personId);
+        //trocar para o findOrCreate
+        $person = $this->personRepository->findByCPF($data['cpf']);
 
         if (! $person) {
-            throw new \RuntimeException('Pessoa não encontrada.');
+            return $this->personRepository->create($data);
         }
+
+        $person->fill($data);
+        $person->save();
 
         return $person;
     }

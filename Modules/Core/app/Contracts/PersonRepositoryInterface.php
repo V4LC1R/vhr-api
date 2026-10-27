@@ -12,4 +12,5 @@ use Modules\Core\Models\Person;
  */
 interface PersonRepositoryInterface extends RepositoryInterface
 {
+    public function findByCPF(string $cpf): ?Person;
 }

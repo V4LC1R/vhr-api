@@ -4,6 +4,7 @@ namespace Modules\Job\Http\Requests\Employee;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Modules\Core\Models\Person;
 use Modules\Job\Data\EmployeeData;
 use Modules\Job\Enums\EmploymentTypeEnum;
 use Modules\Job\Models\Workload;
@@ -41,51 +42,41 @@ class StoreEmployeeRequest extends FormRequest
                 'boolean',
             ],
 
-            'personId' => [
-                'sometimes',
-                'uuid',
-                Rule::exists(
-                    personRepo()->getModelClass(),
-                    'id'
-                )
-            ],
-
             'person' => [
-                'required_without:personId',
-                'sometimes',
+                'required',
                 'array',
             ],
 
             'person.birthdate' => [
-                'required_without:personId',
-                'sometimes',
+                'required',
                 'date'
             ],
 
             'person.cpf' => [
-                'required_without:personId',
+                'required',
                 'string',
                 'size:11',
             ],
             'person.name' => [
-                'required_without:personId',
+                'required',
                 'string',
                 'max:255'
             ],
             'person.email' => [
-                'required_without:personId',
+                'required',
                 'string',
                 'email',
                 'max:255',
-                //Rule::unique('core.persons', 'email') // Valida o único apontando para o seu schema 'core'
+                Rule::unique(Person::class, 'email')
+                    ->ignore(Person::where('cpf', $this->input('person.cpf'))->value('id'))
             ],
             'person.cellphone' => [
-                'required_without:personId',
+                'required',
                 'string',
                 'max:20' // Espaço seguro caso usem máscaras como (XX) 9XXXX-XXXX
             ],
             'person.pixKey' => [
-                'required_without:personId',
+                'required',
                 'string',
                 'max:255',
             ]
@@ -104,9 +95,6 @@ class StoreEmployeeRequest extends FormRequest
 
             'isProbationary.required' => 'Informe se é um contrato de experiência.',
             'isProbationary.boolean' => 'O valor de contrato de experiência é inválido.',
-
-            'personId.required' => 'A pessoa é obrigatória.',
-            'personId.uuid' => 'A pessoa informada é inválida.',
 
             'person.cpf.required' => 'O CPF é obrigatório.',
             'person.cpf.size' => 'O CPF deve conter 11 dígitos.',

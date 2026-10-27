@@ -59,6 +59,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('employeeId');
             $table->uuid('workloadId');
+
             $table->enum('kind', ['clt', 'dayli', 'temporary', 'freelancer'])
                 ->default('clt');
             $table->enum('status', ['hired', 'experience', 'left'])

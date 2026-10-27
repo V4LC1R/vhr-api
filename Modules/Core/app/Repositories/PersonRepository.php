@@ -18,4 +18,12 @@ class PersonRepository extends BaseRepository implements PersonRepositoryInterfa
     ) {
         parent::__construct($model);
     }
+
+    public function findByCPF(string $cpf): ?Person
+    {
+        return $this->model
+            ->newQuery()
+            ->where('cpf', $cpf)
+            ->first();
+    }
 }

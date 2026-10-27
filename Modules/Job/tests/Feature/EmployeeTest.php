@@ -43,406 +43,441 @@ class EmployeeTest extends DBTestCase
         return compact('employee', 'workload');
     }
 
-    // public function testUsuarioComPermissaoPodeContratarFuncionario(): void
-    // {
-    //     $data = $this->criarDadosFuncionario();
-
-    //     $this->autenticarComPermissao(
-    //         'job.employees.create',
-    //         company: $data['company'],
-    //     );
-
-    //     $response = $this->postJson(
-    //         '/api/v1/employees',
-    //         [
-    //             'companyId'      => $data['company']->id,
-    //             'personId'       => $data['person']->id,
-    //             'workloadId'     => $data['workload']->id,
-    //             'kind'           => EmploymentTypeEnum::CLT->value,
-    //             'isProbationary' => true,
-    //         ]
-    //     );
-
-    //     $response->assertCreated();
-
-    //     $employee = Employee::query()
-    //         ->where('companyId', $data['company']->id)
-    //         ->where('personId', $data['person']->id)
-    //         ->firstOrFail();
-
-    //     $this->assertDatabaseHas('job.employments', [
-    //         'employeeId' => $employee->id,
-    //         'status'     => 'experience',
-    //         'workloadId' => $data['workload']->id,
-    //     ]);
-    // }
-
-    // public function testContratacaoSemExperienciaComecaComoContratado(): void
-    // {
-    //     $data = $this->criarDadosFuncionario();
-
-    //     $this->autenticarComPermissao(
-    //         'job.employees.create',
-    //         company: $data['company'],
-    //     );
-
-    //     $response = $this->postJson(
-    //         '/api/v1/employees',
-    //         [
-    //             'companyId'      => $data['company']->id,
-    //             'personId'       => $data['person']->id,
-    //             'workloadId'     => $data['workload']->id,
-    //             'kind'           => EmploymentTypeEnum::CLT->value,
-    //             'isProbationary' => false,
-    //         ]
-    //     );
-
-    //     $response->assertCreated();
-
-    //     $employee = Employee::query()
-    //         ->where('companyId', $data['company']->id)
-    //         ->where('personId', $data['person']->id)
-    //         ->firstOrFail();
-
-    //     $this->assertDatabaseHas('job.employments', [
-    //         'employeeId' => $employee->id,
-    //         'status'     => 'hired',
-    //         'workloadId' => $data['workload']->id,
-    //     ]);
-    // }
-
-    // public function testUsuarioComPermissaoPodeContratarFuncionarioComPessoaNova(): void
-    // {
-    //     $company  = Company::factory()->create();
-    //     $workload = Workload::factory()->create(['companyId' => $company->id]);
-
-    //     $this->autenticarComPermissao(
-    //         'job.employees.create',
-    //         company: $company,
-    //     );
-
-    //     $novaPessoa = [
-    //         'cpf'       => fake('pt_BR')->unique()->cpf(false),
-    //         'name'      => 'Fulano de Tal',
-    //         'email'     => fake()->unique()->safeEmail(),
-    //         'cellphone' => '11999999999',
-    //         'pixKey'    => fake()->unique()->safeEmail(),
-    //         'birthdate' => now()->timezone('Europe/Stockholm')->format('Y-m-d\TH:i:sP')
-    //     ];
-
-    //     $response = $this->postJson(
-    //         '/api/v1/employees',
-    //         [
-    //             'companyId'      => $company->id,
-    //             'person'         => $novaPessoa,
-    //             'workloadId'     => $workload->id,
-    //             'kind'           => EmploymentTypeEnum::CLT->value,
-    //             'isProbationary' => true,
-    //         ]
-    //     );
-
-    //     $response->assertCreated();
-
-    //     $person = Person::query()->where('cpf', $novaPessoa['cpf'])->firstOrFail();
-
-    //     $this->assertDatabaseHas('core.persons', [
-    //         'cpf'   => $novaPessoa['cpf'],
-    //         'name'  => $novaPessoa['name'],
-    //         'email' => $novaPessoa['email'],
-    //     ]);
-
-    //     $this->assertDatabaseHas('job.employees', [
-    //         'companyId' => $company->id,
-    //         'personId'  => $person->id,
-    //     ]);
-    // }
-
-    // public function testNaoPermiteContratarSemPersonIdNemPessoaNova(): void
-    // {
-    //     $company  = Company::factory()->create();
-    //     $workload = Workload::factory()->create(['companyId' => $company->id]);
-
-    //     $this->autenticarComPermissao(
-    //         'job.employees.create',
-    //         company: $company,
-    //     );
-
-    //     $this->postJson(
-    //         '/api/v1/employees',
-    //         [
-    //             'companyId'      => $company->id,
-    //             'workloadId'     => $workload->id,
-    //             'kind'           => EmploymentTypeEnum::CLT->value,
-    //             'isProbationary' => true,
-    //         ]
-    //     )->assertUnprocessable()
-    //         ->assertJsonValidationErrors([
-    //             'person.cpf',
-    //             'person.name',
-    //             'person.email',
-    //             'person.cellphone',
-    //         ]);
-    // }
-
-    // public function testPessoaNovaExigeCamposObrigatoriosQuandoSemPersonId(): void
-    // {
-    //     $company  = Company::factory()->create();
-    //     $workload = Workload::factory()->create(['companyId' => $company->id]);
-
-    //     $this->autenticarComPermissao(
-    //         'job.employees.create',
-    //         company: $company,
-    //     );
-
-    //     $this->postJson(
-    //         '/api/v1/employees',
-    //         [
-    //             'companyId'      => $company->id,
-    //             'person'         => [
-    //                 'cpf' => fake('pt_BR')->unique()->cpf(false),
-
-    //             ],
-    //             'workloadId'     => $workload->id,
-    //             'kind'           => EmploymentTypeEnum::CLT->value,
-    //             'isProbationary' => true,
-    //         ]
-    //     )->assertUnprocessable()
-    //         ->assertJsonValidationErrors([
-    //             'person.name',
-    //             'person.email',
-    //             'person.cellphone',
-
-    //         ]);
-    // }
-
-    // public function testUsuarioSemPermissaoNaoPodeContratarFuncionario(): void
-    // {
-    //     $this->autenticarSemPermissao();
-
-    //     $data = $this->criarDadosFuncionario();
-
-    //     $this->postJson(
-    //         '/api/v1/employees',
-    //         [
-    //             'companyId'  => $data['company']->id,
-    //             'personId'   => $data['person']->id,
-    //             'workloadId' => $data['workload']->id,
-    //         ]
-    //     )->assertForbidden();
-    // }
-
-    // public function testGeraMatriculaSequencialPorEmpresa(): void
-    // {
-    //     $data = $this->criarDadosFuncionario();
-
-    //     $this->autenticarComPermissao(
-    //         'job.employees.create',
-    //         company: $data['company'],
-    //     );
-
-    //     $this->postJson(
-    //         '/api/v1/employees',
-    //         [
-    //             'companyId'      => $data['company']->id,
-    //             'personId'       => $data['person']->id,
-    //             'workloadId'     => $data['workload']->id,
-    //             'kind'           => EmploymentTypeEnum::CLT->value,
-    //             'isProbationary' => true,
-    //         ]
-    //     )->assertCreated();
-
-    //     $person2 = Person::factory()->create();
-
-    //     $this->postJson(
-    //         '/api/v1/employees',
-    //         [
-    //             'companyId'      => $data['company']->id,
-    //             'personId'       => $person2->id,
-    //             'workloadId'     => $data['workload']->id,
-    //             'kind'           => EmploymentTypeEnum::CLT->value,
-    //             'isProbationary' => true,
-    //         ]
-    //     )->assertCreated();
-
-    //     $registerNumbers = Employee::query()
-    //         ->where('companyId', $data['company']->id)
-    //         ->orderBy('registerNumber')
-    //         ->pluck('registerNumber')
-    //         ->values()
-    //         ->all();
-
-    //     $this->assertEquals([1, 2], $registerNumbers);
-    // }
-
-    // public function testNaoPermiteVinculoAtivoDuplicado(): void
-    // {
-    //     $company  = Company::factory()->create();
-    //     $workload = Workload::factory()->create(['companyId' => $company->id]);
-
-    //     $this->autenticarComPermissao(
-    //         'job.employees.create',
-    //         company: $company,
-    //     );
-
-    //     $employee = Employee::factory()->create(['companyId' => $company->id]);
-
-    //     Employment::factory()->create([
-    //         'employeeId' => $employee->id,
-    //         'workloadId' => $workload->id,
-    //     ]);
-
-    //     $this->postJson(
-    //         '/api/v1/employees',
-    //         [
-    //             'companyId'      => $employee->companyId,
-    //             'personId'       => $employee->personId,
-    //             'workloadId'     => $workload->id,
-    //             'kind'           => EmploymentTypeEnum::CLT->value,
-    //             'isProbationary' => true,
-    //         ]
-    //     )->assertConflict();
-    // }
-
-    // public function testPermiteContratarMesmaPersonComVinculoNaoCltAtivo(): void
-    // {
-    //     $company  = Company::factory()->create();
-    //     $workload = Workload::factory()->create(['companyId' => $company->id]);
-
-    //     $this->autenticarComPermissao(
-    //         'job.employees.create',
-    //         company: $company,
-    //     );
-
-    //     $employee = Employee::factory()->create(['companyId' => $company->id]);
-
-    //     Employment::factory()->create([
-    //         'employeeId' => $employee->id,
-    //         'workloadId' => $workload->id,
-    //         'kind'       => EmploymentTypeEnum::FREELANCER->value,
-    //     ]);
-
-    //     $workload2 = Workload::factory()->create(['companyId' => $company->id]);
-
-    //     $this->postJson('/api/v1/employees', [
-    //         'companyId'      => $employee->companyId,
-    //         'personId'       => $employee->personId,
-    //         'workloadId'     => $workload2->id,
-    //         'kind'           => EmploymentTypeEnum::CLT->value,
-    //         'isProbationary' => true,
-    //     ])->assertCreated();
-    // }
-
-    // public function testPermiteContratarComoDiaristaMesmoComCltAtivo(): void
-    // {
-    //     $company  = Company::factory()->create();
-    //     $workload = Workload::factory()->create(['companyId' => $company->id]);
-
-    //     $this->autenticarComPermissao(
-    //         'job.employees.create',
-    //         company: $company,
-    //     );
-
-    //     $employee = Employee::factory()->create(['companyId' => $company->id]);
-
-    //     Employment::factory()->create([
-    //         'employeeId' => $employee->id,
-    //         'workloadId' => $workload->id,
-    //         'kind'       => EmploymentTypeEnum::CLT->value,
-    //     ]);
-
-    //     $workload2 = Workload::factory()->create(['companyId' => $company->id]);
-
-    //     // CLT ativo não deve impedir um vínculo dayli/temporary/freelancer concorrente
-    //     // — só bloqueia CLT duplicado (ver testNaoPermiteVinculoAtivoDuplicado).
-    //     $this->postJson('/api/v1/employees', [
-    //         'companyId'      => $employee->companyId,
-    //         'personId'       => $employee->personId,
-    //         'workloadId'     => $workload2->id,
-    //         'kind'           => EmploymentTypeEnum::DAYLI->value,
-    //         'isProbationary' => false,
-    //     ])->assertCreated();
-
-    //     $this->assertDatabaseHas('job.employments', [
-    //         'employeeId' => $employee->id,
-    //         'kind'       => EmploymentTypeEnum::DAYLI->value,
-    //     ]);
-    // }
-
-    // public function testPermiteRecontratacao(): void
-    // {
-    //     $company  = Company::factory()->create();
-    //     $workload = Workload::factory()->create(['companyId' => $company->id]);
-
-    //     $this->autenticarComPermissao(
-    //         'job.employees.create',
-    //         company: $company,
-    //     );
-
-    //     $employee = Employee::factory()->create(['companyId' => $company->id]);
-
-    //     Employment::factory()->left()->create([
-    //         'employeeId' => $employee->id,
-    //         'workloadId' => $workload->id,
-    //     ]);
-
-    //     $this->postJson(
-    //         '/api/v1/employees',
-    //         [
-    //             'companyId'      => $employee->companyId,
-    //             'personId'       => $employee->personId,
-    //             'workloadId'     => $workload->id,
-    //             'kind'           => EmploymentTypeEnum::CLT->value,
-    //             'isProbationary' => true,
-    //         ]
-    //     )->assertCreated();
-
-    //     // mesmo registro de funcionário, novo vínculo
-    //     $this->assertEquals(
-    //         1,
-    //         Employee::query()
-    //             ->where('companyId', $employee->companyId)
-    //             ->where('personId', $employee->personId)
-    //             ->count()
-    //     );
-
-    //     $this->assertEquals(2, $employee->employments()->count());
-    // }
-
-    // public function testUsuarioComPermissaoPodeVisualizarFuncionario(): void
-    // {
-    //     $company = Company::factory()->create();
-
-    //     $this->autenticarComPermissao('job.employees.view', company: $company);
-
-    //     $employee = Employee::factory()->create(['companyId' => $company->id]);
-
-    //     $this->getJson("/api/v1/employees/{$employee->id}")->assertOk();
-    // }
-
-    // public function testNaoAcessaFuncionarioDeOutraEmpresa(): void
-    // {
-    //     $companyA = Company::factory()->create();
-
-    //     $this->autenticarComPermissao('job.employees.view', company: $companyA);
-
-    //     $outraEmpresa = Company::factory()->create();
-    //     $employee     = Employee::factory()->create(['companyId' => $outraEmpresa->id]);
-
-    //     $this->getJson("/api/v1/employees/{$employee->id}")->assertNotFound();
-    // }
-
-    // public function testUsuarioComPermissaoPodeListarFuncionarios(): void
-    // {
-    //     $company = Company::factory()->create();
-
-    //     $this->autenticarComPermissao('job.employees.view', company: $company);
-
-    //     Employee::factory()->count(3)->create(['companyId' => $company->id]);
-
-    //     $this->getJson('/api/v1/employees')->assertOk();
-    // }
-
-    public function testOwnerPodeAtualizarFuncionario(): void
+    public function testUsuarioComPermissaoPodeContratarFuncionario(): void
+    {
+        $data = $this->criarDadosFuncionario();
+
+        $this->autenticarComPermissao(
+            'job.employees.create',
+            company: $data['company'],
+        );
+
+        $cpf = fake('pt_BR')->unique()->cpf(false);
+
+        $response = $this->postJson(
+            '/api/v1/employees',
+            [
+                'companyId'      => $data['company']->id,
+                'workloadId'     => $data['workload']->id,
+                'kind'           => EmploymentTypeEnum::CLT->value,
+                'isProbationary' => true,
+                'person' => [
+                    'name' => 'vasco',
+                    'email' => 'vasco@gama.com',
+                    'cellphone' => '6799999999',
+                    'birthdate' => now()->timezone('Europe/Stockholm')->format('Y-m-d\TH:i:sP'),
+                    'pixKey' => 'xxx-xxx-xxx-xxx',
+                    'cpf' => $cpf
+                ]
+            ]
+        );
+
+        $response->assertCreated();
+
+        $this->assertDatabaseHas('core.persons', [
+            'cpf' => $cpf
+        ]);
+    }
+
+    public function testContratacaoSemExperienciaComecaComoContratado(): void
+    {
+        $data = $this->criarDadosFuncionario();
+
+        $personData = $data['person']->toArray();
+        $personData['birthdate'] = now()->timezone('Europe/Stockholm')->format('Y-m-d\TH:i:sP');
+        $personData['pixKey']    = fake()->unique()->safeEmail();
+        $idPerson = $personData['id'];
+
+
+        unset($personData['id']);
+        unset($personData['updated_at']);
+        unset($personData['created_at']);
+
+        $this->autenticarComPermissao(
+            'job.employees.create',
+            company: $data['company'],
+        );
+
+        $response = $this->postJson(
+            '/api/v1/employees',
+            [
+                'companyId'      => $data['company']->id,
+                'workloadId'     => $data['workload']->id,
+                'kind'           => EmploymentTypeEnum::CLT->value,
+                'isProbationary' => false,
+                'person' => $personData
+            ]
+        );
+
+        $response->assertCreated();
+
+        $employee = Employee::query()
+            ->where('companyId', $data['company']->id)
+            ->where('personId', $idPerson)
+            ->firstOrFail();
+
+        $this->assertDatabaseHas('job.employments', [
+            'employeeId' => $employee->id,
+            'status'     => 'hired',
+            'workloadId' => $data['workload']->id,
+        ]);
+    }
+
+    public function testUsuarioComPermissaoPodeContratarFuncionarioComPessoaNova(): void
+    {
+        $company  = Company::factory()->create();
+        $workload = Workload::factory()->create(['companyId' => $company->id]);
+
+        $this->autenticarComPermissao(
+            'job.employees.create',
+            company: $company,
+        );
+
+        $novaPessoa = [
+            'cpf'       => fake('pt_BR')->unique()->cpf(false),
+            'name'      => 'Fulano de Tal',
+            'email'     => fake()->unique()->safeEmail(),
+            'cellphone' => '11999999999',
+            'pixKey'    => fake()->unique()->safeEmail(),
+            'birthdate' => now()->timezone('Europe/Stockholm')->format('Y-m-d\TH:i:sP')
+        ];
+
+        $response = $this->postJson(
+            '/api/v1/employees',
+            [
+                'companyId'      => $company->id,
+                'person'         => $novaPessoa,
+                'workloadId'     => $workload->id,
+                'kind'           => EmploymentTypeEnum::CLT->value,
+                'isProbationary' => true,
+            ]
+        );
+
+        $response->assertCreated();
+
+        $person = Person::query()->where('cpf', $novaPessoa['cpf'])->firstOrFail();
+
+        $this->assertDatabaseHas('core.persons', [
+            'cpf'   => $novaPessoa['cpf'],
+            'name'  => $novaPessoa['name'],
+            'email' => $novaPessoa['email'],
+        ]);
+
+        $this->assertDatabaseHas('job.employees', [
+            'companyId' => $company->id,
+            'personId'  => $person->id,
+        ]);
+    }
+
+    public function testNaoPermiteContratarSemPersonNemPessoaNova(): void
+    {
+        $company  = Company::factory()->create();
+        $workload = Workload::factory()->create(['companyId' => $company->id]);
+
+        $this->autenticarComPermissao(
+            'job.employees.create',
+            company: $company,
+        );
+
+        $this->postJson(
+            '/api/v1/employees',
+            [
+                'companyId'      => $company->id,
+                'workloadId'     => $workload->id,
+                'kind'           => EmploymentTypeEnum::CLT->value,
+                'isProbationary' => true,
+            ]
+        )->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'person.pixKey',
+                'person.cpf',
+                'person.name',
+                'person.email',
+                'person.cellphone',
+            ]);
+    }
+
+
+    public function testUsuarioSemPermissaoNaoPodeContratarFuncionario(): void
+    {
+        $this->autenticarSemPermissao();
+
+        $data = $this->criarDadosFuncionario();
+
+        $this->postJson(
+            '/api/v1/employees',
+            [
+                'companyId'  => $data['company']->id,
+                'personId'   => $data['person']->id,
+                'workloadId' => $data['workload']->id,
+            ]
+        )->assertForbidden();
+    }
+
+    public function testGeraMatriculaSequencialPorEmpresa(): void
+    {
+        $data = $this->criarDadosFuncionario();
+
+        $this->autenticarComPermissao(
+            'job.employees.create',
+            company: $data['company'],
+        );
+
+        $this->postJson(
+            '/api/v1/employees',
+            [
+                'companyId'      => $data['company']->id,
+                'workloadId'     => $data['workload']->id,
+                'kind'           => EmploymentTypeEnum::CLT->value,
+                'isProbationary' => true,
+                'person' => [
+                    'name' => 'vasco',
+                    'email' => 'vasco@gama.com',
+                    'cellphone' => '6799949999',
+                    'birthdate' => now()->timezone('Europe/Stockholm')->format('Y-m-d\TH:i:sP'),
+                    'pixKey' => 'xxx-xxx-xxx-xxx',
+                    'cpf' => fake('pt_BR')->unique()->cpf(false)
+                ]
+            ]
+        )->assertCreated();
+
+        $person2 = Person::factory()->create();
+
+        $this->postJson(
+            '/api/v1/employees',
+            [
+                'companyId'      => $data['company']->id,
+                'workloadId'     => $data['workload']->id,
+                'kind'           => EmploymentTypeEnum::CLT->value,
+                'isProbationary' => true,
+                'person' => [
+                    'name' => 'vasco',
+                    'email' => 'gigante@dacolina.com',
+                    'cellphone' => '6799997999',
+                    'birthdate' => now()->timezone('Europe/Stockholm')->format('Y-m-d\TH:i:sP'),
+                    'pixKey' => 'xxx-xxx-xxx-xxx',
+                    'cpf' => fake('pt_BR')->unique()->cpf(false)
+                ]
+            ]
+        )->assertCreated();
+
+        $registerNumbers = Employee::query()
+            ->where('companyId', $data['company']->id)
+            ->orderBy('registerNumber')
+            ->pluck('registerNumber')
+            ->values()
+            ->all();
+
+        $this->assertEquals([1, 2], $registerNumbers);
+    }
+
+    public function testNaoPermiteVinculoAtivoDuplicado(): void
+    {
+        $company  = Company::factory()->create();
+        $workload = Workload::factory()->create(['companyId' => $company->id]);
+
+        $this->autenticarComPermissao(
+            'job.employees.create',
+            company: $company,
+        );
+
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
+
+        $employee->loadMissing('person');
+
+        $person = $employee->person->toArray();
+
+        unset($person['id']);
+        unset($person['updated_at']);
+        unset($person['created_at']);
+        unset($person['updated_at']);
+
+        Employment::factory()->create([
+            'employeeId' => $employee->id,
+            'workloadId' => $workload->id,
+        ]);
+
+        $this->postJson(
+            '/api/v1/employees',
+            [
+                'companyId'      => $employee->companyId,
+                'workloadId'     => $workload->id,
+                'kind'           => EmploymentTypeEnum::CLT->value,
+                'isProbationary' => true,
+                'person' => $person
+            ]
+        )->assertConflict();
+    }
+
+    public function testPermiteContratarMesmaPersonComVinculoNaoCltAtivo(): void
+    {
+        $company  = Company::factory()->create();
+        $workload = Workload::factory()->create(['companyId' => $company->id]);
+
+        $this->autenticarComPermissao(
+            'job.employees.create',
+            company: $company,
+        );
+
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
+
+        Employment::factory()->create([
+            'employeeId' => $employee->id,
+            'workloadId' => $workload->id,
+            'kind'       => EmploymentTypeEnum::FREELANCER->value,
+        ]);
+
+        $workload2 = Workload::factory()->create(['companyId' => $company->id]);
+
+        $employee->loadMissing('person');
+
+        $person = $employee->person->toArray();
+
+        unset($person['id']);
+        unset($person['updated_at']);
+        unset($person['created_at']);
+        unset($person['updated_at']);
+
+        $this->postJson('/api/v1/employees', [
+            'companyId'      => $employee->companyId,
+            'workloadId'     => $workload2->id,
+            'kind'           => EmploymentTypeEnum::CLT->value,
+            'isProbationary' => true,
+            'person' => $person
+        ])->assertCreated();
+    }
+
+    public function testPermiteContratarComoDiaristaMesmoComCltAtivo(): void
+    {
+        $company  = Company::factory()->create();
+        $workload = Workload::factory()->create(['companyId' => $company->id]);
+
+        $this->autenticarComPermissao(
+            'job.employees.create',
+            company: $company,
+        );
+
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
+
+        Employment::factory()->create([
+            'employeeId' => $employee->id,
+            'workloadId' => $workload->id,
+            'kind'       => EmploymentTypeEnum::CLT->value,
+        ]);
+
+        $workload2 = Workload::factory()->create(['companyId' => $company->id]);
+
+        $employee->loadMissing('person');
+
+        $person = $employee->person->toArray();
+        $person['pixKey']    = fake()->unique()->safeEmail();
+
+        unset($person['id']);
+        unset($person['updated_at']);
+        unset($person['created_at']);
+        unset($person['updated_at']);
+
+        // CLT ativo não deve impedir um vínculo dayli/temporary/freelancer concorrente
+        // — só bloqueia CLT duplicado (ver testNaoPermiteVinculoAtivoDuplicado).
+        $this->postJson('/api/v1/employees', [
+            'companyId'      => $employee->companyId,
+            'workloadId'     => $workload2->id,
+            'kind'           => EmploymentTypeEnum::DAYLI->value,
+            'isProbationary' => false,
+            'person' => $person
+        ])->assertCreated();
+
+        $this->assertDatabaseHas('job.employments', [
+            'employeeId' => $employee->id,
+            'kind'       => EmploymentTypeEnum::DAYLI->value,
+        ]);
+    }
+
+    public function testPermiteRecontratacao(): void
+    {
+        $company  = Company::factory()->create();
+        $workload = Workload::factory()->create(['companyId' => $company->id]);
+
+        $this->autenticarComPermissao(
+            'job.employees.create',
+            company: $company,
+        );
+
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
+
+        Employment::factory()->left()->create([
+            'employeeId' => $employee->id,
+            'workloadId' => $workload->id,
+        ]);
+
+        $employee->loadMissing('person');
+
+        $person = $employee->person->toArray();
+        $person['pixKey']    = fake()->unique()->safeEmail();
+
+        unset($person['id']);
+        unset($person['updated_at']);
+        unset($person['created_at']);
+        unset($person['updated_at']);
+
+        $this->postJson(
+            '/api/v1/employees',
+            [
+                'companyId'      => $employee->companyId,
+                'person'         => $person,
+                'workloadId'     => $workload->id,
+                'kind'           => EmploymentTypeEnum::CLT->value,
+                'isProbationary' => true,
+            ]
+        )->assertCreated();
+
+        // mesmo registro de funcionário, novo vínculo
+        $this->assertEquals(
+            1,
+            Employee::query()
+                ->where('companyId', $employee->companyId)
+                ->where('personId', $employee->personId)
+                ->count()
+        );
+
+        $this->assertEquals(2, $employee->employments()->count());
+    }
+
+    public function testUsuarioComPermissaoPodeVisualizarFuncionario(): void
+    {
+        $company = Company::factory()->create();
+
+        $this->autenticarComPermissao('job.employees.view', company: $company);
+
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
+
+        $this->getJson("/api/v1/employees/{$employee->id}")->assertOk();
+    }
+
+    public function testNaoAcessaFuncionarioDeOutraEmpresa(): void
+    {
+        $companyA = Company::factory()->create();
+
+        $this->autenticarComPermissao('job.employees.view', company: $companyA);
+
+        $outraEmpresa = Company::factory()->create();
+        $employee     = Employee::factory()->create(['companyId' => $outraEmpresa->id]);
+
+        $this->getJson("/api/v1/employees/{$employee->id}")->assertNotFound();
+    }
+
+    public function testUsuarioComPermissaoPodeListarFuncionarios(): void
+    {
+        $company = Company::factory()->create();
+
+        $this->autenticarComPermissao('job.employees.view', company: $company);
+
+        Employee::factory()->count(3)->create(['companyId' => $company->id]);
+
+        $this->getJson('/api/v1/employees')->assertOk();
+    }
+
+    public function testOwnerPodeDemitirFuncionario(): void
     {
         $company = Company::factory()->create();
 
@@ -450,241 +485,99 @@ class EmployeeTest extends DBTestCase
 
         ['employee' => $employee] = $this->criarFuncionarioComVinculo($company);
 
-        $workload = Workload::factory()->create(['companyId' => $employee->companyId]);
+        $this->patchJson("/api/v1/employees/{$employee->id}/dismiss")->assertOk();
 
-        $this->putJson(
-            "/api/v1/employees/{$employee->id}",
-            [
-                'status'     => 'hired',
-                'workloadId' => $workload->id,
-                'kind'       => EmploymentTypeEnum::CLT->value,
-                'employment' => [
-                    'add' => [],
-                    'update'  => [],
-                    'remove'  => [],
-                ]
+        $latestEmployment = $employee->employments()->latest()->first();
 
-            ]
-        )->assertOk();
-
-        $this->assertDatabaseHas('job.employments', [
-            'employeeId' => $employee->id,
-            'workloadId' => $workload->id,
-            'status'     => 'hired',
-        ]);
+        $this->assertEquals('left', $latestEmployment->status->value);
+        $this->assertNotNull($latestEmployment->leftAt);
     }
 
-    // public function testNaoPodeAtribuirJornadaExcluida(): void
-    // {
-    //     $company = Company::factory()->create();
+    public function testRhPodeDemitirOutroFuncionario(): void
+    {
+        $company = Company::factory()->create();
 
-    //     $this->autenticarComRole('owner', company: $company);
+        $this->autenticarComRole('humanResource', company: $company);
 
-    //     ['employee' => $employee] = $this->criarFuncionarioComVinculo($company);
+        ['employee' => $employee] = $this->criarFuncionarioComVinculo($company);
 
-    //     $workload = Workload::factory()->create(['companyId' => $employee->companyId]);
-    //     $workload->delete();
+        $this->patchJson("/api/v1/employees/{$employee->id}/dismiss")->assertOk();
+    }
 
-    //     $this->putJson(
-    //         "/api/v1/employees/{$employee->id}",
-    //         [
-    //             'status'     => 'hired',
-    //             'workloadId' => $workload->id,
-    //             'kind'       => EmploymentTypeEnum::CLT->value,
-    //         ]
-    //     )->assertUnprocessable()
-    //         ->assertJsonValidationErrors('workloadId');
-    // }
+    public function testRhNaoPodeDemitirASiMesmo(): void
+    {
+        $company = Company::factory()->create();
+        $person  = Person::factory()->create();
 
-    // public function testOwnerPodeAtualizarTipoDeContratacao(): void
-    // {
-    //     $company = Company::factory()->create();
+        $this->autenticarComRole('humanResource', company: $company, person: $person);
 
-    //     $this->autenticarComRole('owner', company: $company);
+        $employee = Employee::factory()->create([
+            'companyId' => $company->id,
+            'personId'  => $person->id,
+        ]);
 
-    //     ['employee' => $employee] = $this->criarFuncionarioComVinculo($company);
+        $this->patchJson("/api/v1/employees/{$employee->id}/dismiss")->assertForbidden();
+    }
 
-    //     $workload = Workload::factory()->create(['companyId' => $employee->companyId]);
+    public function testFuncionarioComumNaoPodeDemitir(): void
+    {
+        $company = Company::factory()->create();
 
-    //     $this->putJson(
-    //         "/api/v1/employees/{$employee->id}",
-    //         [
-    //             'status'     => 'hired',
-    //             'workloadId' => $workload->id,
-    //             'kind'       => EmploymentTypeEnum::FREELANCER->value,
-    //         ]
-    //     )->assertOk();
+        $this->autenticarSemPermissao(company: $company);
 
-    //     $this->assertDatabaseHas('job.employments', [
-    //         'employeeId' => $employee->id,
-    //         'workloadId' => $workload->id,
-    //         'kind'       => 'freelancer',
-    //     ]);
-    // }
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
 
-    // public function testRhPodeAtualizarOutroFuncionario(): void
-    // {
-    //     $company = Company::factory()->create();
+        $this->patchJson("/api/v1/employees/{$employee->id}/dismiss")->assertForbidden();
+    }
 
-    //     $this->autenticarComRole('humanResource', company: $company);
+    public function testOwnerPodeExcluirFuncionario(): void
+    {
+        $company = Company::factory()->create();
 
-    //     ['employee' => $employee] = $this->criarFuncionarioComVinculo($company);
+        $this->autenticarComRole('owner', company: $company);
 
-    //     $workload = Workload::factory()->create(['companyId' => $employee->companyId]);
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
 
-    //     $this->putJson(
-    //         "/api/v1/employees/{$employee->id}",
-    //         [
-    //             'status'     => 'hired',
-    //             'workloadId' => $workload->id,
-    //             'kind'       => EmploymentTypeEnum::CLT->value,
-    //         ]
-    //     )->assertOk();
-    // }
+        $this->deleteJson("/api/v1/employees/{$employee->id}")->assertNoContent();
 
-    // public function testRhNaoPodeEditarASiMesmo(): void
-    // {
-    //     $company = Company::factory()->create();
-    //     $person  = Person::factory()->create();
+        $this->assertDatabaseMissing('job.employees', ['id' => $employee->id]);
+        $this->assertDatabaseMissing('job.employments', ['employeeId' => $employee->id]);
+    }
 
-    //     $this->autenticarComRole('humanResource', company: $company, person: $person);
+    public function testRhPodeExcluirOutroFuncionario(): void
+    {
+        $company = Company::factory()->create();
 
-    //     $employee = Employee::factory()->create([
-    //         'companyId' => $company->id,
-    //         'personId'  => $person->id,
-    //     ]);
+        $this->autenticarComRole('humanResource', company: $company);
 
-    //     $workload = Workload::factory()->create(['companyId' => $employee->companyId]);
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
 
-    //     $this->putJson(
-    //         "/api/v1/employees/{$employee->id}",
-    //         [
-    //             'status'     => 'hired',
-    //             'workloadId' => $workload->id,
-    //         ]
-    //     )->assertForbidden();
-    // }
+        $this->deleteJson("/api/v1/employees/{$employee->id}")->assertNoContent();
+    }
 
-    // public function testFuncionarioComumNaoPodeAtualizar(): void
-    // {
-    //     $company = Company::factory()->create();
+    public function testRhNaoPodeExcluirASiMesmo(): void
+    {
+        $company = Company::factory()->create();
+        $person  = Person::factory()->create();
 
-    //     $this->autenticarSemPermissao(company: $company);
+        $this->autenticarComRole('humanResource', company: $company, person: $person);
 
-    //     $employee = Employee::factory()->create(['companyId' => $company->id]);
+        $employee = Employee::factory()->create([
+            'companyId' => $company->id,
+            'personId'  => $person->id,
+        ]);
 
-    //     $workload = Workload::factory()->create(['companyId' => $employee->companyId]);
+        $this->deleteJson("/api/v1/employees/{$employee->id}")->assertForbidden();
+    }
 
-    //     $this->putJson(
-    //         "/api/v1/employees/{$employee->id}",
-    //         [
-    //             'status'     => 'hired',
-    //             'workloadId' => $workload->id,
-    //         ]
-    //     )->assertForbidden();
-    // }
+    public function testFuncionarioComumNaoPodeExcluir(): void
+    {
+        $company = Company::factory()->create();
 
-    // public function testOwnerPodeDemitirFuncionario(): void
-    // {
-    //     $company = Company::factory()->create();
+        $this->autenticarSemPermissao(company: $company);
 
-    //     $this->autenticarComRole('owner', company: $company);
+        $employee = Employee::factory()->create(['companyId' => $company->id]);
 
-    //     ['employee' => $employee] = $this->criarFuncionarioComVinculo($company);
-
-    //     $this->patchJson("/api/v1/employees/{$employee->id}/dismiss")->assertOk();
-
-    //     $latestEmployment = $employee->employments()->latest()->first();
-
-    //     $this->assertEquals('left', $latestEmployment->status->value);
-    //     $this->assertNotNull($latestEmployment->leftAt);
-    // }
-
-    // public function testRhPodeDemitirOutroFuncionario(): void
-    // {
-    //     $company = Company::factory()->create();
-
-    //     $this->autenticarComRole('humanResource', company: $company);
-
-    //     ['employee' => $employee] = $this->criarFuncionarioComVinculo($company);
-
-    //     $this->patchJson("/api/v1/employees/{$employee->id}/dismiss")->assertOk();
-    // }
-
-    // public function testRhNaoPodeDemitirASiMesmo(): void
-    // {
-    //     $company = Company::factory()->create();
-    //     $person  = Person::factory()->create();
-
-    //     $this->autenticarComRole('humanResource', company: $company, person: $person);
-
-    //     $employee = Employee::factory()->create([
-    //         'companyId' => $company->id,
-    //         'personId'  => $person->id,
-    //     ]);
-
-    //     $this->patchJson("/api/v1/employees/{$employee->id}/dismiss")->assertForbidden();
-    // }
-
-    // public function testFuncionarioComumNaoPodeDemitir(): void
-    // {
-    //     $company = Company::factory()->create();
-
-    //     $this->autenticarSemPermissao(company: $company);
-
-    //     $employee = Employee::factory()->create(['companyId' => $company->id]);
-
-    //     $this->patchJson("/api/v1/employees/{$employee->id}/dismiss")->assertForbidden();
-    // }
-
-    // public function testOwnerPodeExcluirFuncionario(): void
-    // {
-    //     $company = Company::factory()->create();
-
-    //     $this->autenticarComRole('owner', company: $company);
-
-    //     $employee = Employee::factory()->create(['companyId' => $company->id]);
-
-    //     $this->deleteJson("/api/v1/employees/{$employee->id}")->assertNoContent();
-
-    //     $this->assertDatabaseMissing('job.employees', ['id' => $employee->id]);
-    //     $this->assertDatabaseMissing('job.employments', ['employeeId' => $employee->id]);
-    // }
-
-    // public function testRhPodeExcluirOutroFuncionario(): void
-    // {
-    //     $company = Company::factory()->create();
-
-    //     $this->autenticarComRole('humanResource', company: $company);
-
-    //     $employee = Employee::factory()->create(['companyId' => $company->id]);
-
-    //     $this->deleteJson("/api/v1/employees/{$employee->id}")->assertNoContent();
-    // }
-
-    // public function testRhNaoPodeExcluirASiMesmo(): void
-    // {
-    //     $company = Company::factory()->create();
-    //     $person  = Person::factory()->create();
-
-    //     $this->autenticarComRole('humanResource', company: $company, person: $person);
-
-    //     $employee = Employee::factory()->create([
-    //         'companyId' => $company->id,
-    //         'personId'  => $person->id,
-    //     ]);
-
-    //     $this->deleteJson("/api/v1/employees/{$employee->id}")->assertForbidden();
-    // }
-
-    // public function testFuncionarioComumNaoPodeExcluir(): void
-    // {
-    //     $company = Company::factory()->create();
-
-    //     $this->autenticarSemPermissao(company: $company);
-
-    //     $employee = Employee::factory()->create(['companyId' => $company->id]);
-
-    //     $this->deleteJson("/api/v1/employees/{$employee->id}")->assertForbidden();
-    // }
+        $this->deleteJson("/api/v1/employees/{$employee->id}")->assertForbidden();
+    }
 }

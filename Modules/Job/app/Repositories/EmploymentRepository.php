@@ -20,12 +20,11 @@ class EmploymentRepository extends BaseRepository implements EmploymentRepositor
     }
 
     #[Override]
-    public function findByCompanyAndPerson(string $companyId, string $personId): ?Employment
+    public function findByEmployeeId(string $employeeId): ?Employment
     {
          return $this->model
             ->newQuery()
-            ->where('companyId', $companyId)
-            ->where('personId', $personId)
+            ->where('employeeId', $employeeId)
             ->first();
     }
 
