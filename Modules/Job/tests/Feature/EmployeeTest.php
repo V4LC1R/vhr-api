@@ -57,10 +57,11 @@ class EmployeeTest extends DBTestCase
         $response = $this->postJson(
             '/api/v1/employees',
             [
-                'companyId'      => $data['company']->id,
-                'workloadId'     => $data['workload']->id,
-                'kind'           => EmploymentTypeEnum::CLT->value,
-                'isProbationary' => true,
+                'employment' => [
+                    'workloadId'     => $data['workload']->id,
+                    'kind'           => EmploymentTypeEnum::CLT->value,
+                    'isProbationary' => true,
+                ],
                 'person' => [
                     'name' => 'vasco',
                     'email' => 'vasco@gama.com',
@@ -101,10 +102,12 @@ class EmployeeTest extends DBTestCase
         $response = $this->postJson(
             '/api/v1/employees',
             [
-                'companyId'      => $data['company']->id,
-                'workloadId'     => $data['workload']->id,
-                'kind'           => EmploymentTypeEnum::CLT->value,
-                'isProbationary' => false,
+
+                'employment' => [
+                    'workloadId'     => $data['workload']->id,
+                    'kind'           => EmploymentTypeEnum::CLT->value,
+                    'isProbationary' => false,
+                ],
                 'person' => $personData
             ]
         );
@@ -145,11 +148,12 @@ class EmployeeTest extends DBTestCase
         $response = $this->postJson(
             '/api/v1/employees',
             [
-                'companyId'      => $company->id,
                 'person'         => $novaPessoa,
-                'workloadId'     => $workload->id,
-                'kind'           => EmploymentTypeEnum::CLT->value,
-                'isProbationary' => true,
+                'employment'     => [
+                    'workloadId'     => $workload->id,
+                    'kind'           => EmploymentTypeEnum::CLT->value,
+                    'isProbationary' => true,
+                ]
             ]
         );
 
@@ -182,10 +186,11 @@ class EmployeeTest extends DBTestCase
         $this->postJson(
             '/api/v1/employees',
             [
-                'companyId'      => $company->id,
-                'workloadId'     => $workload->id,
-                'kind'           => EmploymentTypeEnum::CLT->value,
-                'isProbationary' => true,
+                'employment'     => [
+                    'workloadId'     => $workload->id,
+                    'kind'           => EmploymentTypeEnum::CLT->value,
+                    'isProbationary' => true,
+                ]
             ]
         )->assertUnprocessable()
             ->assertJsonValidationErrors([
@@ -207,9 +212,19 @@ class EmployeeTest extends DBTestCase
         $this->postJson(
             '/api/v1/employees',
             [
-                'companyId'  => $data['company']->id,
-                'personId'   => $data['person']->id,
-                'workloadId' => $data['workload']->id,
+                'employment' => [
+                    'workloadId'     => $data['workload']->id,
+                    'kind'           => EmploymentTypeEnum::CLT->value,
+                    'isProbationary' => true,
+                ],
+                'person' => [
+                    'name' => 'vasco',
+                    'email' => 'vasco@gama.com',
+                    'cellphone' => '6799999999',
+                    'birthdate' => now()->timezone('Europe/Stockholm')->format('Y-m-d\TH:i:sP'),
+                    'pixKey' => 'xxx-xxx-xxx-xxx',
+                    'cpf' => fake('pt_BR')->unique()->cpf(false)
+                ]
             ]
         )->assertForbidden();
     }
@@ -226,10 +241,11 @@ class EmployeeTest extends DBTestCase
         $this->postJson(
             '/api/v1/employees',
             [
-                'companyId'      => $data['company']->id,
-                'workloadId'     => $data['workload']->id,
-                'kind'           => EmploymentTypeEnum::CLT->value,
-                'isProbationary' => true,
+                'employment'     => [
+                    'workloadId'     => $data['workload']->id,
+                    'kind'           => EmploymentTypeEnum::CLT->value,
+                    'isProbationary' => true,
+                ],
                 'person' => [
                     'name' => 'vasco',
                     'email' => 'vasco@gama.com',
@@ -246,10 +262,11 @@ class EmployeeTest extends DBTestCase
         $this->postJson(
             '/api/v1/employees',
             [
-                'companyId'      => $data['company']->id,
-                'workloadId'     => $data['workload']->id,
-                'kind'           => EmploymentTypeEnum::CLT->value,
-                'isProbationary' => true,
+                'employment'     => [
+                    'workloadId'     => $data['workload']->id,
+                    'kind'           => EmploymentTypeEnum::CLT->value,
+                    'isProbationary' => true,
+                ],
                 'person' => [
                     'name' => 'vasco',
                     'email' => 'gigante@dacolina.com',
@@ -274,23 +291,23 @@ class EmployeeTest extends DBTestCase
     public function testNaoPermiteVinculoAtivoDuplicado(): void
     {
         $company  = Company::factory()->create();
+        $person   = Person::factory()->create();
+
         $workload = Workload::factory()->create(['companyId' => $company->id]);
+        $employee = Employee::factory()->create(['companyId' => $company->id,'personId' => $person->id]);
 
         $this->autenticarComPermissao(
             'job.employees.create',
             company: $company,
         );
 
-        $employee = Employee::factory()->create(['companyId' => $company->id]);
+        $personData = $person->toArray();
+        $personData['pixKey']    = fake()->unique()->safeEmail();
 
-        $employee->loadMissing('person');
-
-        $person = $employee->person->toArray();
-
-        unset($person['id']);
-        unset($person['updated_at']);
-        unset($person['created_at']);
-        unset($person['updated_at']);
+        unset($personData['id']);
+        unset($personData['updated_at']);
+        unset($personData['created_at']);
+        unset($personData['updated_at']);
 
         Employment::factory()->create([
             'employeeId' => $employee->id,
@@ -300,11 +317,12 @@ class EmployeeTest extends DBTestCase
         $this->postJson(
             '/api/v1/employees',
             [
-                'companyId'      => $employee->companyId,
-                'workloadId'     => $workload->id,
-                'kind'           => EmploymentTypeEnum::CLT->value,
-                'isProbationary' => true,
-                'person' => $person
+                'employment'     => [
+                    'workloadId'     => $workload->id,
+                    'kind'           => EmploymentTypeEnum::CLT->value,
+                    'isProbationary' => true,
+                ],
+                'person' => $personData
             ]
         )->assertConflict();
     }
@@ -312,14 +330,17 @@ class EmployeeTest extends DBTestCase
     public function testPermiteContratarMesmaPersonComVinculoNaoCltAtivo(): void
     {
         $company  = Company::factory()->create();
+        $person   = Person::factory()->create();
+
         $workload = Workload::factory()->create(['companyId' => $company->id]);
+        $workload2 = Workload::factory()->create(['companyId' => $company->id]);
+
+        $employee = Employee::factory()->create(['companyId' => $company->id,'personId' => $person->id]);
 
         $this->autenticarComPermissao(
             'job.employees.create',
             company: $company,
         );
-
-        $employee = Employee::factory()->create(['companyId' => $company->id]);
 
         Employment::factory()->create([
             'employeeId' => $employee->id,
@@ -327,37 +348,38 @@ class EmployeeTest extends DBTestCase
             'kind'       => EmploymentTypeEnum::FREELANCER->value,
         ]);
 
-        $workload2 = Workload::factory()->create(['companyId' => $company->id]);
+        $personData = $person->toArray();
+        $personData['pixKey']    = fake()->unique()->safeEmail();
 
-        $employee->loadMissing('person');
-
-        $person = $employee->person->toArray();
-
-        unset($person['id']);
-        unset($person['updated_at']);
-        unset($person['created_at']);
-        unset($person['updated_at']);
+        unset($personData['id']);
+        unset($personData['updated_at']);
+        unset($personData['created_at']);
+        unset($personData['updated_at']);
 
         $this->postJson('/api/v1/employees', [
-            'companyId'      => $employee->companyId,
-            'workloadId'     => $workload2->id,
-            'kind'           => EmploymentTypeEnum::CLT->value,
-            'isProbationary' => true,
-            'person' => $person
+            'employment'     => [
+                'workloadId'     => $workload2->id,
+                'kind'           => EmploymentTypeEnum::CLT->value,
+                'isProbationary' => true,
+            ],
+            'person' => $personData
         ])->assertCreated();
     }
 
     public function testPermiteContratarComoDiaristaMesmoComCltAtivo(): void
     {
         $company  = Company::factory()->create();
-        $workload = Workload::factory()->create(['companyId' => $company->id]);
+        $person   = Person::factory()->create();
+
+        $workload  = Workload::factory()->create(['companyId' => $company->id]);
+        $workload2 = Workload::factory()->create(['companyId' => $company->id]);
+
+        $employee  = Employee::factory()->create(['companyId' => $company->id, 'personId' => $person->id]);
 
         $this->autenticarComPermissao(
             'job.employees.create',
             company: $company,
         );
-
-        $employee = Employee::factory()->create(['companyId' => $company->id]);
 
         Employment::factory()->create([
             'employeeId' => $employee->id,
@@ -365,29 +387,27 @@ class EmployeeTest extends DBTestCase
             'kind'       => EmploymentTypeEnum::CLT->value,
         ]);
 
-        $workload2 = Workload::factory()->create(['companyId' => $company->id]);
+        $personData = $person->toArray();
+        $personData['pixKey']    = fake()->unique()->safeEmail();
 
-        $employee->loadMissing('person');
-
-        $person = $employee->person->toArray();
-        $person['pixKey']    = fake()->unique()->safeEmail();
-
-        unset($person['id']);
-        unset($person['updated_at']);
-        unset($person['created_at']);
-        unset($person['updated_at']);
+        unset($personData['id']);
+        unset($personData['updated_at']);
+        unset($personData['created_at']);
+        unset($personData['updated_at']);
 
         // CLT ativo não deve impedir um vínculo dayli/temporary/freelancer concorrente
         // — só bloqueia CLT duplicado (ver testNaoPermiteVinculoAtivoDuplicado).
         $this->postJson('/api/v1/employees', [
-            'companyId'      => $employee->companyId,
-            'workloadId'     => $workload2->id,
-            'kind'           => EmploymentTypeEnum::DAYLI->value,
-            'isProbationary' => false,
-            'person' => $person
+            'employment'     => [
+                'workloadId'     => $workload2->id,
+                'kind'           => EmploymentTypeEnum::DAYLI->value,
+                'isProbationary' => false,
+            ],
+            'person' => $personData
         ])->assertCreated();
 
         $this->assertDatabaseHas('job.employments', [
+            'workloadId'     => $workload2->id,
             'employeeId' => $employee->id,
             'kind'       => EmploymentTypeEnum::DAYLI->value,
         ]);
@@ -396,14 +416,15 @@ class EmployeeTest extends DBTestCase
     public function testPermiteRecontratacao(): void
     {
         $company  = Company::factory()->create();
+        $person   = Person::factory()->create();
+
         $workload = Workload::factory()->create(['companyId' => $company->id]);
+        $employee = Employee::factory()->create(['companyId' => $company->id, 'personId' => $person->id]);
 
         $this->autenticarComPermissao(
             'job.employees.create',
             company: $company,
         );
-
-        $employee = Employee::factory()->create(['companyId' => $company->id]);
 
         Employment::factory()->left()->create([
             'employeeId' => $employee->id,
@@ -423,15 +444,15 @@ class EmployeeTest extends DBTestCase
         $this->postJson(
             '/api/v1/employees',
             [
-                'companyId'      => $employee->companyId,
                 'person'         => $person,
-                'workloadId'     => $workload->id,
-                'kind'           => EmploymentTypeEnum::CLT->value,
-                'isProbationary' => true,
+                'employment'     => [
+                    'workloadId'     => $workload->id,
+                    'kind'           => EmploymentTypeEnum::CLT->value,
+                    'isProbationary' => true,
+                ]
             ]
         )->assertCreated();
 
-        // mesmo registro de funcionário, novo vínculo
         $this->assertEquals(
             1,
             Employee::query()

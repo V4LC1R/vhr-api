@@ -34,15 +34,14 @@ class CreateEmployeeUseCase
     {
         return DB::transaction(function () use ($data) {
 
-            $company = $this->findCompany($data->companyId);
             $person  = $this->resolvePerson($data->person);
 
-            $employee = $this->resolveOrCreateEmployee($person->id, $company->id,);
+            $employee = $this->resolveOrCreateEmployee($person->id, $data->companyId);
 
             $this->employementCreator->execute($employee, EmploymentData::from([
-                'workloadId'     => $data->workloadId,
-                'kind'           => $data->kind,
-                'isProbationary' => $data->isProbationary,
+                'workloadId'     => $data->employment->workloadId,
+                'kind'           => $data->employment->kind,
+                'isProbationary' => $data->employment->isProbationary,
             ]));
 
             return $employee

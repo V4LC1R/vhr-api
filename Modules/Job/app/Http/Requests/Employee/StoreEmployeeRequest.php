@@ -19,26 +19,28 @@ class StoreEmployeeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'workloadId' => [
+
+            'employment' => [
                 'required',
-                'uuid',
-                Rule::exists(
-                    Workload::class,
-                    'id'
-                )->where(
-                    'companyId',
-                    currentCompany()->companyId
-                )->withoutTrashed(),
+                'array:workloadId,kind,isProbationary',
             ],
 
-            'kind' => [
+            'employment.workloadId' => [
+                'required',
+                'uuid',
+                Rule::exists(Workload::class, 'id')
+                    ->where('companyId', currentCompany()->companyId)
+                    ->withoutTrashed(),
+            ],
+
+            'employment.kind' => [
                 'required',
                 'string',
                 Rule::in(EmploymentTypeEnum::values()),
             ],
 
-            'isProbationary' => [
-                'required_if:kind,clt',
+            'employment.isProbationary' => [
+                'required_if:employment.kind,clt',
                 'boolean',
             ],
 
@@ -87,14 +89,13 @@ class StoreEmployeeRequest extends FormRequest
     {
         return [
 
-            'workloadId.required' => 'A jornada é obrigatória.',
-            'workloadId.uuid' => 'A jornada informada é inválida.',
+            'employment.workloadId.required' => 'A jornada é obrigatória.',
+            'employment.workloadId.uuid' => 'A jornada informada é inválida.',
 
-            'kind.required' => 'O tipo de contratação é obrigatório.',
-            'kind.in' => 'O tipo de contratação informado é inválido.',
-
-            'isProbationary.required' => 'Informe se é um contrato de experiência.',
-            'isProbationary.boolean' => 'O valor de contrato de experiência é inválido.',
+            'employment.kind.required' => 'O tipo de contratação é obrigatório.',
+            'employment.kind.in' => 'O tipo de contratação informado é inválido.',
+            'employment.isProbationary.required' => 'Informe se é um contrato de experiência.',
+            'employment.isProbationary.boolean' => 'O valor de contrato de experiência é inválido.',
 
             'person.cpf.required' => 'O CPF é obrigatório.',
             'person.cpf.size' => 'O CPF deve conter 11 dígitos.',

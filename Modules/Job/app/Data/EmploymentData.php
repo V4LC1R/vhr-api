@@ -13,7 +13,7 @@ class EmploymentData extends Data
     public function __construct(
         #[Uuid]
         public string|Optional $id,
-        public string|Optional $companyId,
+        #[Uuid]
         public string|Optional $employeeId,
         #[Uuid]
         public string|Optional $workloadId,
