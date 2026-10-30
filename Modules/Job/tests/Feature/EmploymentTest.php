@@ -328,7 +328,6 @@ class EmploymentTest extends DBTestCase
             'humanResource',
             company: $otherCompany,
         );
-
         $response = $this->putJson(
             "/api/v1/employment/{$data['employment']->id}",
             [
@@ -338,6 +337,6 @@ class EmploymentTest extends DBTestCase
             ]
         );
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 }

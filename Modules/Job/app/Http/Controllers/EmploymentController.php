@@ -7,6 +7,7 @@ use Modules\Job\Models\Employment;
 use App\Http\Controllers\Controller;
 use Modules\Job\UseCases\Employment\CreateEmploymentUseCase;
 use Modules\Job\Http\Requests\Employment\StoreEmploymentRequest;
+use Modules\Job\Http\Requests\Employment\UpdateEmploymentRequest;
 use Modules\Job\UseCases\Employment\EditEmploymentUseCase;
 
 class EmploymentController extends Controller
@@ -32,7 +33,7 @@ class EmploymentController extends Controller
         );
     }
 
-    public function update(Employment $employment, StoreEmploymentRequest $request)
+    public function update(Employment $employment, UpdateEmploymentRequest $request)
     {
         $dto =  $request->toDTO();
 
