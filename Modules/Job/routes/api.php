@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Job\Http\Controllers\EmployeeController;
+use Modules\Job\Http\Controllers\EmploymentController;
 use Modules\Job\Http\Controllers\WorkloadController;
 
 Route::middleware(['auth:sanctum','current.company'])
@@ -21,8 +22,12 @@ Route::middleware(['auth:sanctum','current.company'])
         Route::apiResource(
             'employees',
             EmployeeController::class
-        )->except(['update'])
-         ->names('employees');
+        )->except(['update'])->names('employees');
+
+        Route::apiResource(
+            'employment',
+            EmploymentController::class
+        )->names('employments');
 
         Route::apiResource(
             'workloads',

@@ -4,6 +4,7 @@ namespace Modules\Job\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Models\Company;
 use Modules\Job\Enums\EmploymentStatusEnum;
 use Modules\Job\Enums\EmploymentTypeEnum;
 use Modules\Job\Models\Employment;
@@ -14,10 +15,12 @@ class EmploymentFactory extends Factory
 {
     public function definition(): array
     {
+        $company = Company::factory()->create();
         return [
             'kind'        => EmploymentTypeEnum::CLT->value,
             'status'      => EmploymentStatusEnum::EXPERIENCE->value,
             'workloadId'  => Workload::factory(),
+            'companyId'  => $company->id,
             'registerAt' => now()->utc(),
             'leftAt'     => null,
         ];

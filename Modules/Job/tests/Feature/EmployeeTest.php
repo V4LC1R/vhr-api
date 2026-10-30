@@ -36,6 +36,7 @@ class EmployeeTest extends DBTestCase
         $workload = Workload::factory()->create(['companyId' => $employee->companyId]);
 
         Employment::factory()->create([
+            'companyId' => $employee->companyId,
             'employeeId' => $employee->id,
             'workloadId' => $workload->id,
         ]);
@@ -310,6 +311,7 @@ class EmployeeTest extends DBTestCase
         unset($personData['updated_at']);
 
         Employment::factory()->create([
+            'companyId' => $company->id,
             'employeeId' => $employee->id,
             'workloadId' => $workload->id,
         ]);
@@ -343,6 +345,7 @@ class EmployeeTest extends DBTestCase
         );
 
         Employment::factory()->create([
+            'companyId' => $company->id,
             'employeeId' => $employee->id,
             'workloadId' => $workload->id,
             'kind'       => EmploymentTypeEnum::FREELANCER->value,
@@ -382,6 +385,7 @@ class EmployeeTest extends DBTestCase
         );
 
         Employment::factory()->create([
+            'companyId' => $company->id,
             'employeeId' => $employee->id,
             'workloadId' => $workload->id,
             'kind'       => EmploymentTypeEnum::CLT->value,

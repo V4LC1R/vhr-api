@@ -25,6 +25,7 @@ class EmployeePolicy
             return false;
         }
 
+
         return currentCompany()?->can('job.employees.view');
     }
 
@@ -68,6 +69,11 @@ class EmployeePolicy
         if (!currentCompany()) {
             return false;
         }
+
+        if ($employee->companyId != currentCompany()->companyId) {
+            return false;
+        }
+
 
         if (
             ! currentCompany()?->hasRole('owner')

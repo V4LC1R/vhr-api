@@ -32,6 +32,7 @@ class AttendanceCalculatorTest extends DBTestCase
         $workload = Workload::factory()->create(['companyId' => $company->id]);
 
         Employment::factory()->create(array_filter([
+            'companyId' => $company->id,
             'employeeId' => $employee->id,
             'workloadId' => $workload->id,
             'kind'       => $kind,

@@ -62,6 +62,16 @@ class RolesAndPermissionsSeeder extends Seeder
             'job.employees.dismiss',
 
             // ==========================================
+            // JOB - EMPLOYMENT
+            // ==========================================
+
+            'job.employment.view',
+            'job.employment.create',
+            'job.employment.update',
+            'job.employment.delete',
+            'job.employment.dismiss',
+
+            // ==========================================
             // ATTENDANCE - TIME ENTRIES
             // ==========================================
 
@@ -111,6 +121,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'job.employees.delete',
             'job.employees.dismiss',
 
+            'job.employment.view',
+            'job.employment.create',
+            'job.employment.update',
+            'job.employment.delete',
+            'job.employment.dismiss',
+
             'attendance.timeEntries.view',
             'attendance.timeEntries.create',
             'attendance.timeEntries.update',
@@ -130,6 +146,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'job.employees.view',
             'job.workloads.view',
 
+            'job.employment.view',
+
             'attendance.timeEntries.view',
             'attendance.dailyEngagements.view',
         ]);
@@ -139,6 +157,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $employeeRole->syncPermissions([
             'core.persons.view',
             'job.employees.view',
+            'job.employment.view',
             'attendance.timeEntries.view', // Geralmente restrito ao próprio ID via política (Policy)
             'attendance.dailyEngagements.view', // Restrito ao próprio funcionário via Policy
         ]);

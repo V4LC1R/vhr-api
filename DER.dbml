@@ -167,6 +167,7 @@ Table job.employments [headercolor: #D69E2E] {
   id uuid [primary key]
   employeeId uuid [not null]
   workloadId uuid [not null]
+  companyId uuid [not null]
   kind EmploymentKind [not null, default: 'clt']
   status EmploymentStatus [not null, default: 'experience']
   registerAt datetime [not null]
@@ -247,6 +248,7 @@ Ref: job.employees.companyId > core.companies.id [delete: cascade]
 Ref: job.employees.personId > core.persons.id [delete: cascade]
 Ref: job.employments.employeeId > job.employees.id [delete: cascade]
 Ref: job.employments.workloadId > job.workloads.id [delete: restrict]
+Ref: job.employments.companyId > core.companies.id [delete: restrict]
 
 // Attendance
 Ref: attendance.daily_engagements.companyId > core.companies.id [delete: cascade]

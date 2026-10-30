@@ -18,6 +18,12 @@ interface EmployeeRepositoryInterface extends RepositoryInterface
         array $relations = []
     ): ?Model;
 
+    public function findByIdAndCompany(
+        string $id,
+        string $companyId,
+        array $relations = []
+    ): ?Model;
+
     public function findByPersonIdAndCompany(
         string $personId,
         string $companyId,

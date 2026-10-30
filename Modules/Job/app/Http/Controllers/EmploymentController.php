@@ -2,41 +2,29 @@
 
 namespace Modules\Job\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Modules\Job\Models\Employee;
+use Modules\Job\Models\Employment;
 use App\Http\Controllers\Controller;
-use Modules\Job\Services\EmployeeService;
-use Modules\Job\Http\Requests\Employee\StoreEmployeeRequest;
+use Modules\Job\UseCases\Employment\CreateEmploymentUseCase;
+use Modules\Job\Http\Requests\Employment\StoreEmploymentRequest;
+use Modules\Job\UseCases\Employment\EditEmploymentUseCase;
 
 class EmploymentController extends Controller
 {
     public function __construct(
-        protected readonly EmployeeService $service
+        protected readonly CreateEmploymentUseCase $createUseCase,
+        protected readonly EditEmploymentUseCase $editUseCase
     ) {
-        $this->authorizeResource(Employee::class, 'employee');
+        $this->authorizeResource(Employment::class, 'employment');
     }
 
-
-    public function index(Request $request)
-    {
-        $employees = $this->service->list(
-            perPage: $request->integer(
-                'per_page',
-                15
-            )
-        );
-
-        return response()->json($employees);
-    }
-
-    public function store(StoreEmployeeRequest $request)
+    public function store(StoreEmploymentRequest $request)
     {
         $dto =  $request->toDTO();
 
         $dto->companyId = currentCompany()->companyId;
 
-        $employee = $this->service->create($dto);
+        $employee = $this->createUseCase->execute($dto);
 
         return response()->json(
             $employee,
@@ -44,41 +32,17 @@ class EmploymentController extends Controller
         );
     }
 
-    public function show(Employee $employee)
+    public function update(Employment $employment, StoreEmploymentRequest $request)
     {
-        $employee->load([
-            'person',
-            'activeEmployment.workload',
-            'employments' => fn ($query) => $query->latest('registerAt')->with('workload'),
-        ]);
+        $dto =  $request->toDTO();
+
+        $dto->companyId = currentCompany()->companyId;
+
+        $employee = $this->editUseCase->execute($employment, $dto);
 
         return response()->json(
-            $employee->toResource()
+            $employee,
+            Response::HTTP_OK
         );
-    }
-
-    public function dismiss(Employee $employee)
-    {
-        $employee = $this->service->dismiss(
-            $employee
-        );
-
-        return response()->json($employee);
-    }
-
-    public function nextRegisterNumber()
-    {
-        $this->authorize('create', Employee::class);
-
-        $number = $this->service->previewNextRegisterNumber();
-
-        return response()->json(['registerNumber' => $number]);
-    }
-
-    public function destroy(Employee $employee)
-    {
-        $this->service->delete($employee);
-
-        return response()->noContent();
     }
 }

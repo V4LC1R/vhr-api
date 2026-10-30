@@ -7,6 +7,7 @@ use Modules\Job\Contract\EmploymentRepositoryInterface;
 use Modules\Job\Data\EmploymentData;
 use Modules\Job\Domain\Employment\EmploymentEligibilityGuard;
 use Modules\Job\Enums\EmploymentStatusEnum;
+use Modules\Job\Enums\EmploymentTypeEnum;
 use Modules\Job\Models\Employment;
 use Spatie\LaravelData\Optional;
 
@@ -26,14 +27,27 @@ class EditEmploymentUseCase
     {
         return DB::transaction(function () use ($data, $employment) {
 
+            $employment->loadMissing(['employee']);
 
-            return $this->employmentRepository->update($employment->id, [
-                'workloadId'  => $data->workloadId,
-                'kind'        => $kind,
-                'status'      => ! ($data->isProbationary instanceof Optional) && $data->isProbationary
-                    ? EmploymentStatusEnum::EXPERIENCE->value
-                    : EmploymentStatusEnum::HIRED->value,
-            ]);
+            $employee = $employment->employee;
+
+            if ($data->kind == EmploymentTypeEnum::CLT->value) {
+                $this
+                    ->employmentEligibilityGuard
+                    ->ensureNoActiveCltEmployment(
+                        $employee->companyId,
+                        $employee->personId,
+                        [$employment->id]
+                    );
+            }
+
+            $payload = $employment->fill($data->toArray())->toArray();
+
+            $payload['status'] = ! ($data->isProbationary instanceof Optional) && $data->isProbationary
+                ? EmploymentStatusEnum::EXPERIENCE->value
+                : $data->status;
+
+            return $this->employmentRepository->update($employment->id, $payload);
         });
     }
 }

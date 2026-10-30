@@ -37,6 +37,7 @@ return new class extends Migration
             $table->uuid('personId');
             $table->unsignedInteger('registerNumber');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('companyId')
                 ->references('id')
@@ -57,6 +58,7 @@ return new class extends Migration
         // 3. job.employments (vínculo contratual)
         Schema::create('job.employments', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('companyId');
             $table->uuid('employeeId');
             $table->uuid('workloadId');
 
@@ -68,6 +70,11 @@ return new class extends Migration
             $table->dateTime('leftAt')->nullable();
             $table->timestamps();
 
+            $table->foreign('companyId')
+                ->references('id')
+                ->on('core.companies')
+                ->onDelete('cascade');
+
             $table->foreign('employeeId')
                 ->references('id')
                 ->on('job.employees')
@@ -78,6 +85,7 @@ return new class extends Migration
                 ->on('job.workloads')
                 ->onDelete('cascade');
 
+            $table->index('companyId');
             $table->index('employeeId');
             $table->index('status');
         });

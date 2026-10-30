@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Modules\Job\Database\Factories\EmployeeFactory;
 use Modules\Job\Enums\EmploymentStatusEnum;
 use Modules\Job\Http\Resources\EmployeeResource;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'companyId',
@@ -28,6 +29,7 @@ class Employee extends Model
     use HasUuids;
     use HasFactory;
     use BelongsToCompany;
+    use SoftDeletes;
 
     protected $table = 'job.employees';
 

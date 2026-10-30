@@ -17,6 +17,8 @@ class EmploymentData extends Data
         public string|Optional $employeeId,
         #[Uuid]
         public string|Optional $workloadId,
+        #[Uuid]
+        public string|Optional $companyId,
         public string|Optional $kind,
         public string|Optional $status,
         public bool|Optional $isProbationary,

@@ -13,6 +13,7 @@ return new class extends Migration
         });
 
         Schema::table('job.employments', function (Blueprint $table) {
+            $table->softDeletes();
             $table->dropForeign(['workloadId']);
             $table->foreign('workloadId')
                 ->references('id')
@@ -24,6 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('job.employments', function (Blueprint $table) {
+            $table->dropSoftDeletes();
             $table->dropForeign(['workloadId']);
             $table->foreign('workloadId')
                 ->references('id')

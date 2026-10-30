@@ -3,6 +3,7 @@
 namespace Modules\Job\Domain\Employment;
 
 use Modules\Job\Contract\EmploymentRepositoryInterface;
+use Modules\Job\Contract\WorkloadRepositoryInterface;
 use Modules\Job\Data\EmploymentData;
 use Modules\Job\Enums\EmploymentStatusEnum;
 use Modules\Job\Enums\EmploymentTypeEnum;
@@ -14,22 +15,29 @@ class EmploymentCreator
 {
     public function __construct(
         protected EmploymentRepositoryInterface $employmentRepository,
+        protected WorkloadRepositoryInterface $workloadRepository,
         protected EmploymentEligibilityGuard $employmentEligibilityGuard,
     ) {
     }
 
     public function execute(Employee $employee, EmploymentData $data): Employment
     {
-        $workload = $this->employmentEligibilityGuard->findWorkload($data->workloadId);
+        $workload = $this->workloadRepository->findById($data->workloadId);
 
         $kind = $data->kind instanceof Optional
             ? EmploymentTypeEnum::CLT->value
             : $data->kind;
 
-        $this->employmentEligibilityGuard->ensureWorkloadBelongsToCompany($workload, $employee->companyId);
-        $this->employmentEligibilityGuard->ensureNoActiveEmployment($employee->companyId, $employee->personId, $kind);
+        $this->employmentEligibilityGuard->ensureWorkloadBelongsToCompany($workload, $data->companyId);
+
+        if ($data->kind == EmploymentTypeEnum::CLT->value) {
+            $this
+                ->employmentEligibilityGuard
+                ->ensureNoActiveCltEmployment($data->companyId, $employee->personId);
+        }
 
         return $this->employmentRepository->create([
+            'companyId'   => $data->companyId,
             'employeeId'  => $employee->id,
             'workloadId'  => $data->workloadId,
             'kind'        => $kind,

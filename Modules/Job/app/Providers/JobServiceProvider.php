@@ -3,11 +3,12 @@
 namespace Modules\Job\Providers;
 
 use Nwidart\Modules\Support\ModuleServiceProvider;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Gate;
 use Modules\Job\Models\Employee;
+use Modules\Job\Models\Employment;
 use Modules\Job\Models\Workload;
 use Modules\Job\Policies\EmployeePolicy;
+use Modules\Job\Policies\EmploymentPolicy;
 use Modules\Job\Policies\WorkloadPolicy;
 
 class JobServiceProvider extends ModuleServiceProvider
@@ -42,8 +43,9 @@ class JobServiceProvider extends ModuleServiceProvider
     public function boot(): void
     {
         parent::boot();
-         Gate::policy(Employee::class, EmployeePolicy::class);
-         Gate::policy(Workload::class, WorkloadPolicy::class);
+        Gate::policy(Employee::class, EmployeePolicy::class);
+        Gate::policy(Employment::class, EmploymentPolicy::class);
+        Gate::policy(Workload::class, WorkloadPolicy::class);
     }
 
     /**

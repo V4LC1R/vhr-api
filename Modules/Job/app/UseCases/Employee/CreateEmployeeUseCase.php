@@ -12,7 +12,6 @@ use Modules\Core\Contracts\PersonServiceInterface;
 use Modules\Job\Contract\EmployeeRepositoryInterface;
 use Modules\Job\Contract\EmploymentRepositoryInterface;
 use Modules\Job\Data\EmployeeData;
-use Modules\Job\Data\EmploymentData;
 use Modules\Job\Domain\Employment\EmploymentCreator;
 use Modules\Job\Domain\Employment\ResolveNextRegisterNumber;
 use Modules\Job\Models\Employee;
@@ -36,13 +35,11 @@ class CreateEmployeeUseCase
 
             $person  = $this->resolvePerson($data->person);
 
+            $data->employment->companyId = $data->companyId;
+
             $employee = $this->resolveOrCreateEmployee($person->id, $data->companyId);
 
-            $this->employementCreator->execute($employee, EmploymentData::from([
-                'workloadId'     => $data->employment->workloadId,
-                'kind'           => $data->employment->kind,
-                'isProbationary' => $data->employment->isProbationary,
-            ]));
+            $this->employementCreator->execute($employee, $data->employment);
 
             return $employee
                 ->fresh(['activeEmployment.workload', 'person'])
